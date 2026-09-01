@@ -601,3 +601,77 @@ button {
       repeat(4, minmax(34px, 1fr));
   }
 }
+
+.inventory-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 14px;
+  margin-bottom: 10px;
+
+  border-radius: 14px;
+
+  background: #2b2e36;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+}
+
+.inventory-item__icon {
+  font-size: 28px;
+}
+
+.clue-card {
+  padding: 14px 16px;
+  margin: 10px 0;
+
+  border-radius: 14px;
+
+  background:
+    rgba(54, 198, 160, 0.1);
+
+  border:
+    1px solid rgba(54, 198, 160, 0.28);
+}
+
+.success-box {
+  padding: 14px 16px;
+
+  border-radius: 14px;
+
+  background:
+    rgba(54, 198, 160, 0.12);
+
+  border:
+    1px solid rgba(54, 198, 160, 0.35);
+}
+
+.locked-box {
+  padding: 14px 16px;
+
+  border-radius: 14px;
+
+  background:
+    rgba(240, 200, 94, 0.08);
+
+  border:
+    1px solid rgba(240, 200, 94, 0.25);
+}
+
+.object-action-btn {
+  width: 100%;
+
+  margin-top: 12px;
+
+  padding: 13px 16px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background: var(--accent-2);
+
+  color: #24200f;
+
+  font-weight: 800;
+}
