@@ -6,35 +6,30 @@ const QUESTS = [
     enabled: true,
     password: "day1"
   },
-
   {
     day: 2,
     title: "Смена еще не открыта",
     topic: "",
     enabled: false
   },
-
   {
     day: 3,
     title: "Смена еще не открыта",
     topic: "",
     enabled: false
   },
-
   {
     day: 4,
     title: "Смена еще не открыта",
     topic: "",
     enabled: false
   },
-
   {
     day: 5,
     title: "Смена еще не открыта",
     topic: "",
     enabled: false
   },
-
   {
     day: 6,
     title: "Смена еще не открыта",
@@ -44,549 +39,224 @@ const QUESTS = [
 ];
 
 
-/* =========================================================
-   ОБЪЕКТЫ КОМНАТЫ
-========================================================= */
-
 const OBJECTS = [
-
-  {
-    id: "phone",
-    name: "Телефон",
-    x: 10.5,
-    y: 79,
-    width: 13,
-    height: 22,
-    active: true
-  },
-
-  {
-    id: "computer",
-    name: "Компьютер",
-    x: 28,
-    y: 72,
-    width: 22,
-    height: 29,
-    active: true
-  },
-
-  {
-    id: "journal",
-    name: "Журнал",
-    x: 51,
-    y: 80,
-    width: 19,
-    height: 22,
-    active: true
-  },
-
-  {
-    id: "medicineCabinet",
-    name: "Шкаф препаратов",
-    x: 19,
-    y: 31,
-    width: 18,
-    height: 47,
-    active: true
-  },
-
-  {
-    id: "fridge",
-    name: "Холодильник",
-    x: 5.5,
-    y: 47,
-    width: 11,
-    height: 41,
-    active: true
-  },
-
-  {
-    id: "cashbox",
-    name: "Касса",
-    x: 72.5,
-    y: 80,
-    width: 20,
-    height: 22,
-    active: true
-  },
-
-  {
-    id: "safe",
-    name: "Сейф",
-    x: 61,
-    y: 47,
-    width: 11,
-    height: 31,
-    active: true
-  },
-
-  {
-    id: "locker",
-    name: "Служебный шкафчик",
-    x: 49.5,
-    y: 42,
-    width: 13,
-    height: 43,
-    active: true
-  },
-
-  {
-    id: "box",
-    name: "Коробка",
-    x: 39,
-    y: 51,
-    width: 9,
-    height: 15,
-    active: true
-  },
-
-  {
-    id: "board",
-    name: "Доска объявлений",
-    x: 31,
-    y: 28,
-    width: 11,
-    height: 19,
-    active: true
-  },
-
-  {
-    id: "clock",
-    name: "Часы",
-    x: 33,
-    y: 12,
-    width: 8,
-    height: 12,
-    active: true
-  },
-
-  {
-    id: "calendar",
-    name: "Календарь",
-    x: 40,
-    y: 28,
-    width: 7,
-    height: 16,
-    active: true
-  },
-
-  {
-    id: "trash",
-    name: "Корзина",
-    x: 83,
-    y: 61,
-    width: 8,
-    height: 18,
-    active: true
-  },
-
-  {
-    id: "firstAid",
-    name: "Аптечка",
-    x: 35.5,
-    y: 39,
-    width: 9,
-    height: 11,
-    active: true
-  },
-
-  {
-    id: "door",
-    name: "Дверь",
-    x: 76,
-    y: 39,
-    width: 13,
-    height: 43,
-    active: true
-  }
-
+  { id: "phone", name: "Телефон", x: 10.5, y: 79, width: 13, height: 22, active: true },
+  { id: "computer", name: "Компьютер", x: 28, y: 72, width: 22, height: 29, active: true },
+  { id: "journal", name: "Журнал", x: 51, y: 80, width: 19, height: 22, active: true },
+  { id: "medicineCabinet", name: "Шкаф препаратов", x: 19, y: 31, width: 18, height: 47, active: true },
+  { id: "fridge", name: "Холодильник", x: 5.5, y: 47, width: 11, height: 41, active: true },
+  { id: "cashbox", name: "Касса", x: 72.5, y: 80, width: 20, height: 22, active: true },
+  { id: "safe", name: "Сейф", x: 61, y: 47, width: 11, height: 31, active: true },
+  { id: "locker", name: "Служебный шкафчик", x: 49.5, y: 42, width: 13, height: 43, active: true },
+  { id: "box", name: "Коробка", x: 39, y: 51, width: 9, height: 15, active: true },
+  { id: "board", name: "Доска объявлений", x: 31, y: 28, width: 11, height: 19, active: true },
+  { id: "clock", name: "Часы", x: 33, y: 12, width: 8, height: 12, active: true },
+  { id: "calendar", name: "Календарь", x: 40, y: 28, width: 7, height: 16, active: true },
+  { id: "trash", name: "Корзина", x: 83, y: 61, width: 8, height: 18, active: true },
+  { id: "firstAid", name: "Аптечка", x: 35.5, y: 39, width: 9, height: 11, active: true },
+  { id: "door", name: "Дверь", x: 76, y: 39, width: 13, height: 43, active: true }
 ];
 
 
-/* =========================================================
-   УЧЕБНЫЕ ЗАДАНИЯ
-
-   Пока прописаны вручную.
-
-   Позже эти данные будет создавать
-   администратор через редактор.
-========================================================= */
-
 const QUESTIONS = {
-
   phone: {
     title: "Телефон",
     text: "Что является предметом изучения психологии?",
-
     options: [
       "Закономерности возникновения, развития и функционирования психики",
       "Только строение головного мозга",
       "Только поведение человека в обществе",
       "Способы лечения психических заболеваний"
     ],
-
     correct: 0
   },
 
-
   locker: {
     title: "Карточка в шкафчике",
-
-    text:
-      "Какое понятие обозначает свойство высокоорганизованной материи отражать объективную действительность?",
-
+    text: "Какое понятие обозначает свойство высокоорганизованной материи отражать объективную действительность?",
     options: [
       "Психика",
       "Общение",
       "Темперамент",
       "Память"
     ],
+    correct: 0
+  },
 
+  journal: {
+    title: "Запись в журнале",
+    text: "Расположите этапы развития представлений о предмете психологии в правильном порядке.",
+    options: [
+      "Душа → сознание → поведение → психика",
+      "Психика → поведение → сознание → душа",
+      "Сознание → душа → психика → поведение",
+      "Поведение → душа → сознание → психика"
+    ],
+    correct: 0
+  },
+
+  computer: {
+    title: "Компьютер",
+    text: "Что наиболее точно описывает психическую деятельность?",
+    options: [
+      "Совокупность психических процессов, состояний и свойств, обеспечивающих отражение действительности и регуляцию поведения",
+      "Только процесс мышления",
+      "Только эмоциональные реакции человека",
+      "Любая физическая активность"
+    ],
     correct: 0
   }
-
 };
 
-
-/* =========================================================
-   СОСТОЯНИЕ ИГРЫ
-
-   Вот это уже настоящая механика.
-========================================================= */
 
 const gameState = {
-
   phoneSolved: false,
-
   fridgeClueKnown: false,
-
   fridgeSearched: false,
-
   smallKeyFound: false,
-
   lockerOpened: false,
-
   lockerSolved: false,
+  digit7Found: false,
 
-  digit7Found: false
-
+  journalSolved: false,
+  computerPasswordKnown: false,
+  computerUnlocked: false,
+  computerSolved: false,
+  digit2Found: false
 };
 
 
-/* =========================================================
-   ИНВЕНТАРЬ И ЗАМЕТКИ
-========================================================= */
-
 let inventory = [];
-
 let foundNotes = [];
 
 
-/* =========================================================
-   ЭЛЕМЕНТЫ
-========================================================= */
-
 const screens = {
-
-  start:
-    document.getElementById("start-screen"),
-
-  login:
-    document.getElementById("login-screen"),
-
-  game:
-    document.getElementById("game-screen")
-
+  start: document.getElementById("start-screen"),
+  login: document.getElementById("login-screen"),
+  game: document.getElementById("game-screen")
 };
 
+const overlay = document.getElementById("overlay");
+const overlayContent = document.getElementById("overlay-content");
+const passwordInput = document.getElementById("quest-password");
+const passwordError = document.getElementById("password-error");
 
-const overlay =
-  document.getElementById("overlay");
+let selectedQuest = QUESTS[0];
 
-
-const overlayContent =
-  document.getElementById("overlay-content");
-
-
-const passwordInput =
-  document.getElementById("quest-password");
-
-
-const passwordError =
-  document.getElementById("password-error");
-
-
-let selectedQuest =
-  QUESTS[0];
-
-
-/* =========================================================
-   ЭКРАНЫ
-========================================================= */
 
 function showScreen(name) {
-
-  Object
-    .values(screens)
-    .forEach(screen => {
-
-      screen.classList.remove(
-        "screen--active"
-      );
-
-    });
-
-
-  screens[name]
-    .classList.add(
-      "screen--active"
-    );
-
-}
-
-
-/* =========================================================
-   СТАРТОВАЯ СТРАНИЦА
-========================================================= */
-
-function renderDays() {
-
-  const grid =
-    document.getElementById(
-      "days-grid"
-    );
-
-
-  grid.innerHTML = "";
-
-
-  QUESTS.forEach(quest => {
-
-    const button =
-      document.createElement(
-        "button"
-      );
-
-
-    button.className =
-      "day-btn";
-
-
-    button.disabled =
-      !quest.enabled;
-
-
-    button.innerHTML = `
-      <strong>
-        ДЕНЬ ${quest.day}
-      </strong>
-
-      <span>
-        ${quest.title}
-      </span>
-    `;
-
-
-    button.addEventListener(
-      "click",
-      () => {
-
-        selectedQuest =
-          quest;
-
-
-        document
-          .getElementById(
-            "login-day-label"
-          )
-          .textContent =
-          `ДЕНЬ ${quest.day}`;
-
-
-        document
-          .getElementById(
-            "login-title"
-          )
-          .textContent =
-          quest.title;
-
-
-        document
-          .getElementById(
-            "login-topic"
-          )
-          .textContent =
-          quest.topic;
-
-
-        passwordInput.value =
-          "";
-
-
-        passwordError.textContent =
-          "";
-
-
-        showScreen(
-          "login"
-        );
-
-      }
-    );
-
-
-    grid.appendChild(
-      button
-    );
-
+  Object.values(screens).forEach(screen => {
+    screen.classList.remove("screen--active");
   });
 
+  screens[name].classList.add("screen--active");
 }
 
 
-/* =========================================================
-   ИНТЕРАКТИВНЫЕ ОБЛАСТИ
-========================================================= */
+function renderDays() {
+  const grid = document.getElementById("days-grid");
+  grid.innerHTML = "";
+
+  QUESTS.forEach(quest => {
+    const button = document.createElement("button");
+
+    button.className = "day-btn";
+    button.disabled = !quest.enabled;
+
+    button.innerHTML = `
+      <strong>ДЕНЬ ${quest.day}</strong>
+      <span>${quest.title}</span>
+    `;
+
+    button.addEventListener("click", () => {
+      selectedQuest = quest;
+
+      document.getElementById("login-day-label").textContent =
+        `ДЕНЬ ${quest.day}`;
+
+      document.getElementById("login-title").textContent =
+        quest.title;
+
+      document.getElementById("login-topic").textContent =
+        quest.topic;
+
+      passwordInput.value = "";
+      passwordError.textContent = "";
+
+      showScreen("login");
+    });
+
+    grid.appendChild(button);
+  });
+}
+
 
 function renderHotspots() {
-
-  const host =
-    document.getElementById(
-      "hotspots"
-    );
-
-
+  const host = document.getElementById("hotspots");
   host.innerHTML = "";
-
 
   OBJECTS
     .filter(object => object.active)
     .forEach(object => {
+      const button = document.createElement("button");
 
-      const button =
-        document.createElement(
-          "button"
-        );
+      button.className = "hotspot";
+      button.style.left = `${object.x}%`;
+      button.style.top = `${object.y}%`;
+      button.style.width = `${object.width}%`;
+      button.style.height = `${object.height}%`;
 
+      button.title = object.name;
+      button.setAttribute("aria-label", object.name);
 
-      button.className =
-        "hotspot";
+      button.addEventListener("click", () => {
+        tapEffect(button);
+        openObject(object.id);
+      });
 
-
-      button.style.left =
-        `${object.x}%`;
-
-
-      button.style.top =
-        `${object.y}%`;
-
-
-      button.style.width =
-        `${object.width}%`;
-
-
-      button.style.height =
-        `${object.height}%`;
-
-
-      button.title =
-        object.name;
-
-
-      button.setAttribute(
-        "aria-label",
-        object.name
-      );
-
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          tapEffect(
-            button
-          );
-
-
-          openObject(
-            object.id
-          );
-
-        }
-      );
-
-
-      host.appendChild(
-        button
-      );
-
+      host.appendChild(button);
     });
-
 }
 
-
-/* =========================================================
-   ЭФФЕКТ ТАПА
-========================================================= */
 
 function tapEffect(button) {
+  button.classList.add("hotspot--tap");
 
-  button.classList.add(
-    "hotspot--tap"
-  );
-
-
-  setTimeout(
-    () => {
-
-      button.classList.remove(
-        "hotspot--tap"
-      );
-
-    },
-
-    220
-  );
-
+  setTimeout(() => {
+    button.classList.remove("hotspot--tap");
+  }, 220);
 }
 
 
-/* =========================================================
-   РАБОТА С ПРЕДМЕТАМИ
-========================================================= */
-
 function openObject(id) {
-
   if (id === "phone") {
-
     openPhone();
-
     return;
   }
-
 
   if (id === "fridge") {
-
     openFridge();
-
     return;
   }
-
 
   if (id === "locker") {
-
     openLocker();
-
     return;
   }
 
+  if (id === "journal") {
+    openJournal();
+    return;
+  }
+
+  if (id === "computer") {
+    openComputer();
+    return;
+  }
 
   if (id === "door") {
-
     openOverlay(`
-      <h3>
-        Выход
-      </h3>
+      <h3>Выход</h3>
 
       <div class="locked-box">
         Дверь заперта.
@@ -602,13 +272,9 @@ function openObject(id) {
     return;
   }
 
-
   if (id === "cashbox") {
-
     openOverlay(`
-      <h3>
-        Касса
-      </h3>
+      <h3>Касса</h3>
 
       <div class="locked-box">
         Касса закрыта на ключ.
@@ -618,123 +284,47 @@ function openObject(id) {
     return;
   }
 
-
-  if (id === "computer") {
-
-    openOverlay(`
-      <h3>
-        Компьютер
-      </h3>
-
-      <p>
-        Система просит пароль.
-      </p>
-
-      <p class="meta-note">
-        Эту ветку мы подключим следующей.
-      </p>
-    `);
-
-    return;
-  }
-
-
-  if (id === "journal") {
-
-    openOverlay(`
-      <h3>
-        Журнал учета
-      </h3>
-
-      <p>
-        Журнал выглядит важным.
-      </p>
-
-      <p class="meta-note">
-        В следующей ветке здесь появится
-        задание на этапы развития психологии.
-      </p>
-    `);
-
-    return;
-  }
-
-
   if (id === "medicineCabinet") {
-
     openOverlay(`
-      <h3>
-        Шкаф препаратов
-      </h3>
+      <h3>Шкаф препаратов</h3>
 
       <p>
         На полках множество упаковок.
       </p>
 
       <p class="meta-note">
-        Позже отсюда начнется третья
-        игровая ветка.
+        Эта ветка квеста будет подключена следующей.
       </p>
     `);
 
     return;
   }
 
-
   const names = {
-
-    safe:
-      "Сейф",
-
-    box:
-      "Коробка",
-
-    board:
-      "Доска объявлений",
-
-    clock:
-      "Часы",
-
-    calendar:
-      "Календарь",
-
-    trash:
-      "Корзина",
-
-    firstAid:
-      "Аптечка"
-
+    safe: "Сейф",
+    box: "Коробка",
+    board: "Доска объявлений",
+    clock: "Часы",
+    calendar: "Календарь",
+    trash: "Корзина",
+    firstAid: "Аптечка"
   };
 
-
   openOverlay(`
-    <h3>
-      ${names[id] || "Предмет"}
-    </h3>
+    <h3>${names[id] || "Предмет"}</h3>
 
     <p>
       Пока здесь ничего полезного
       обнаружить не удалось.
     </p>
   `);
-
 }
 
 
-/* =========================================================
-   ТЕЛЕФОН
-========================================================= */
-
 function openPhone() {
-
-  if (
-    gameState.phoneSolved
-  ) {
-
+  if (gameState.phoneSolved) {
     openOverlay(`
-      <h3>
-        Телефон
-      </h3>
+      <h3>Телефон</h3>
 
       <p>
         В трубке больше ничего нет.
@@ -742,38 +332,25 @@ function openPhone() {
 
       <div class="clue-card">
         Последнее сообщение:
-        <strong>
-          «Ищите там, где всегда холодно».
-        </strong>
+        <strong>«Ищите там, где всегда холодно».</strong>
       </div>
     `);
 
     return;
   }
 
-
   openQuestion(
     QUESTIONS.phone,
-
     () => {
-
-      gameState.phoneSolved =
-        true;
-
-
-      gameState.fridgeClueKnown =
-        true;
-
+      gameState.phoneSolved = true;
+      gameState.fridgeClueKnown = true;
 
       addNote(
         "Телефон: «Ищите там, где всегда холодно»."
       );
 
-
       openOverlay(`
-        <h3>
-          Верно!
-        </h3>
+        <h3>Верно!</h3>
 
         <div class="success-box">
           Из трубки слышится короткое сообщение:
@@ -785,32 +362,18 @@ function openPhone() {
         </div>
 
         <p>
-          Подсказка добавлена
-          в заметки.
+          Подсказка добавлена в заметки.
         </p>
       `);
-
     }
-
   );
-
 }
 
 
-/* =========================================================
-   ХОЛОДИЛЬНИК
-========================================================= */
-
 function openFridge() {
-
-  if (
-    !gameState.fridgeClueKnown
-  ) {
-
+  if (!gameState.fridgeClueKnown) {
     openOverlay(`
-      <h3>
-        Холодильник
-      </h3>
+      <h3>Холодильник</h3>
 
       <p>
         Холодильник заполнен препаратами.
@@ -825,25 +388,17 @@ function openFridge() {
     return;
   }
 
-
-  if (
-    !gameState.smallKeyFound
-  ) {
-
+  if (!gameState.smallKeyFound) {
     openOverlay(`
-      <h3>
-        Холодильник
-      </h3>
+      <h3>Холодильник</h3>
 
       <p>
         После телефонной подсказки
-        вы осматриваете холодильник
-        внимательнее.
+        вы осматриваете холодильник внимательнее.
       </p>
 
       <div class="success-box">
-        За одной из упаковок
-        обнаруживается маленький ключ.
+        За одной из упаковок обнаруживается маленький ключ.
       </div>
 
       <button
@@ -854,107 +409,65 @@ function openFridge() {
       </button>
     `);
 
-
     document
-      .getElementById(
-        "take-small-key"
-      )
-      .addEventListener(
-        "click",
-        () => {
+      .getElementById("take-small-key")
+      .addEventListener("click", () => {
+        gameState.fridgeSearched = true;
+        gameState.smallKeyFound = true;
 
-          gameState.fridgeSearched =
-            true;
+        addInventoryItem({
+          id: "smallKey",
+          icon: "🔑",
+          name: "Маленький ключ"
+        });
 
+        openOverlay(`
+          <h3>Ключ найден</h3>
 
-          gameState.smallKeyFound =
-            true;
+          <p>
+            Маленький ключ добавлен в инвентарь.
+          </p>
 
-
-          addInventoryItem({
-            id: "smallKey",
-            icon: "🔑",
-            name: "Маленький ключ"
-          });
-
-
-          openOverlay(`
-            <h3>
-              Ключ найден
-            </h3>
-
-            <p>
-              Маленький ключ добавлен
-              в инвентарь.
-            </p>
-
-            <p>
-              Теперь осталось понять,
-              что именно он открывает.
-            </p>
-          `);
-
-        }
-      );
-
+          <p>
+            Теперь осталось понять,
+            что именно он открывает.
+          </p>
+        `);
+      });
 
     return;
   }
 
-
   openOverlay(`
-    <h3>
-      Холодильник
-    </h3>
+    <h3>Холодильник</h3>
 
     <p>
-      Вы уже нашли здесь
-      маленький ключ.
+      Вы уже нашли здесь маленький ключ.
     </p>
   `);
-
 }
 
 
-/* =========================================================
-   СЛУЖЕБНЫЙ ШКАФЧИК
-========================================================= */
-
 function openLocker() {
-
-  if (
-    !gameState.lockerOpened
-  ) {
-
-    if (
-      !hasInventoryItem(
-        "smallKey"
-      )
-    ) {
-
+  if (!gameState.lockerOpened) {
+    if (!hasInventoryItem("smallKey")) {
       openOverlay(`
-        <h3>
-          Служебный шкафчик
-        </h3>
+        <h3>Служебный шкафчик</h3>
 
         <div class="locked-box">
           Шкафчик заперт.
         </div>
 
         <p>
-          На дверце обычная
-          небольшая замочная скважина.
+          На дверце обычная небольшая замочная скважина.
         </p>
       `);
 
       return;
     }
 
-
     openOverlay(`
-      <h3>
-        Служебный шкафчик
-      </h3>
+      <h3>Служебный шкафчик</h3>
 
       <p>
         У вас есть маленький ключ.
@@ -968,79 +481,48 @@ function openLocker() {
       </button>
     `);
 
-
     document
-      .getElementById(
-        "use-small-key"
-      )
-      .addEventListener(
-        "click",
-        () => {
+      .getElementById("use-small-key")
+      .addEventListener("click", () => {
+        removeInventoryItem("smallKey");
 
-          removeInventoryItem(
-            "smallKey"
-          );
+        gameState.lockerOpened = true;
 
+        openOverlay(`
+          <h3>Шкафчик открыт</h3>
 
-          gameState.lockerOpened =
-            true;
+          <p>
+            Ключ подошел.
+          </p>
 
+          <p>
+            На внутренней стороне дверцы
+            прикреплена карточка с вопросом.
+          </p>
 
-          openOverlay(`
-            <h3>
-              Шкафчик открыт
-            </h3>
+          <button
+            class="primary-btn"
+            id="locker-question-btn"
+          >
+            Прочитать карточку
+          </button>
+        `);
 
-            <p>
-              Ключ подошел.
-            </p>
-
-            <p>
-              На внутренней стороне дверцы
-              прикреплена карточка
-              с вопросом.
-            </p>
-
-            <button
-              class="primary-btn"
-              id="locker-question-btn"
-            >
-              Прочитать карточку
-            </button>
-          `);
-
-
-          document
-            .getElementById(
-              "locker-question-btn"
-            )
-            .addEventListener(
-              "click",
-              openLockerQuestion
-            );
-
-        }
-      );
-
+        document
+          .getElementById("locker-question-btn")
+          .addEventListener("click", openLockerQuestion);
+      });
 
     return;
   }
 
-
-  if (
-    !gameState.lockerSolved
-  ) {
-
+  if (!gameState.lockerSolved) {
     openLockerQuestion();
-
     return;
   }
-
 
   openOverlay(`
-    <h3>
-      Служебный шкафчик
-    </h3>
+    <h3>Служебный шкафчик</h3>
 
     <p>
       Шкафчик открыт.
@@ -1051,38 +533,20 @@ function openLocker() {
       <strong>7</strong>
     </div>
   `);
-
 }
 
 
-/* =========================================================
-   ЗАДАНИЕ В ШКАФЧИКЕ
-========================================================= */
-
 function openLockerQuestion() {
-
   openQuestion(
     QUESTIONS.locker,
-
     () => {
+      gameState.lockerSolved = true;
+      gameState.digit7Found = true;
 
-      gameState.lockerSolved =
-        true;
-
-
-      gameState.digit7Found =
-        true;
-
-
-      addNote(
-        "Найдена цифра: 7."
-      );
-
+      addNote("Найдена цифра: 7.");
 
       openOverlay(`
-        <h3>
-          Верно!
-        </h3>
+        <h3>Верно!</h3>
 
         <p>
           За карточкой обнаруживается
@@ -1091,55 +555,246 @@ function openLockerQuestion() {
 
         <div class="clue-card">
           На ней выгравирована цифра:
-          <strong style="font-size: 32px;">
-            7
-          </strong>
+          <strong style="font-size: 32px;">7</strong>
         </div>
 
         <p>
-          Цифра сохранена
-          в заметках.
+          Цифра сохранена в заметках.
         </p>
       `);
-
     }
   );
-
 }
 
 
-/* =========================================================
-   УНИВЕРСАЛЬНОЕ ЗАДАНИЕ
-========================================================= */
+/* =========================
+   ВТОРАЯ ВЕТКА
+========================= */
 
-function openQuestion(
-  question,
-  onSuccess
-) {
+function openJournal() {
+  if (gameState.journalSolved) {
+    openOverlay(`
+      <h3>Журнал учета</h3>
 
-  const options =
-    question.options
-      .map(
-        (option, index) => `
-          <button
-            class="choice-btn"
-            data-answer="${index}"
-          >
-            ${option}
-          </button>
-        `
-      )
-      .join("");
+      <p>
+        Вы уже изучили эту страницу.
+      </p>
 
+      <div class="clue-card">
+        На полях записано:
+        <strong>PAVLOV</strong>
+      </div>
+    `);
+
+    return;
+  }
+
+  openQuestion(
+    QUESTIONS.journal,
+    () => {
+      gameState.journalSolved = true;
+      gameState.computerPasswordKnown = true;
+
+      addNote("В журнале найден пароль: PAVLOV.");
+
+      openOverlay(`
+        <h3>Верно!</h3>
+
+        <p>
+          Под правильной последовательностью
+          вы замечаете сделанную карандашом запись.
+        </p>
+
+        <div class="clue-card">
+          PAVLOV
+        </div>
+
+        <p>
+          Похоже на пароль.
+        </p>
+      `);
+    }
+  );
+}
+
+
+function openComputer() {
+  if (!gameState.computerPasswordKnown) {
+    openOverlay(`
+      <h3>Компьютер</h3>
+
+      <div class="locked-box">
+        Система заблокирована.
+      </div>
+
+      <p>
+        На экране написано:
+        «Введите пароль».
+      </p>
+
+      <p>
+        Пароль вам пока неизвестен.
+      </p>
+    `);
+
+    return;
+  }
+
+  if (!gameState.computerUnlocked) {
+    openOverlay(`
+      <h3>Компьютер</h3>
+
+      <p>
+        Введите пароль:
+      </p>
+
+      <input
+        id="computer-password"
+        class="text-input"
+        type="text"
+        autocomplete="off"
+        placeholder="Пароль"
+      />
+
+      <button
+        class="primary-btn"
+        id="computer-login-btn"
+      >
+        Войти
+      </button>
+
+      <p
+        id="computer-password-error"
+        class="error-text"
+      ></p>
+    `);
+
+    document
+      .getElementById("computer-login-btn")
+      .addEventListener("click", checkComputerPassword);
+
+    document
+      .getElementById("computer-password")
+      .addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          checkComputerPassword();
+        }
+      });
+
+    return;
+  }
+
+  if (!gameState.computerSolved) {
+    openComputerQuestion();
+    return;
+  }
 
   openOverlay(`
-    <h3>
-      ${question.title}
-    </h3>
+    <h3>Компьютер</h3>
 
     <p>
-      ${question.text}
+      Система разблокирована.
     </p>
+
+    <div class="clue-card">
+      На экране осталась цифра:
+      <strong>2</strong>
+    </div>
+  `);
+}
+
+
+function checkComputerPassword() {
+  const input = document
+    .getElementById("computer-password")
+    .value
+    .trim()
+    .toUpperCase();
+
+  if (input !== "PAVLOV") {
+    document
+      .getElementById("computer-password-error")
+      .textContent =
+      "Пароль не подходит.";
+
+    return;
+  }
+
+  gameState.computerUnlocked = true;
+
+  openOverlay(`
+    <h3>Доступ разрешен</h3>
+
+    <p>
+      Система разблокирована.
+    </p>
+
+    <button
+      class="primary-btn"
+      id="open-computer-task"
+    >
+      Открыть файл
+    </button>
+  `);
+
+  document
+    .getElementById("open-computer-task")
+    .addEventListener("click", openComputerQuestion);
+}
+
+
+function openComputerQuestion() {
+  openQuestion(
+    QUESTIONS.computer,
+    () => {
+      gameState.computerSolved = true;
+      gameState.digit2Found = true;
+
+      addNote("На компьютере найдена цифра: 2.");
+
+      openOverlay(`
+        <h3>Верно!</h3>
+
+        <p>
+          После ответа файл закрывается,
+          а на экране остается только одна цифра.
+        </p>
+
+        <div class="clue-card">
+          <strong style="font-size: 32px;">2</strong>
+        </div>
+
+        <p>
+          Цифра сохранена в заметках.
+        </p>
+      `);
+    }
+  );
+}
+
+
+/* =========================
+   УНИВЕРСАЛЬНЫЙ ВОПРОС
+========================= */
+
+function openQuestion(question, onSuccess) {
+  const options = question.options
+    .map(
+      (option, index) => `
+        <button
+          class="choice-btn"
+          data-answer="${index}"
+        >
+          ${option}
+        </button>
+      `
+    )
+    .join("");
+
+  openOverlay(`
+    <h3>${question.title}</h3>
+
+    <p>${question.text}</p>
 
     <div class="choice-list">
       ${options}
@@ -1151,548 +806,347 @@ function openQuestion(
     ></p>
   `);
 
-
   overlayContent
-    .querySelectorAll(
-      "[data-answer]"
-    )
+    .querySelectorAll("[data-answer]")
     .forEach(button => {
+      button.addEventListener("click", () => {
+        const answer =
+          Number(button.dataset.answer);
 
-      button.addEventListener(
-        "click",
-        () => {
-
-          const answer =
-            Number(
-              button.dataset.answer
-            );
-
-
-          if (
-            answer ===
-            question.correct
-          ) {
-
-            onSuccess();
-
-          }
-
-          else {
-
-            document
-              .getElementById(
-                "question-feedback"
-              )
-              .textContent =
-              "Ответ неверный. Попробуйте еще раз.";
-
-          }
-
+        if (answer === question.correct) {
+          onSuccess();
+        } else {
+          document
+            .getElementById("question-feedback")
+            .textContent =
+            "Ответ неверный. Попробуйте еще раз.";
         }
-      );
-
+      });
     });
-
 }
 
 
-/* =========================================================
+/* =========================
    ИНВЕНТАРЬ
-========================================================= */
+========================= */
 
-function addInventoryItem(
-  item
-) {
-
-  if (
-    hasInventoryItem(
-      item.id
-    )
-  ) {
-
+function addInventoryItem(item) {
+  if (hasInventoryItem(item.id)) {
     return;
   }
 
-
-  inventory.push(
-    item
-  );
-
-
+  inventory.push(item);
   renderInventory();
-
 }
 
 
-function removeInventoryItem(
-  id
-) {
-
+function removeInventoryItem(id) {
   inventory =
     inventory.filter(
-      item =>
-        item.id !== id
+      item => item.id !== id
     );
 
-
   renderInventory();
-
 }
 
 
-function hasInventoryItem(
-  id
-) {
-
+function hasInventoryItem(id) {
   return inventory.some(
-    item =>
-      item.id === id
+    item => item.id === id
   );
-
 }
 
 
-/* =========================================================
+/* =========================
    ЗАМЕТКИ
-========================================================= */
+========================= */
 
-function addNote(
-  text
-) {
-
-  if (
-    foundNotes.includes(
-      text
-    )
-  ) {
-
+function addNote(text) {
+  if (foundNotes.includes(text)) {
     return;
   }
 
-
-  foundNotes.push(
-    text
-  );
-
+  foundNotes.push(text);
 }
 
 
-/* =========================================================
+/* =========================
    ОТРИСОВКА ИНВЕНТАРЯ
-========================================================= */
+========================= */
 
 function renderInventory() {
-
   const slots =
-    document.getElementById(
-      "inventory-slots"
-    );
+    document.getElementById("inventory-slots");
 
+  slots.innerHTML = "";
 
-  slots.innerHTML =
-    "";
-
-
-  for (
-    let i = 0;
-    i < 6;
-    i++
-  ) {
-
+  for (let i = 0; i < 6; i++) {
     const slot =
-      document.createElement(
-        "div"
-      );
-
+      document.createElement("div");
 
     slot.className =
       "inventory-slot";
 
-
-    if (
-      inventory[i]
-    ) {
-
+    if (inventory[i]) {
       slot.innerHTML = `
         <span style="font-size: 22px;">
           ${inventory[i].icon}
         </span>
       `;
 
-
       slot.title =
         inventory[i].name;
-
     }
 
-
-    slots.appendChild(
-      slot
-    );
-
+    slots.appendChild(slot);
   }
-
 }
 
 
-/* =========================================================
+/* =========================
    МОДАЛЬНОЕ ОКНО
-========================================================= */
+========================= */
 
-function openOverlay(
-  html
-) {
-
-  overlayContent.innerHTML =
-    html;
-
-
-  overlay.hidden =
-    false;
-
+function openOverlay(html) {
+  overlayContent.innerHTML = html;
+  overlay.hidden = false;
 }
 
 
 function closeOverlay() {
-
-  overlay.hidden =
-    true;
-
+  overlay.hidden = true;
 }
 
 
-/* =========================================================
-   ПАРОЛЬ
-========================================================= */
+/* =========================
+   ПАРОЛЬ КВЕСТА
+========================= */
 
 document
-  .getElementById(
-    "enter-quest"
-  )
-  .addEventListener(
-    "click",
-    () => {
+  .getElementById("enter-quest")
+  .addEventListener("click", () => {
+    if (
+      passwordInput.value.trim() !==
+      selectedQuest.password
+    ) {
+      passwordError.textContent =
+        "Неверный пароль";
 
-      if (
-        passwordInput
-          .value
-          .trim() !==
-        selectedQuest.password
-      ) {
-
-        passwordError.textContent =
-          "Неверный пароль";
-
-        return;
-
-      }
-
-
-      showScreen(
-        "game"
-      );
-
-
-      requestAnimationFrame(
-        () => {
-
-          if (
-            window.innerWidth
-            < 760
-          ) {
-
-            document
-              .getElementById(
-                "scene-wrap"
-              )
-              .scrollLeft =
-              180;
-
-          }
-
-        }
-      );
-
+      return;
     }
-  );
 
+    showScreen("game");
 
-passwordInput
-  .addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Enter"
-      ) {
-
+    requestAnimationFrame(() => {
+      if (window.innerWidth < 760) {
         document
-          .getElementById(
-            "enter-quest"
-          )
-          .click();
-
+          .getElementById("scene-wrap")
+          .scrollLeft = 180;
       }
+    });
+  });
 
+
+passwordInput.addEventListener(
+  "keydown",
+  event => {
+    if (event.key === "Enter") {
+      document
+        .getElementById("enter-quest")
+        .click();
     }
-  );
+  }
+);
 
 
-/* =========================================================
-   КНОПКИ
-========================================================= */
+/* =========================
+   НАВИГАЦИЯ
+========================= */
 
 document
-  .getElementById(
-    "back-to-start"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      showScreen(
-        "start"
-      );
-
-    }
-  );
+  .getElementById("back-to-start")
+  .addEventListener("click", () => {
+    showScreen("start");
+  });
 
 
 document
-  .getElementById(
-    "overlay-close"
-  )
-  .addEventListener(
-    "click",
-    closeOverlay
-  );
+  .getElementById("overlay-close")
+  .addEventListener("click", closeOverlay);
 
 
-overlay
-  .addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target === overlay
-      ) {
-
-        closeOverlay();
-
-      }
-
+overlay.addEventListener(
+  "click",
+  event => {
+    if (event.target === overlay) {
+      closeOverlay();
     }
-  );
+  }
+);
 
 
-/* =========================================================
-   ОКНО ИНВЕНТАРЯ
-========================================================= */
+/* =========================
+   ИНВЕНТАРЬ
+========================= */
 
 document
-  .getElementById(
-    "inventory-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      const content =
-        inventory.length
-
-          ? inventory
-              .map(
-                item => `
-                  <div class="inventory-item">
-
-                    <div class="inventory-item__icon">
-                      ${item.icon}
-                    </div>
-
-                    <div>
-                      ${item.name}
-                    </div>
-
+  .getElementById("inventory-btn")
+  .addEventListener("click", () => {
+    const content =
+      inventory.length
+        ? inventory
+            .map(
+              item => `
+                <div class="inventory-item">
+                  <div class="inventory-item__icon">
+                    ${item.icon}
                   </div>
-                `
-              )
-              .join("")
 
-          : `
-              <p>
-                Пока пусто.
-              </p>
-            `;
+                  <div>
+                    ${item.name}
+                  </div>
+                </div>
+              `
+            )
+            .join("")
+        : `
+            <p>
+              Пока пусто.
+            </p>
+          `;
 
-
-      openOverlay(`
-        <h3>
-          Инвентарь
-        </h3>
-
-        ${content}
-      `);
-
-    }
-  );
+    openOverlay(`
+      <h3>Инвентарь</h3>
+      ${content}
+    `);
+  });
 
 
-/* =========================================================
+/* =========================
    ЗАМЕТКИ
-========================================================= */
+========================= */
 
 document
-  .getElementById(
-    "notes-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
+  .getElementById("notes-btn")
+  .addEventListener("click", () => {
+    const content =
+      foundNotes.length
+        ? foundNotes
+            .map(
+              note => `
+                <div class="clue-card">
+                  ${note}
+                </div>
+              `
+            )
+            .join("")
+        : `
+            <p>
+              Пока ничего не найдено.
+            </p>
+          `;
 
-      const content =
-        foundNotes.length
-
-          ? foundNotes
-              .map(
-                note => `
-                  <div class="clue-card">
-                    ${note}
-                  </div>
-                `
-              )
-              .join("")
-
-          : `
-              <p>
-                Пока ничего
-                не найдено.
-              </p>
-            `;
+    openOverlay(`
+      <h3>Заметки</h3>
+      ${content}
+    `);
+  });
 
 
-      openOverlay(`
-        <h3>
-          Заметки
-        </h3>
-
-        ${content}
-      `);
-
-    }
-  );
-
-
-/* =========================================================
+/* =========================
    ПОДСКАЗКА
-========================================================= */
+========================= */
 
 document
-  .getElementById(
-    "hint-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
+  .getElementById("hint-btn")
+  .addEventListener("click", () => {
+    let hint =
+      "Осмотритесь. Возможно, стоит начать с телефона или журнала.";
 
-      let hint =
-        "Осмотритесь. Возможно, стоит начать с телефона.";
-
-
-      if (
-        gameState.phoneSolved &&
-        !gameState.smallKeyFound
-      ) {
-
-        hint =
-          "Телефон говорил о месте, где всегда холодно.";
-
-      }
-
-
-      else if (
-        gameState.smallKeyFound &&
-        !gameState.lockerOpened
-      ) {
-
-        hint =
-          "У вас появился маленький ключ. Осмотрите предметы с замочными скважинами.";
-
-      }
-
-
-      else if (
-        gameState.lockerOpened &&
-        !gameState.lockerSolved
-      ) {
-
-        hint =
-          "В открытом шкафчике осталась карточка.";
-
-      }
-
-
-      else if (
-        gameState.digit7Found
-      ) {
-
-        hint =
-          "Первая часть пути пройдена. В комнате должны быть и другие ветки.";
-
-      }
-
-
-      openOverlay(`
-        <h3>
-          Подсказка
-        </h3>
-
-        <p>
-          ${hint}
-        </p>
-      `);
-
+    if (
+      gameState.phoneSolved &&
+      !gameState.smallKeyFound
+    ) {
+      hint =
+        "Телефон говорил о месте, где всегда холодно.";
     }
-  );
+
+    else if (
+      gameState.smallKeyFound &&
+      !gameState.lockerOpened
+    ) {
+      hint =
+        "У вас есть маленький ключ. Осмотрите предметы с замочными скважинами.";
+    }
+
+    else if (
+      gameState.lockerOpened &&
+      !gameState.lockerSolved
+    ) {
+      hint =
+        "В открытом шкафчике осталась карточка.";
+    }
+
+    else if (
+      !gameState.journalSolved
+    ) {
+      hint =
+        "На столе лежит журнал. Возможно, в нем есть что-то полезное.";
+    }
+
+    else if (
+      gameState.computerPasswordKnown &&
+      !gameState.computerUnlocked
+    ) {
+      hint =
+        "Вы уже нашли слово, похожее на пароль.";
+    }
+
+    else if (
+      gameState.computerUnlocked &&
+      !gameState.computerSolved
+    ) {
+      hint =
+        "На разблокированном компьютере остался файл.";
+    }
+
+    else if (
+      gameState.digit7Found &&
+      gameState.digit2Found
+    ) {
+      hint =
+        "У вас уже две цифры. В комнате осталась еще одна игровая ветка.";
+    }
+
+    openOverlay(`
+      <h3>Подсказка</h3>
+      <p>${hint}</p>
+    `);
+  });
 
 
-/* =========================================================
+/* =========================
    МЕНЮ
-========================================================= */
+========================= */
 
 document
-  .getElementById(
-    "menu-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
+  .getElementById("menu-btn")
+  .addEventListener("click", () => {
+    openOverlay(`
+      <h3>Меню</h3>
 
-      openOverlay(`
-        <h3>
-          Меню
-        </h3>
+      <p>
+        День 1 — Первый день в аптеке
+      </p>
 
-        <p>
-          День 1 —
-          Первый день в аптеке
-        </p>
+      <p class="meta-note">
+        Перезапуск и сохранение прохождения
+        добавим позже.
+      </p>
+    `);
+  });
 
-        <p class="meta-note">
-          Перезапуск и сохранение
-          прохождения добавим позже.
-        </p>
-      `);
-
-    }
-  );
-
-
-/* =========================================================
-   ЗАПУСК
-========================================================= */
 
 renderDays();
-
 renderHotspots();
-
 renderInventory();
