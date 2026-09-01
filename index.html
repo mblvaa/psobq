@@ -1,129 +1,892 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Аптека — учебный квест</title>
-  <link rel="stylesheet" href="styles.css" />
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="theme-color"
+    content="#14181b"
+  >
+
+  <title>
+    Аптека — Психология общения
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
 </head>
+
+
 <body>
-  <main id="app">
 
-    <!-- СТАРТОВАЯ СТРАНИЦА -->
-    <section id="start-screen" class="screen screen--active">
+
+  <main class="app">
+
+
+    <!-- =====================================================
+         СТАРТОВЫЙ ЭКРАН
+    ====================================================== -->
+
+    <section
+      id="start-screen"
+      class="screen screen--active"
+    >
+
       <div class="start-card">
-        <div class="eyebrow">Учебный квест</div>
-        <h1>АПТЕКА</h1>
-        <p class="subtitle">Психология общения</p>
 
-        <div class="days-grid" id="days-grid"></div>
+        <div class="eyebrow">
+          УЧЕБНЫЙ ESCAPE ROOM
+        </div>
+
+
+        <h1>
+          АПТЕКА
+        </h1>
+
+
+        <p class="subtitle">
+          Психология общения
+        </p>
+
+
+        <p class="start-description">
+          Выберите смену.
+        </p>
+
+
+        <!--
+          Кнопки ДЕНЬ 1 — ДЕНЬ 6
+          создаются автоматически
+          из app.js
+        -->
+
+        <div
+          id="days-grid"
+          class="days-grid"
+        ></div>
+
+
+        <button
+          id="open-admin"
+          class="secondary-btn admin-entry-btn"
+          type="button"
+        >
+          ⚙ Администратор
+        </button>
+
       </div>
+
     </section>
 
-    <!-- ВВОД ПАРОЛЯ -->
-    <section id="login-screen" class="screen">
-      <div class="modal-card">
-        <button class="ghost-btn" id="back-to-start">← Назад</button>
 
-        <div class="eyebrow" id="login-day-label">ДЕНЬ 1</div>
 
-        <h2 id="login-title">Первый день в аптеке</h2>
+    <!-- =====================================================
+         ЭКРАН ВХОДА В КВЕСТ
+    ====================================================== -->
 
-        <p id="login-topic">
+    <section
+      id="login-screen"
+      class="screen"
+    >
+
+      <div class="login-card">
+
+        <button
+          id="back-to-start"
+          class="back-btn"
+          type="button"
+        >
+          ← Назад
+        </button>
+
+
+        <div
+          id="login-day-label"
+          class="eyebrow"
+        >
+          ДЕНЬ 1
+        </div>
+
+
+        <h2
+          id="login-title"
+        >
+          Первый день в аптеке
+        </h2>
+
+
+        <p
+          id="login-topic"
+          class="subtitle"
+        >
           Введение в психологию общения
         </p>
 
-        <label class="field-label" for="quest-password">
-          Пароль квеста
-        </label>
 
-        <input
-          id="quest-password"
-          class="text-input"
-          type="password"
-          autocomplete="off"
-          placeholder="Введите пароль"
-        />
+        <div class="login-form">
 
-        <button class="primary-btn" id="enter-quest">
-          Начать смену
-        </button>
+          <label
+            for="quest-password"
+            class="input-label"
+          >
+            Пароль смены
+          </label>
 
-        <p
-          class="error-text"
-          id="password-error"
-          aria-live="polite"
-        ></p>
+
+          <input
+            id="quest-password"
+            class="text-input"
+            type="password"
+            autocomplete="off"
+            placeholder="Введите пароль"
+          >
+
+
+          <button
+            id="enter-quest"
+            class="primary-btn"
+            type="button"
+          >
+            Начать смену
+          </button>
+
+
+          <p
+            id="password-error"
+            class="error-text"
+          ></p>
+
+        </div>
+
       </div>
+
     </section>
 
-    <!-- ИГРОВАЯ КОМНАТА -->
-    <section id="game-screen" class="screen game-screen">
+
+
+    <!-- =====================================================
+         ИГРОВОЙ ЭКРАН
+    ====================================================== -->
+
+    <section
+      id="game-screen"
+      class="screen game-screen"
+    >
+
+
+      <!-- =========================
+           ВЕРХНЯЯ ПАНЕЛЬ
+      ========================== -->
 
       <header class="game-topbar">
-        <div>
-          <div class="eyebrow">ДЕНЬ 1</div>
-          <strong>Первый день в аптеке</strong>
+
+        <div class="game-title">
+
+          <span class="game-title__small">
+            АПТЕКА
+          </span>
+
+          <strong>
+            Первый день
+          </strong>
+
         </div>
 
-        <div class="topbar-actions">
-          <button class="icon-btn" id="hint-btn">?</button>
-          <button class="icon-btn" id="menu-btn">☰</button>
+
+        <div class="game-actions">
+
+          <button
+            id="notes-btn"
+            class="topbar-btn"
+            type="button"
+          >
+            📝
+            <span>
+              Заметки
+            </span>
+          </button>
+
+
+          <button
+            id="hint-btn"
+            class="topbar-btn"
+            type="button"
+          >
+            💡
+            <span>
+              Подсказка
+            </span>
+          </button>
+
+
+          <button
+            id="menu-btn"
+            class="topbar-btn"
+            type="button"
+          >
+            ☰
+            <span>
+              Меню
+            </span>
+          </button>
+
         </div>
+
       </header>
 
-      <div class="scene-wrap" id="scene-wrap">
 
-        <img
-          src="pharmacy-concept.png"
-          alt="Игровая аптека"
-          class="scene-image"
-          id="scene-image"
-        />
 
-        <div class="hotspots" id="hotspots"></div>
+      <!-- =========================
+           КОМНАТА
+      ========================== -->
+
+      <div
+        id="scene-wrap"
+        class="scene-wrap"
+      >
+
+        <div class="scene-stage">
+
+
+          <!--
+            ВАЖНО:
+            картинка лежит прямо
+            в корне репозитория.
+
+            Файл должен называться:
+
+            pharmacy-concept.png
+          -->
+
+          <img
+            id="scene-image"
+            class="scene-image"
+            src="pharmacy-concept.png"
+            alt="Игровая аптека"
+            draggable="false"
+          >
+
+
+          <!--
+            Невидимые кликабельные
+            области создаются
+            автоматически из app.js
+          -->
+
+          <div
+            id="hotspots"
+            class="hotspots"
+          ></div>
+
+
+        </div>
 
       </div>
 
-      <footer class="game-bottom">
 
-        <button class="inventory-btn" id="inventory-btn">
-          🎒
-          <span>Инвентарь</span>
+
+      <!-- =========================
+           НИЖНЯЯ ПАНЕЛЬ
+      ========================== -->
+
+      <div class="game-bottom-bar">
+
+        <button
+          id="inventory-btn"
+          class="inventory-title"
+          type="button"
+        >
+          🎒 Инвентарь
         </button>
+
 
         <div
-          class="inventory-slots"
           id="inventory-slots"
+          class="inventory-slots"
         ></div>
 
-        <button class="inventory-btn" id="notes-btn">
-          📘
-          <span>Заметки</span>
-        </button>
+      </div>
 
-      </footer>
 
     </section>
+
+
+
+    <!-- =====================================================
+         АДМИН-ПАНЕЛЬ
+    ====================================================== -->
+
+    <section
+      id="admin-screen"
+      class="screen"
+    >
+
+      <div class="admin-page">
+
+
+        <!-- =========================
+             ЗАГОЛОВОК АДМИНКИ
+        ========================== -->
+
+        <div class="admin-header">
+
+          <div>
+
+            <div class="eyebrow">
+              КОНСТРУКТОР КВЕСТОВ
+            </div>
+
+
+            <h2>
+              Администратор
+            </h2>
+
+          </div>
+
+
+          <button
+            id="admin-back"
+            class="secondary-btn"
+            type="button"
+          >
+            ← На главную
+          </button>
+
+        </div>
+
+
+
+        <!-- =========================
+             ОСНОВНАЯ СЕТКА
+        ========================== -->
+
+        <div class="admin-grid">
+
+
+          <!-- =================================================
+               ЛЕВАЯ КАРТОЧКА:
+               ПРЕДМЕТ КОМНАТЫ
+          ================================================== -->
+
+          <section class="admin-card">
+
+            <h3>
+              Предмет комнаты
+            </h3>
+
+
+            <!-- КВЕСТ -->
+
+            <label class="admin-field">
+
+              <span>
+                Квест
+              </span>
+
+
+              <select
+                id="admin-quest-select"
+                class="admin-input"
+              ></select>
+
+            </label>
+
+
+
+            <!-- ПРЕДМЕТ -->
+
+            <label class="admin-field">
+
+              <span>
+                Предмет
+              </span>
+
+
+              <select
+                id="admin-object-select"
+                class="admin-input"
+              ></select>
+
+            </label>
+
+
+
+            <!-- АКТИВНОСТЬ -->
+
+            <label class="admin-check">
+
+              <input
+                id="admin-object-active"
+                type="checkbox"
+              >
+
+
+              <span>
+                Предмет активен
+              </span>
+
+            </label>
+
+
+
+            <!-- НАЗВАНИЕ -->
+
+            <label class="admin-field">
+
+              <span>
+                Название
+              </span>
+
+
+              <input
+                id="admin-object-name"
+                class="admin-input"
+                type="text"
+              >
+
+            </label>
+
+
+
+            <!-- =========================
+                 КООРДИНАТЫ
+            ========================== -->
+
+            <div class="admin-coordinates">
+
+
+              <label class="admin-field">
+
+                <span>
+                  X
+                </span>
+
+
+                <input
+                  id="admin-object-x"
+                  class="admin-input"
+                  type="number"
+                  step="0.1"
+                >
+
+              </label>
+
+
+
+              <label class="admin-field">
+
+                <span>
+                  Y
+                </span>
+
+
+                <input
+                  id="admin-object-y"
+                  class="admin-input"
+                  type="number"
+                  step="0.1"
+                >
+
+              </label>
+
+
+
+              <label class="admin-field">
+
+                <span>
+                  Ширина
+                </span>
+
+
+                <input
+                  id="admin-object-width"
+                  class="admin-input"
+                  type="number"
+                  step="0.1"
+                >
+
+              </label>
+
+
+
+              <label class="admin-field">
+
+                <span>
+                  Высота
+                </span>
+
+
+                <input
+                  id="admin-object-height"
+                  class="admin-input"
+                  type="number"
+                  step="0.1"
+                >
+
+              </label>
+
+
+            </div>
+
+
+
+            <hr class="admin-divider">
+
+
+
+            <!-- =========================
+                 ТИП БАЗОВОГО ДЕЙСТВИЯ
+            ========================== -->
+
+            <label class="admin-field">
+
+              <span>
+                Базовое действие
+              </span>
+
+
+              <select
+                id="admin-action-type"
+                class="admin-input"
+              >
+
+                <option value="message">
+                  Показать текст
+                </option>
+
+
+                <option value="task">
+                  Запустить задание
+                </option>
+
+              </select>
+
+            </label>
+
+
+
+            <!-- =========================
+                 ТЕКСТОВОЕ ДЕЙСТВИЕ
+            ========================== -->
+
+            <div
+              id="admin-message-fields"
+            >
+
+              <label class="admin-field">
+
+                <span>
+                  Текст при нажатии
+                </span>
+
+
+                <textarea
+                  id="admin-object-message"
+                  class="admin-input admin-textarea"
+                  placeholder="Что увидит игрок при нажатии на предмет"
+                ></textarea>
+
+              </label>
+
+            </div>
+
+
+
+            <!-- =========================
+                 ЗАДАНИЕ
+            ========================== -->
+
+            <div
+              id="admin-task-fields"
+              hidden
+            >
+
+              <label class="admin-field">
+
+                <span>
+                  Какое задание запустить
+                </span>
+
+
+                <select
+                  id="admin-object-task"
+                  class="admin-input"
+                ></select>
+
+              </label>
+
+            </div>
+
+
+
+            <!-- СОХРАНЕНИЕ -->
+
+            <button
+              id="admin-save-object"
+              class="primary-btn"
+              type="button"
+            >
+              Сохранить предмет
+            </button>
+
+
+          </section>
+
+
+
+          <!-- =================================================
+               ПРАВАЯ КАРТОЧКА:
+               УЧЕБНОЕ ЗАДАНИЕ
+          ================================================== -->
+
+          <section class="admin-card">
+
+            <h3>
+              Учебное задание
+            </h3>
+
+
+
+            <!-- ВЫБОР ЗАДАНИЯ -->
+
+            <label class="admin-field">
+
+              <span>
+                Задание
+              </span>
+
+
+              <select
+                id="admin-task-select"
+                class="admin-input"
+              ></select>
+
+            </label>
+
+
+
+            <!-- ЗАГОЛОВОК -->
+
+            <label class="admin-field">
+
+              <span>
+                Заголовок
+              </span>
+
+
+              <input
+                id="admin-task-title"
+                class="admin-input"
+                type="text"
+              >
+
+            </label>
+
+
+
+            <!-- ВОПРОС -->
+
+            <label class="admin-field">
+
+              <span>
+                Вопрос
+              </span>
+
+
+              <textarea
+                id="admin-task-question"
+                class="admin-input admin-textarea"
+              ></textarea>
+
+            </label>
+
+
+
+            <!-- ВАРИАНТЫ -->
+
+            <label class="admin-field">
+
+              <span>
+                Варианты ответа
+              </span>
+
+
+              <textarea
+                id="admin-task-options"
+                class="admin-input admin-textarea admin-options"
+                placeholder="Один вариант на строку"
+              ></textarea>
+
+            </label>
+
+
+
+            <!-- ПРАВИЛЬНЫЙ ОТВЕТ -->
+
+            <label class="admin-field">
+
+              <span>
+                Номер правильного варианта
+              </span>
+
+
+              <input
+                id="admin-task-correct"
+                class="admin-input"
+                type="number"
+                min="1"
+                step="1"
+              >
+
+
+              <small>
+                Например: 1 — первый вариант
+              </small>
+
+            </label>
+
+
+
+            <!-- СОХРАНЕНИЕ -->
+
+            <button
+              id="admin-save-task"
+              class="primary-btn"
+              type="button"
+            >
+              Сохранить задание
+            </button>
+
+
+
+            <div class="admin-note">
+
+              Сейчас доступен первый
+              шаблон задания:
+              один правильный ответ.
+
+              Позже здесь появятся
+              множественный выбор,
+              сопоставление,
+              последовательность,
+              сортировка и ввод текста.
+
+            </div>
+
+
+          </section>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             СООБЩЕНИЕ О СОХРАНЕНИИ
+        ================================================== -->
+
+        <div
+          id="admin-status"
+          class="admin-status"
+          aria-live="polite"
+        ></div>
+
+
+
+        <!-- =================================================
+             КНОПКИ ВНИЗУ
+        ================================================== -->
+
+        <div class="admin-bottom-actions">
+
+          <button
+            id="admin-preview"
+            class="primary-btn"
+            type="button"
+          >
+            ▶ Проверить квест
+          </button>
+
+
+          <button
+            id="admin-reset"
+            class="secondary-btn"
+            type="button"
+          >
+            Сбросить локальные изменения
+          </button>
+
+        </div>
+
+
+      </div>
+
+    </section>
+
 
   </main>
 
-  <!-- ВСПЛЫВАЮЩЕЕ ОКНО -->
-  <div class="overlay" id="overlay" hidden>
-    <div class="overlay-card">
+
+
+  <!-- =====================================================
+       ОБЩЕЕ МОДАЛЬНОЕ ОКНО
+  ====================================================== -->
+
+  <div
+    id="overlay"
+    class="overlay"
+    hidden
+  >
+
+    <div
+      class="overlay-card"
+      role="dialog"
+      aria-modal="true"
+    >
+
 
       <button
-        class="close-btn"
         id="overlay-close"
+        class="overlay-close"
+        type="button"
+        aria-label="Закрыть"
       >
         ×
       </button>
 
-      <div id="overlay-content"></div>
+
+      <div
+        id="overlay-content"
+        class="overlay-content"
+      ></div>
+
 
     </div>
+
   </div>
 
+
+
+  <!-- =====================================================
+       JAVASCRIPT
+
+       Подключаем в самом конце,
+       когда HTML уже создан.
+  ====================================================== -->
+
   <script src="app.js"></script>
+
+
 </body>
+
 </html>
