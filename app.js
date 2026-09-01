@@ -45,252 +45,320 @@ const QUESTS = [
 
 
 /*
-  Все потенциальные объекты комнаты.
+  Координаты объектов на новой картинке.
 
-  x и y — положение кнопки
-  относительно картинки в процентах.
+  x / y — центр зоны в процентах.
+  width / height — размер зоны в процентах.
+
+  Позже мы еще сможем немного
+  подправить их по фактическому виду сайта.
 */
 
 const OBJECTS = [
 
   {
-    id: 1,
+    id: "phone",
     name: "Телефон",
+
     x: 10.5,
-    y: 71.5,
-    type: "task",
+    y: 79,
+
+    width: 13,
+    height: 22,
+
     active: true
   },
 
   {
-    id: 2,
+    id: "computer",
     name: "Компьютер",
-    x: 35.7,
-    y: 61.5,
-    type: "task",
+
+    x: 28,
+    y: 72,
+
+    width: 22,
+    height: 29,
+
     active: true
   },
 
   {
-    id: 3,
+    id: "journal",
     name: "Журнал",
-    x: 50,
-    y: 70.5,
-    type: "task",
+
+    x: 51,
+    y: 80,
+
+    width: 19,
+    height: 22,
+
     active: true
   },
 
   {
-    id: 4,
+    id: "medicineCabinet",
     name: "Шкаф препаратов",
-    x: 21.5,
-    y: 28.5,
-    type: "task",
+
+    x: 19,
+    y: 31,
+
+    width: 18,
+    height: 47,
+
     active: true
   },
 
   {
-    id: 5,
+    id: "fridge",
     name: "Холодильник",
-    x: 9.5,
-    y: 45,
-    type: "container",
+
+    x: 5.5,
+    y: 47,
+
+    width: 11,
+    height: 41,
+
     active: true
   },
 
   {
-    id: 6,
+    id: "cashbox",
     name: "Касса",
-    x: 73.6,
-    y: 77.5,
-    type: "task",
+
+    x: 72.5,
+    y: 80,
+
+    width: 20,
+    height: 22,
+
     active: true
   },
 
   {
-    id: 7,
+    id: "safe",
     name: "Сейф",
-    x: 60.5,
-    y: 37.5,
-    type: "locked",
-    active: false
-  },
 
-  {
-    id: 8,
-    name: "Служебный шкафчик",
-    x: 51.5,
-    y: 34.5,
-    type: "locked",
+    x: 61,
+    y: 47,
+
+    width: 11,
+    height: 31,
+
     active: true
   },
 
   {
-    id: 9,
+    id: "locker",
+    name: "Служебный шкафчик",
+
+    x: 49.5,
+    y: 42,
+
+    width: 13,
+    height: 43,
+
+    active: true
+  },
+
+  {
+    id: "box",
     name: "Коробка",
-    x: 40.5,
-    y: 50.5,
-    type: "container",
-    active: false
+
+    x: 39,
+    y: 51,
+
+    width: 9,
+    height: 15,
+
+    active: true
   },
 
   {
-    id: 10,
+    id: "board",
     name: "Доска объявлений",
-    x: 35,
-    y: 24.5,
-    type: "clue",
-    active: false
+
+    x: 31,
+    y: 28,
+
+    width: 11,
+    height: 19,
+
+    active: true
   },
 
   {
-    id: 11,
+    id: "clock",
     name: "Часы",
-    x: 40,
-    y: 14.5,
-    type: "clue",
-    active: false
+
+    x: 33,
+    y: 12,
+
+    width: 8,
+    height: 12,
+
+    active: true
   },
 
   {
-    id: 12,
+    id: "calendar",
     name: "Календарь",
-    x: 45.5,
-    y: 29,
-    type: "clue",
-    active: false
+
+    x: 40,
+    y: 28,
+
+    width: 7,
+    height: 16,
+
+    active: true
   },
 
   {
-    id: 13,
+    id: "trash",
     name: "Корзина",
-    x: 83.8,
-    y: 56,
-    type: "container",
-    active: false
+
+    x: 83,
+    y: 61,
+
+    width: 8,
+    height: 18,
+
+    active: true
   },
 
   {
-    id: 14,
+    id: "firstAid",
     name: "Аптечка",
-    x: 41.5,
+
+    x: 35.5,
     y: 39,
-    type: "container",
-    active: false
+
+    width: 9,
+    height: 11,
+
+    active: true
   },
 
   {
-    id: 15,
+    id: "door",
     name: "Дверь",
-    x: 74,
+
+    x: 76,
     y: 39,
-    type: "exit",
+
+    width: 13,
+    height: 43,
+
     active: true
   }
+
 ];
 
 
 /*
-  Временные задания.
+  Пока только демонстрационные реакции.
 
-  Позже все это будет приходить
-  из администраторской части.
+  На следующем этапе сюда уже
+  подключим состояние игры.
 */
 
-const demoQuestions = {
+const OBJECT_MESSAGES = {
 
-  1: {
+  phone: {
     title: "Телефон",
-
     text:
-      "Что изучает психология?",
-
-    options: [
-      "Закономерности психики и поведения",
-      "Только строение мозга",
-      "Только межличностные конфликты"
-    ],
-
-    correct: 0
+      "Телефон молчит. Но выглядит так, будто он еще пригодится."
   },
 
-
-  2: {
+  computer: {
     title: "Компьютер",
-
     text:
-      "Что из перечисленного ближе всего к понятию психики?",
-
-    options: [
-      "Способ отражения действительности",
-      "Набор лекарств",
-      "Метод измерения температуры"
-    ],
-
-    correct: 0
+      "Экран включен. Для доступа к системе потребуется пароль."
   },
 
-
-  3: {
-    title: "Журнал",
-
+  journal: {
+    title: "Журнал учета",
     text:
-      "Позже здесь будет задание типа «Последовательность» для этапов развития психологии.",
-
-    options: [
-      "Понятно",
-      "Еще раз"
-    ],
-
-    correct: 0
+      "Толстый журнал лежит прямо на рабочем столе. Кажется, его стоит изучить."
   },
 
-
-  4: {
+  medicineCabinet: {
     title: "Шкаф препаратов",
-
     text:
-      "Позже администратор сможет привязать сюда любое задание.",
-
-    options: [
-      "Продолжить"
-    ],
-
-    correct: 0
+      "На полках много упаковок. Возможно, среди них что-то спрятано."
   },
 
+  fridge: {
+    title: "Холодильник",
+    text:
+      "Внутри прохладно. Пока ничего необычного не видно."
+  },
 
-  6: {
+  cashbox: {
     title: "Касса",
-
     text:
-      "В финальной версии касса сможет быть закрыта ключом и содержать часть кода выхода.",
-
-    options: [
-      "Продолжить"
-    ],
-
-    correct: 0
+      "Касса закрыта на ключ."
   },
 
-
-  8: {
-    title: "Служебный шкафчик",
-
+  safe: {
+    title: "Сейф",
     text:
-      "Шкафчик можно будет открыть найденным в комнате ключом.",
+      "На сейфе кодовый замок. Вы пока не знаете комбинацию."
+  },
 
-    options: [
-      "Осмотреть замок"
-    ],
+  locker: {
+    title: "Служебный шкафчик",
+    text:
+      "Шкафчик закрыт. В замке явно должен быть ключ."
+  },
 
-    correct: 0
+  box: {
+    title: "Коробка",
+    text:
+      "Обычная коробка. По крайней мере, на первый взгляд."
+  },
+
+  board: {
+    title: "Доска объявлений",
+    text:
+      "На доске несколько записок и служебных объявлений."
+  },
+
+  clock: {
+    title: "Часы",
+    text:
+      "Часы идут. Время тоже иногда бывает подсказкой."
+  },
+
+  calendar: {
+    title: "Календарь",
+    text:
+      "Обычный календарь. Возможно, дата пригодится позже."
+  },
+
+  trash: {
+    title: "Корзина",
+    text:
+      "Вы действительно решили заглянуть в мусорную корзину. Для escape room это разумное решение."
+  },
+
+  firstAid: {
+    title: "Аптечка",
+    text:
+      "Аптечка закрыта. Пока нет причин ее открывать."
+  },
+
+  door: {
+    title: "Выход",
+    text:
+      "Дверь заперта. Рядом электронный кодовый замок. Нужно найти способ открыть дверь."
   }
 
 };
 
 
-/* ЭКРАНЫ */
+/* =========================
+   ЭЛЕМЕНТЫ ИНТЕРФЕЙСА
+========================= */
 
 const screens = {
 
@@ -302,71 +370,92 @@ const screens = {
 
   game:
     document.getElementById("game-screen")
+
 };
 
-
-/* ЭЛЕМЕНТЫ */
 
 const overlay =
   document.getElementById("overlay");
 
+
 const overlayContent =
   document.getElementById("overlay-content");
 
+
 const passwordInput =
   document.getElementById("quest-password");
+
 
 const passwordError =
   document.getElementById("password-error");
 
 
-/* СОСТОЯНИЕ ИГРЫ */
+let selectedQuest =
+  QUESTS[0];
 
-let selectedQuest = QUESTS[0];
-
-let foundNotes = [];
 
 let inventory = [];
 
 
-/* ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ */
+let foundNotes = [];
+
+
+/* =========================
+   ЭКРАНЫ
+========================= */
 
 function showScreen(name) {
 
-  Object.values(screens).forEach(
-    screen =>
+  Object.values(screens)
+    .forEach(screen => {
+
       screen.classList.remove(
         "screen--active"
-      )
-  );
+      );
 
-  screens[name].classList.add(
-    "screen--active"
-  );
+    });
+
+
+  screens[name]
+    .classList.add(
+      "screen--active"
+    );
 
 }
 
 
-/* СОЗДАНИЕ КНОПОК ДНЕЙ */
+/* =========================
+   СТАРТОВАЯ СТРАНИЦА
+========================= */
 
 function renderDays() {
 
   const grid =
-    document.getElementById("days-grid");
+    document.getElementById(
+      "days-grid"
+    );
+
 
   grid.innerHTML = "";
 
+
   QUESTS.forEach(quest => {
 
-    const btn =
-      document.createElement("button");
+    const button =
+      document.createElement(
+        "button"
+      );
 
-    btn.className = "day-btn";
 
-    btn.disabled =
+    button.className =
+      "day-btn";
+
+
+    button.disabled =
       !quest.enabled;
 
-    btn.innerHTML = `
+
+    button.innerHTML = `
       <strong>
         ДЕНЬ ${quest.day}
       </strong>
@@ -376,11 +465,14 @@ function renderDays() {
       </span>
     `;
 
-    btn.addEventListener(
+
+    button.addEventListener(
       "click",
       () => {
 
-        selectedQuest = quest;
+        selectedQuest =
+          quest;
+
 
         document
           .getElementById(
@@ -389,12 +481,14 @@ function renderDays() {
           .textContent =
           `ДЕНЬ ${quest.day}`;
 
+
         document
           .getElementById(
             "login-title"
           )
           .textContent =
           quest.title;
+
 
         document
           .getElementById(
@@ -403,277 +497,216 @@ function renderDays() {
           .textContent =
           quest.topic;
 
-        passwordInput.value = "";
 
-        passwordError.textContent = "";
+        passwordInput.value =
+          "";
 
-        showScreen("login");
+
+        passwordError.textContent =
+          "";
+
+
+        showScreen(
+          "login"
+        );
 
       }
     );
 
-    grid.appendChild(btn);
+
+    grid.appendChild(
+      button
+    );
 
   });
 
 }
 
 
-/* ИНТЕРАКТИВНЫЕ ТОЧКИ */
+/* =========================
+   ИГРОВАЯ СЦЕНА
+========================= */
 
 function renderHotspots() {
 
   const host =
-    document.getElementById("hotspots");
+    document.getElementById(
+      "hotspots"
+    );
+
 
   host.innerHTML = "";
 
+
   OBJECTS
-    .filter(obj => obj.active)
-    .forEach(obj => {
+    .filter(object => object.active)
+    .forEach(object => {
 
-      const btn =
-        document.createElement("button");
+      const button =
+        document.createElement(
+          "button"
+        );
 
-      btn.className = "hotspot";
 
-      btn.style.left =
-        `${obj.x}%`;
+      button.className =
+        "hotspot";
 
-      btn.style.top =
-        `${obj.y}%`;
 
-      btn.textContent =
-        obj.id;
+      button.style.left =
+        `${object.x}%`;
 
-      btn.title =
-        obj.name;
 
-      btn.setAttribute(
+      button.style.top =
+        `${object.y}%`;
+
+
+      button.style.width =
+        `${object.width}%`;
+
+
+      button.style.height =
+        `${object.height}%`;
+
+
+      button.title =
+        object.name;
+
+
+      button.setAttribute(
         "aria-label",
-        obj.name
+        object.name
       );
 
-      btn.addEventListener(
-        "click",
-        () => openObject(obj)
-      );
 
-      host.appendChild(btn);
-
-    });
-
-}
-
-
-/* НАЖАТИЕ НА ОБЪЕКТ */
-
-function openObject(obj) {
-
-  /*
-    Дверь
-  */
-
-  if (obj.type === "exit") {
-
-    openOverlay(`
-      <h3>Дверь заперта</h3>
-
-      <p>
-        На двери установлен
-        электронный кодовый замок.
-      </p>
-
-      <p>
-        Чтобы выбраться из аптеки,
-        придется найти код.
-      </p>
-
-      <p class="meta-note">
-        В следующей версии здесь уже
-        будет настоящее поле ввода кода.
-      </p>
-    `);
-
-    return;
-  }
-
-
-  /*
-    Тайник
-  */
-
-  if (
-    obj.type === "container" &&
-    !demoQuestions[obj.id]
-  ) {
-
-    openOverlay(`
-      <h3>${obj.name}</h3>
-
-      <p>
-        Пока здесь ничего нет.
-      </p>
-
-      <p class="meta-note">
-        Позже администратор сможет
-        спрятать сюда ключ, записку,
-        цифру или другой предмет.
-      </p>
-    `);
-
-    return;
-  }
-
-
-  /*
-    Учебное задание
-  */
-
-  const question =
-    demoQuestions[obj.id];
-
-
-  if (!question) {
-
-    openOverlay(`
-      <h3>${obj.name}</h3>
-
-      <p>
-        Сейчас этот объект
-        не участвует в квесте.
-      </p>
-    `);
-
-    return;
-  }
-
-
-  const options =
-    question.options
-      .map(
-        (option, index) => `
-          <button
-            class="choice-btn"
-            data-answer="${index}"
-          >
-            ${option}
-          </button>
-        `
-      )
-      .join("");
-
-
-  openOverlay(`
-    <h3>
-      ${question.title}
-    </h3>
-
-    <p>
-      ${question.text}
-    </p>
-
-    <div class="choice-list">
-      ${options}
-    </div>
-  `);
-
-
-  overlayContent
-    .querySelectorAll(
-      "[data-answer]"
-    )
-    .forEach(btn => {
-
-      btn.addEventListener(
+      button.addEventListener(
         "click",
         () => {
 
-          const answer =
-            Number(
-              btn.dataset.answer
-            );
+          tapEffect(
+            button
+          );
 
 
-          if (
-            answer ===
-            question.correct
-          ) {
-
-            foundNotes.push(
-              `${question.title}: задание выполнено`
-            );
-
-
-            overlayContent.innerHTML = `
-              <h3>Верно!</h3>
-
-              <p>
-                В настоящем квесте
-                здесь появится игровая
-                награда.
-              </p>
-
-              <p>
-                Например:
-                ключ, код, пароль
-                или новая улика.
-              </p>
-
-              <button
-                class="primary-btn"
-                id="continue-btn"
-              >
-                Продолжить
-              </button>
-            `;
-
-
-            document
-              .getElementById(
-                "continue-btn"
-              )
-              .addEventListener(
-                "click",
-                closeOverlay
-              );
-
-          }
-
-          else {
-
-            btn.textContent =
-              `${btn.textContent} — попробуйте еще`;
-
-          }
+          openObject(
+            object
+          );
 
         }
       );
 
+
+      host.appendChild(
+        button
+      );
+
     });
 
 }
 
 
-/* МОДАЛЬНОЕ ОКНО */
+/*
+  Небольшая визуальная реакция
+  на телефонный тап.
+*/
+
+function tapEffect(button) {
+
+  button.classList.add(
+    "hotspot--tap"
+  );
+
+
+  setTimeout(
+    () => {
+
+      button.classList.remove(
+        "hotspot--tap"
+      );
+
+    },
+
+    220
+  );
+
+}
+
+
+/* =========================
+   ВЗАИМОДЕЙСТВИЕ С ПРЕДМЕТОМ
+========================= */
+
+function openObject(object) {
+
+  const message =
+    OBJECT_MESSAGES[
+      object.id
+    ];
+
+
+  if (!message) {
+
+    return;
+
+  }
+
+
+  openOverlay(`
+    <h3>
+      ${message.title}
+    </h3>
+
+    <p>
+      ${message.text}
+    </p>
+
+    <button
+      class="primary-btn"
+      id="object-close"
+    >
+      Продолжить осмотр
+    </button>
+  `);
+
+
+  document
+    .getElementById(
+      "object-close"
+    )
+    .addEventListener(
+      "click",
+      closeOverlay
+    );
+
+}
+
+
+/* =========================
+   МОДАЛЬНОЕ ОКНО
+========================= */
 
 function openOverlay(html) {
 
-  overlayContent.innerHTML = html;
+  overlayContent.innerHTML =
+    html;
 
-  overlay.hidden = false;
+
+  overlay.hidden =
+    false;
 
 }
 
 
 function closeOverlay() {
 
-  overlay.hidden = true;
+  overlay.hidden =
+    true;
 
 }
 
 
-/* ИНВЕНТАРЬ */
+/* =========================
+   ИНВЕНТАРЬ
+========================= */
 
 function renderInventory() {
 
@@ -682,7 +715,9 @@ function renderInventory() {
       "inventory-slots"
     );
 
-  slots.innerHTML = "";
+
+  slots.innerHTML =
+    "";
 
 
   for (
@@ -692,34 +727,31 @@ function renderInventory() {
   ) {
 
     const slot =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     slot.className =
       "inventory-slot";
 
-    slot.textContent =
-      inventory[i] || "пусто";
 
-    slots.appendChild(slot);
+    slot.textContent =
+      inventory[i] || "";
+
+
+    slots.appendChild(
+      slot
+    );
 
   }
 
 }
 
 
-/* НАЗАД */
-
-document
-  .getElementById(
-    "back-to-start"
-  )
-  .addEventListener(
-    "click",
-    () => showScreen("start")
-  );
-
-
-/* ПРОВЕРКА ПАРОЛЯ */
+/* =========================
+   ПАРОЛЬ
+========================= */
 
 document
   .getElementById(
@@ -740,27 +772,38 @@ document
           "Неверный пароль";
 
         return;
+
       }
 
 
-      showScreen("game");
+      showScreen(
+        "game"
+      );
 
-
-      /*
-        На мобильном немного
-        сдвигаем комнату вправо,
-        чтобы стартовый кадр
-        выглядел лучше.
-      */
 
       requestAnimationFrame(
         () => {
 
-          document
-            .getElementById(
+          const scene =
+            document.getElementById(
               "scene-wrap"
-            )
-            .scrollLeft = 260;
+            );
+
+
+          /*
+            На мобильном стартуем
+            чуть левее центра.
+          */
+
+          if (
+            window.innerWidth
+            < 760
+          ) {
+
+            scene.scrollLeft =
+              180;
+
+          }
 
         }
       );
@@ -769,7 +812,49 @@ document
   );
 
 
-/* ЗАКРЫТИЕ ОКНА */
+/*
+  Enter тоже запускает квест.
+*/
+
+passwordInput.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "Enter"
+    ) {
+
+      document
+        .getElementById(
+          "enter-quest"
+        )
+        .click();
+
+    }
+
+  }
+);
+
+
+/* =========================
+   НАВИГАЦИЯ
+========================= */
+
+document
+  .getElementById(
+    "back-to-start"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      showScreen(
+        "start"
+      );
+
+    }
+  );
+
 
 document
   .getElementById(
@@ -797,7 +882,9 @@ overlay.addEventListener(
 );
 
 
-/* ИНВЕНТАРЬ */
+/* =========================
+   ИНВЕНТАРЬ
+========================= */
 
 document
   .getElementById(
@@ -817,11 +904,18 @@ document
               )
               .join("")
 
-          : "<p>Пока пусто.</p>";
+          : `
+              <p>
+                Пока пусто.
+              </p>
+            `;
 
 
       openOverlay(`
-        <h3>Инвентарь</h3>
+        <h3>
+          Инвентарь
+        </h3>
+
         ${content}
       `);
 
@@ -829,7 +923,9 @@ document
   );
 
 
-/* ЗАМЕТКИ */
+/* =========================
+   ЗАМЕТКИ
+========================= */
 
 document
   .getElementById(
@@ -849,11 +945,19 @@ document
               )
               .join("")
 
-          : "<p>Пока ничего не найдено.</p>";
+          : `
+              <p>
+                Пока ничего
+                не найдено.
+              </p>
+            `;
 
 
       openOverlay(`
-        <h3>Заметки</h3>
+        <h3>
+          Заметки
+        </h3>
+
         ${content}
       `);
 
@@ -861,7 +965,9 @@ document
   );
 
 
-/* ПОДСКАЗКА */
+/* =========================
+   ПОДСКАЗКА
+========================= */
 
 document
   .getElementById(
@@ -872,17 +978,21 @@ document
     () => {
 
       openOverlay(`
-        <h3>Подсказка</h3>
+        <h3>
+          Подсказка
+        </h3>
 
         <p>
-          Осматривайте предметы.
+          Осматривайте комнату.
+          Не каждый предмет обязательно
+          содержит задание.
         </p>
 
         <p>
-          Некоторые задания будут
-          открывать другие объекты
-          или давать предметы
-          для инвентаря.
+          Некоторые вещи могут
+          пригодиться только после того,
+          как вы найдете ключ,
+          пароль или другую улику.
         </p>
       `);
 
@@ -890,7 +1000,9 @@ document
   );
 
 
-/* МЕНЮ */
+/* =========================
+   МЕНЮ
+========================= */
 
 document
   .getElementById(
@@ -901,16 +1013,18 @@ document
     () => {
 
       openOverlay(`
-        <h3>Меню</h3>
+        <h3>
+          Меню
+        </h3>
 
         <p>
-          Позже здесь появятся:
+          День 1
         </p>
 
-        <p>
-          • начать квест заново<br>
-          • правила<br>
-          • выйти на стартовую страницу
+        <p class="meta-note">
+          В следующих версиях здесь
+          появятся перезапуск квеста
+          и выход на стартовую страницу.
         </p>
       `);
 
@@ -918,7 +1032,9 @@ document
   );
 
 
-/* СТАРТ */
+/* =========================
+   ЗАПУСК
+========================= */
 
 renderDays();
 
