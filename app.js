@@ -1,1071 +1,682 @@
-/* =========================================================
-   1. СПИСОК КВЕСТОВ
-========================================================= */
-
-const QUESTS = [
-  {
-    id: "day1",
-    day: 1,
-    title: "Первый день в аптеке",
-    topic: "Введение в психологию общения",
-    enabled: true,
-    password: "day1"
-  },
-
-  {
-    id: "day2",
-    day: 2,
-    title: "Смена еще не открыта",
-    topic: "",
-    enabled: false
-  },
-
-  {
-    id: "day3",
-    day: 3,
-    title: "Смена еще не открыта",
-    topic: "",
-    enabled: false
-  },
-
-  {
-    id: "day4",
-    day: 4,
-    title: "Смена еще не открыта",
-    topic: "",
-    enabled: false
-  },
-
-  {
-    id: "day5",
-    day: 5,
-    title: "Смена еще не открыта",
-    topic: "",
-    enabled: false
-  },
-
-  {
-    id: "day6",
-    day: 6,
-    title: "Смена еще не открыта",
-    topic: "",
-    enabled: false
-  }
-];
-
-
-/* =========================================================
-   2. НАСТРОЙКИ
-========================================================= */
-
 const ADMIN_PASSWORD = "admin2026";
-
-const ADMIN_STORAGE_KEY =
-  "psychologyEscapeAdminConfig";
+const STORAGE_KEY = "psychologyEscapeBuilderV3";
 
 
-/* =========================================================
-   3. КОНФИГУРАЦИЯ ДНЯ 1
-========================================================= */
+function makeEmptyQuest(day) {
+  return {
+    day,
+    enabled: false,
+    title: `День ${day}`,
+    topic: "",
+    password: `day${day}`,
+    tasks: {},
+    objects: []
+  };
+}
 
-const QUEST_CONFIG = {
 
-  day1: {
+const DEFAULT_DATA = {
 
-    tasks: {
+  quests: {
 
-      psychology: {
-        id: "psychology",
-        type: "singleChoice",
-        title: "Телефон",
+    day1: {
+      day: 1,
+      enabled: true,
+      title: "Первый день в аптеке",
+      topic: "Введение в психологию общения",
+      password: "day1",
 
-        question:
-          "Что является предметом изучения психологии?",
+      tasks: {
 
-        options: [
-          "Закономерности возникновения, развития и функционирования психики",
-          "Только строение головного мозга",
-          "Только поведение человека в обществе",
-          "Способы лечения психических заболеваний"
-        ],
+        psychology: {
+          id: "psychology",
+          title: "Психология",
+          type: "singleChoice",
 
-        correct: 0,
+          question:
+            "Что является предметом изучения психологии?",
 
-        successEffects: [
-          {
-            type: "setFlag",
-            flag: "phoneSolved"
-          },
+          options: [
+            "Закономерности возникновения, развития и функционирования психики",
+            "Только строение головного мозга",
+            "Только поведение человека в обществе",
+            "Способы лечения психических заболеваний"
+          ],
 
-          {
-            type: "setFlag",
-            flag: "fridgeClueKnown"
-          },
+          correct: [0],
 
-          {
-            type: "addNote",
-            text:
-              "Телефон: «Ищите там, где всегда холодно»."
-          }
-        ],
+          answers: [],
 
-        successMessage: `
-          <h3>Верно!</h3>
+          order: [],
 
-          <div class="success-box">
-            Из трубки слышится короткое сообщение.
-          </div>
+          pairs: [],
 
-          <div class="clue-card">
-            «Если хотите выбраться,
-            ищите там, где всегда холодно».
-          </div>
+          successMessage:
+            "Из трубки слышится сообщение: «Ищите там, где всегда холодно»",
 
-          <p>
-            Подсказка добавлена в заметки.
-          </p>
-        `
+          rewards: [
+            {
+              type: "flag",
+              value: "fridgeClueKnown",
+              name: "",
+              icon: ""
+            },
+
+            {
+              type: "note",
+              value:
+                "Телефон: «Ищите там, где всегда холодно».",
+              name: "",
+              icon: ""
+            }
+          ]
+        },
+
+
+        psyche: {
+          id: "psyche",
+          title: "Психика",
+          type: "singleChoice",
+
+          question:
+            "Как называется свойство высокоорганизованной материи отражать объективную действительность?",
+
+          options: [
+            "Психика",
+            "Общение",
+            "Темперамент",
+            "Память"
+          ],
+
+          correct: [0],
+          answers: [],
+          order: [],
+          pairs: [],
+
+          successMessage:
+            "За карточкой обнаруживается металлическая пластинка с цифрой 7.",
+
+          rewards: [
+            {
+              type: "note",
+              value: "Найдена цифра: 7.",
+              name: "",
+              icon: ""
+            }
+          ]
+        },
+
+
+        history: {
+          id: "history",
+          title: "Основные этапы развития психологии",
+          type: "ordering",
+
+          question:
+            "Расположите этапы развития представлений о предмете психологии в правильном порядке.",
+
+          options: [],
+          correct: [],
+          answers: [],
+
+          order: [
+            "Душа",
+            "Сознание",
+            "Поведение",
+            "Психика"
+          ],
+
+          pairs: [],
+
+          successMessage:
+            "На полях журнала обнаружена запись: PAVLOV.",
+
+          rewards: [
+            {
+              type: "note",
+              value: "Пароль от компьютера: PAVLOV.",
+              name: "",
+              icon: ""
+            }
+          ]
+        },
+
+
+        mentalActivity: {
+          id: "mentalActivity",
+          title: "Психическая деятельность",
+          type: "singleChoice",
+
+          question:
+            "Что наиболее точно описывает психическую деятельность?",
+
+          options: [
+            "Совокупность психических процессов, состояний и свойств, обеспечивающих отражение действительности и регуляцию поведения",
+            "Только процесс мышления",
+            "Только эмоциональные реакции",
+            "Любая физическая активность"
+          ],
+
+          correct: [0],
+          answers: [],
+          order: [],
+          pairs: [],
+
+          successMessage:
+            "На экране остается цифра 2.",
+
+          rewards: [
+            {
+              type: "note",
+              value: "Найдена цифра: 2.",
+              name: "",
+              icon: ""
+            }
+          ]
+        },
+
+
+        everydayPsychology: {
+          id: "everydayPsychology",
+          title: "Житейская психология",
+          type: "multipleChoice",
+
+          question:
+            "Какие признаки характерны для житейской психологии?",
+
+          options: [
+            "Основана на личном опыте",
+            "Часто носит интуитивный характер",
+            "Всегда проверяется научным экспериментом",
+            "Передается через наблюдения, советы и жизненный опыт"
+          ],
+
+          correct: [0, 1, 3],
+          answers: [],
+          order: [],
+          pairs: [],
+
+          successMessage:
+            "За упаковками обнаруживается небольшой ключ с символом ₽.",
+
+          rewards: [
+            {
+              type: "item",
+              value: "cashKey",
+              name: "Ключ от кассы",
+              icon: "🔑"
+            }
+          ]
+        },
+
+
+        communicationPsychology: {
+          id: "communicationPsychology",
+          title: "Психология общения",
+          type: "textInput",
+
+          question:
+            "Как называется раздел психологии, изучающий закономерности взаимодействия и общения людей? Введите словосочетание.",
+
+          options: [],
+          correct: [],
+
+          answers: [
+            "психология общения"
+          ],
+
+          order: [],
+          pairs: [],
+
+          successMessage:
+            "На внутренней стороне крышки кассы вы видите цифру 9.",
+
+          rewards: [
+            {
+              type: "note",
+              value: "Найдена цифра: 9.",
+              name: "",
+              icon: ""
+            }
+          ]
+        }
+
       },
 
 
-      psyche: {
-        id: "psyche",
-        type: "singleChoice",
-        title: "Карточка в шкафчике",
+      objects: [
 
-        question:
-          "Какое понятие обозначает свойство высокоорганизованной материи отражать объективную действительность?",
+        {
+          id: "phone",
+          name: "Телефон",
+          active: true,
 
-        options: [
-          "Психика",
-          "Общение",
-          "Темперамент",
-          "Память"
-        ],
+          x: 10.5,
+          y: 79,
+          width: 13,
+          height: 22,
 
-        correct: 0,
-
-        successEffects: [
-          {
-            type: "setFlag",
-            flag: "lockerSolved"
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
           },
 
-          {
-            type: "addNote",
-            text:
-              "Найдена цифра: 7."
+          fallback:
+            "",
+
+          action: {
+            type: "task",
+            taskId: "psychology"
           }
-        ],
-
-        successMessage: `
-          <h3>Верно!</h3>
-
-          <p>
-            За карточкой обнаруживается
-            небольшая металлическая пластинка.
-          </p>
-
-          <div class="clue-card">
-            На ней выгравирована цифра:
-            <strong style="font-size:32px;">7</strong>
-          </div>
-        `
-      },
+        },
 
 
-      history: {
-        id: "history",
-        type: "singleChoice",
-        title: "Запись в журнале",
+        {
+          id: "fridge",
+          name: "Холодильник",
+          active: true,
 
-        question:
-          "Расположите этапы развития представлений о предмете психологии в правильном порядке.",
+          x: 5.5,
+          y: 47,
+          width: 11,
+          height: 41,
 
-        options: [
-          "Душа → сознание → поведение → психика",
-          "Психика → поведение → сознание → душа",
-          "Сознание → душа → психика → поведение",
-          "Поведение → душа → сознание → психика"
-        ],
-
-        correct: 0,
-
-        successEffects: [
-          {
-            type: "setFlag",
-            flag: "journalSolved"
+          requirement: {
+            type: "flag",
+            key: "fridgeClueKnown",
+            consume: false
           },
 
-          {
-            type: "setFlag",
-            flag: "computerPasswordKnown"
-          },
+          fallback:
+            "В холодильнике стоят препараты. Ничего необычного вы пока не замечаете.",
 
-          {
-            type: "addNote",
-            text:
-              "В журнале найден пароль: PAVLOV."
+          action: {
+            type: "giveItem",
+
+            item: {
+              id: "smallKey",
+              name: "Маленький ключ",
+              icon: "🔑"
+            }
           }
-        ],
-
-        successMessage: `
-          <h3>Верно!</h3>
-
-          <p>
-            На полях журнала вы замечаете
-            сделанную карандашом запись.
-          </p>
-
-          <div class="clue-card">
-            <strong>PAVLOV</strong>
-          </div>
-
-          <p>
-            Похоже на пароль.
-          </p>
-        `
-      },
+        },
 
 
-      mentalActivity: {
-        id: "mentalActivity",
-        type: "singleChoice",
-        title: "Файл на компьютере",
+        {
+          id: "locker",
+          name: "Служебный шкафчик",
+          active: true,
 
-        question:
-          "Что наиболее точно описывает психическую деятельность?",
+          x: 49.5,
+          y: 42,
+          width: 13,
+          height: 43,
 
-        options: [
-          "Совокупность психических процессов, состояний и свойств, обеспечивающих отражение действительности и регуляцию поведения",
-          "Только процесс мышления",
-          "Только эмоциональные реакции человека",
-          "Любая физическая активность"
-        ],
-
-        correct: 0,
-
-        successEffects: [
-          {
-            type: "setFlag",
-            flag: "computerSolved"
+          requirement: {
+            type: "item",
+            key: "smallKey",
+            consume: true
           },
 
-          {
-            type: "addNote",
-            text:
-              "На компьютере найдена цифра: 2."
+          fallback:
+            "Шкафчик заперт. На дверце маленькая замочная скважина.",
+
+          action: {
+            type: "task",
+            taskId: "psyche"
           }
-        ],
+        },
 
-        successMessage: `
-          <h3>Верно!</h3>
 
-          <p>
-            После ответа файл закрывается,
-            а на экране остается одна цифра.
-          </p>
+        {
+          id: "journal",
+          name: "Журнал",
+          active: true,
 
-          <div class="clue-card">
-            <strong style="font-size:32px;">2</strong>
-          </div>
-        `
-      }
+          x: 51,
+          y: 80,
+          width: 19,
+          height: 22,
 
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "task",
+            taskId: "history"
+          }
+        },
+
+
+        {
+          id: "computer",
+          name: "Компьютер",
+          active: true,
+
+          x: 28,
+          y: 72,
+          width: 22,
+          height: 29,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "passwordTask",
+            password: "PAVLOV",
+            taskId: "mentalActivity"
+          }
+        },
+
+
+        {
+          id: "medicineCabinet",
+          name: "Шкаф препаратов",
+          active: true,
+
+          x: 19,
+          y: 31,
+          width: 18,
+          height: 47,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "task",
+            taskId: "everydayPsychology"
+          }
+        },
+
+
+        {
+          id: "cashbox",
+          name: "Касса",
+          active: true,
+
+          x: 72.5,
+          y: 80,
+          width: 20,
+          height: 22,
+
+          requirement: {
+            type: "item",
+            key: "cashKey",
+            consume: true
+          },
+
+          fallback:
+            "Касса закрыта на ключ.",
+
+          action: {
+            type: "task",
+            taskId: "communicationPsychology"
+          }
+        },
+
+
+        {
+          id: "safe",
+          name: "Сейф",
+          active: true,
+
+          x: 61,
+          y: 47,
+          width: 11,
+          height: 31,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "message",
+            message:
+              "Сейф закрыт. Похоже, сегодня он не нужен."
+          }
+        },
+
+
+        {
+          id: "board",
+          name: "Доска объявлений",
+          active: true,
+
+          x: 31,
+          y: 28,
+          width: 11,
+          height: 19,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "message",
+            message:
+              "Расписание смен, объявления и старые записки."
+          }
+        },
+
+
+        {
+          id: "clock",
+          name: "Часы",
+          active: true,
+
+          x: 33,
+          y: 12,
+          width: 8,
+          height: 12,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "message",
+            message:
+              "Часы идут. Время явно не собирается вам помогать."
+          }
+        },
+
+
+        {
+          id: "calendar",
+          name: "Календарь",
+          active: true,
+
+          x: 40,
+          y: 28,
+          width: 7,
+          height: 16,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "message",
+            message:
+              "Обычный календарь."
+          }
+        },
+
+
+        {
+          id: "trash",
+          name: "Корзина",
+          active: true,
+
+          x: 83,
+          y: 61,
+          width: 8,
+          height: 18,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "message",
+            message:
+              "Вы проверили даже мусор. В escape room это вполне разумно."
+          }
+        },
+
+
+        {
+          id: "firstAid",
+          name: "Аптечка",
+          active: true,
+
+          x: 35.5,
+          y: 39,
+          width: 9,
+          height: 11,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "message",
+            message:
+              "Пока аптечка вам не нужна."
+          }
+        },
+
+
+        {
+          id: "door",
+          name: "Выход",
+          active: true,
+
+          x: 76,
+          y: 39,
+          width: 13,
+          height: 43,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "codeLock",
+            code: "792",
+
+            hint:
+              "На панели три символа: ☎ → ₽ → 💻",
+
+            success:
+              "ПОЗДРАВЛЯЕМ С УСПЕШНЫМ ЗАВЕРШЕНИЕМ СМЕНЫ!"
+          }
+        }
+
+      ]
     },
 
 
-    objects: [
+    day2: makeEmptyQuest(2),
+    day3: makeEmptyQuest(3),
+    day4: makeEmptyQuest(4),
+    day5: makeEmptyQuest(5),
+    day6: makeEmptyQuest(6)
 
-      {
-        id: "phone",
-        name: "Телефон",
-        active: true,
-
-        x: 10.5,
-        y: 79,
-        width: 13,
-        height: 22,
-
-        interactions: [
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "phoneSolved",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Телефон</h3>
-
-                <p>
-                  В трубке больше ничего нет.
-                </p>
-
-                <div class="clue-card">
-                  Последнее сообщение:
-                  <strong>
-                    «Ищите там, где всегда холодно».
-                  </strong>
-                </div>
-              `
-            }
-          },
-
-          {
-            conditions: [],
-
-            action: {
-              type: "task",
-              taskId: "psychology"
-            }
-          }
-
-        ]
-      },
-
-
-      {
-        id: "fridge",
-        name: "Холодильник",
-        active: true,
-
-        x: 5.5,
-        y: 47,
-        width: 11,
-        height: 41,
-
-        interactions: [
-
-          {
-            conditions: [
-              {
-                type: "hasItem",
-                itemId: "smallKey",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Холодильник</h3>
-
-                <p>
-                  Вы уже нашли здесь ключ.
-                </p>
-              `
-            }
-          },
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "smallKeyTaken",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Холодильник</h3>
-
-                <p>
-                  Больше ничего полезного здесь нет.
-                </p>
-              `
-            }
-          },
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "fridgeClueKnown",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "giveItem",
-
-              title: "Холодильник",
-
-              text:
-                "За одной из упаковок лежит маленький ключ.",
-
-              item: {
-                id: "smallKey",
-                icon: "🔑",
-                name: "Маленький ключ"
-              },
-
-              buttonText:
-                "🔑 Забрать ключ",
-
-              effects: [
-                {
-                  type: "setFlag",
-                  flag: "smallKeyTaken"
-                }
-              ]
-            }
-          },
-
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Холодильник</h3>
-
-                <p>
-                  В холодильнике стоят препараты.
-                </p>
-
-                <p>
-                  Ничего необычного
-                  вы пока не замечаете.
-                </p>
-              `
-            }
-          }
-
-        ]
-      },
-
-
-      {
-        id: "locker",
-        name: "Служебный шкафчик",
-        active: true,
-
-        x: 49.5,
-        y: 42,
-        width: 13,
-        height: 43,
-
-        interactions: [
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "lockerSolved",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Служебный шкафчик</h3>
-
-                <div class="clue-card">
-                  Найденная цифра:
-                  <strong>7</strong>
-                </div>
-              `
-            }
-          },
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "lockerOpened",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "task",
-              taskId: "psyche"
-            }
-          },
-
-          {
-            conditions: [
-              {
-                type: "hasItem",
-                itemId: "smallKey",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "unlockWithItem",
-
-              title:
-                "Служебный шкафчик",
-
-              itemId:
-                "smallKey",
-
-              itemName:
-                "маленький ключ",
-
-              buttonText:
-                "🔑 Открыть шкафчик",
-
-              effects: [
-                {
-                  type: "setFlag",
-                  flag: "lockerOpened"
-                }
-              ],
-
-              afterHtml: `
-                <h3>Шкафчик открыт</h3>
-
-                <p>
-                  Ключ подошел.
-                </p>
-
-                <p>
-                  На внутренней стороне дверцы
-                  прикреплена карточка.
-                </p>
-
-                <p>
-                  Нажмите на шкафчик еще раз.
-                </p>
-              `
-            }
-          },
-
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Служебный шкафчик</h3>
-
-                <div class="locked-box">
-                  Шкафчик заперт.
-                </div>
-
-                <p>
-                  На дверце небольшая
-                  замочная скважина.
-                </p>
-              `
-            }
-          }
-
-        ]
-      },
-
-
-      {
-        id: "journal",
-        name: "Журнал",
-        active: true,
-
-        x: 51,
-        y: 80,
-        width: 19,
-        height: 22,
-
-        interactions: [
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "journalSolved",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Журнал учета</h3>
-
-                <div class="clue-card">
-                  На полях записано:
-                  <strong>PAVLOV</strong>
-                </div>
-              `
-            }
-          },
-
-          {
-            conditions: [],
-
-            action: {
-              type: "task",
-              taskId: "history"
-            }
-          }
-
-        ]
-      },
-
-
-      {
-        id: "computer",
-        name: "Компьютер",
-        active: true,
-
-        x: 28,
-        y: 72,
-        width: 22,
-        height: 29,
-
-        interactions: [
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "computerSolved",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Компьютер</h3>
-
-                <div class="clue-card">
-                  На экране:
-                  <strong>2</strong>
-                </div>
-              `
-            }
-          },
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "computerUnlocked",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "task",
-              taskId: "mentalActivity"
-            }
-          },
-
-          {
-            conditions: [
-              {
-                type: "flag",
-                flag: "computerPasswordKnown",
-                value: true
-              }
-            ],
-
-            action: {
-              type: "password",
-
-              title:
-                "Компьютер",
-
-              password:
-                "PAVLOV",
-
-              placeholder:
-                "Введите пароль",
-
-              effects: [
-                {
-                  type: "setFlag",
-                  flag: "computerUnlocked"
-                }
-              ],
-
-              successHtml: `
-                <h3>Доступ разрешен</h3>
-
-                <p>
-                  Компьютер разблокирован.
-                </p>
-
-                <p>
-                  На рабочем столе появился файл.
-                </p>
-
-                <p>
-                  Нажмите на компьютер еще раз.
-                </p>
-              `
-            }
-          },
-
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Компьютер</h3>
-
-                <div class="locked-box">
-                  Система заблокирована.
-                </div>
-
-                <p>
-                  Требуется пароль.
-                </p>
-              `
-            }
-          }
-
-        ]
-      },
-
-
-      {
-        id: "medicineCabinet",
-        name: "Шкаф препаратов",
-        active: true,
-
-        x: 19,
-        y: 31,
-        width: 18,
-        height: 47,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Шкаф препаратов</h3>
-
-                <p>
-                  На полках множество упаковок.
-                </p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "cashbox",
-        name: "Касса",
-        active: true,
-
-        x: 72.5,
-        y: 80,
-        width: 20,
-        height: 22,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Касса</h3>
-
-                <div class="locked-box">
-                  Касса закрыта на ключ.
-                </div>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "safe",
-        name: "Сейф",
-        active: true,
-
-        x: 61,
-        y: 47,
-        width: 11,
-        height: 31,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Сейф</h3>
-                <p>Сейф закрыт.</p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "box",
-        name: "Коробка",
-        active: true,
-
-        x: 39,
-        y: 51,
-        width: 9,
-        height: 15,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Коробка</h3>
-                <p>Ничего интересного.</p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "board",
-        name: "Доска объявлений",
-        active: true,
-
-        x: 31,
-        y: 28,
-        width: 11,
-        height: 19,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Доска объявлений</h3>
-                <p>Пока ничего полезного.</p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "clock",
-        name: "Часы",
-        active: true,
-
-        x: 33,
-        y: 12,
-        width: 8,
-        height: 12,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Часы</h3>
-                <p>Часы продолжают идти.</p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "calendar",
-        name: "Календарь",
-        active: true,
-
-        x: 40,
-        y: 28,
-        width: 7,
-        height: 16,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Календарь</h3>
-                <p>Обычный календарь.</p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "trash",
-        name: "Корзина",
-        active: true,
-
-        x: 83,
-        y: 61,
-        width: 8,
-        height: 18,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Корзина</h3>
-                <p>Ничего полезного.</p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "firstAid",
-        name: "Аптечка",
-        active: true,
-
-        x: 35.5,
-        y: 39,
-        width: 9,
-        height: 11,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Аптечка</h3>
-                <p>Пока она вам не нужна.</p>
-              `
-            }
-          }
-        ]
-      },
-
-
-      {
-        id: "door",
-        name: "Выход",
-        active: true,
-
-        x: 76,
-        y: 39,
-        width: 13,
-        height: 43,
-
-        interactions: [
-          {
-            conditions: [],
-
-            action: {
-              type: "message",
-
-              html: `
-                <h3>Выход</h3>
-
-                <div class="locked-box">
-                  Дверь заперта.
-                </div>
-
-                <p>
-                  Рядом расположен
-                  электронный кодовый замок.
-                </p>
-              `
-            }
-          }
-        ]
-      }
-
-    ]
   }
 
 };
 
 
-/* =========================================================
-   4. СОСТОЯНИЕ
-========================================================= */
-
-let gameState = {
-  flags: {},
-  inventory: [],
-  notes: []
-};
+let APP_DATA =
+  structuredClone(
+    DEFAULT_DATA
+  );
 
 
-let selectedQuest =
-  QUESTS[0];
-
-
-let currentConfig =
-  null;
+let selectedQuestId =
+  "day1";
 
 
 let adminQuestId =
   "day1";
 
 
-let adminObjectId =
-  null;
-
-
 let adminTaskId =
   null;
 
 
-/* =========================================================
-   5. ЭЛЕМЕНТЫ
-========================================================= */
+let adminObjectId =
+  null;
+
+
+let adminUnlocked =
+  false;
+
+
+let gameState =
+  createGameState();
+
+
+function createGameState() {
+  return {
+    flags: {},
+    inventory: [],
+    notes: [],
+    completedTasks: {},
+    unlockedObjects: {},
+    takenObjects: {}
+  };
+}
+
+
+/* DOM */
 
 const screens = {
-
   start:
     document.getElementById(
       "start-screen"
@@ -1090,7 +701,6 @@ const screens = {
     document.getElementById(
       "admin-screen"
     )
-
 };
 
 
@@ -1106,58 +716,125 @@ const overlayContent =
   );
 
 
-const passwordInput =
-  document.getElementById(
-    "quest-password"
+/* ОБЩИЕ */
+
+function escapeHtml(text) {
+  return String(
+    text ?? ""
+  )
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function uid(prefix) {
+  return (
+    prefix +
+    "_" +
+    Date.now().toString(36) +
+    Math.random()
+      .toString(36)
+      .slice(2, 6)
   );
+}
 
 
-const passwordError =
-  document.getElementById(
-    "password-error"
-  );
+function normalize(text) {
+  return String(
+    text ?? ""
+  )
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
 
-
-/* =========================================================
-   6. ЭКРАНЫ
-========================================================= */
 
 function showScreen(name) {
+
+  if (
+    name === "admin" &&
+    !adminUnlocked
+  ) {
+    name = "adminLogin";
+  }
+
 
   Object.values(
     screens
   ).forEach(
     screen => {
-
-      if (!screen) {
-        return;
-      }
-
-      screen.classList.remove(
+      screen?.classList.remove(
         "screen--active"
       );
-
     }
   );
 
 
-  if (
-    screens[name]
-  ) {
-
-    screens[name]
-      .classList.add(
-        "screen--active"
-      );
-
-  }
-
+  screens[name]
+    ?.classList.add(
+      "screen--active"
+    );
 }
 
 
-/* =========================================================
-   7. СТАРТОВАЯ СТРАНИЦА
-========================================================= */
+function openOverlay(html) {
+  overlayContent.innerHTML =
+    html;
+
+  overlay.hidden =
+    false;
+}
+
+
+function closeOverlay() {
+  overlay.hidden =
+    true;
+}
+
+
+function saveData() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(
+      APP_DATA
+    )
+  );
+}
+
+
+function loadData() {
+
+  const raw =
+    localStorage.getItem(
+      STORAGE_KEY
+    );
+
+
+  if (!raw) {
+    return;
+  }
+
+
+  try {
+    APP_DATA =
+      JSON.parse(
+        raw
+      );
+  }
+
+  catch (error) {
+    console.error(
+      "Ошибка загрузки конфигурации",
+      error
+    );
+  }
+}
+
+
+/* СТАРТ */
 
 function renderDays() {
 
@@ -1167,118 +844,130 @@ function renderDays() {
     );
 
 
-  grid.innerHTML =
-    "";
+  grid.innerHTML = "";
 
 
-  QUESTS.forEach(
-    quest => {
+  Object.entries(
+    APP_DATA.quests
+  )
+    .sort(
+      (a, b) =>
+        a[1].day -
+        b[1].day
+    )
+    .forEach(
+      ([id, quest]) => {
 
-      const button =
-        document.createElement(
-          "button"
+        const button =
+          document.createElement(
+            "button"
+          );
+
+
+        button.className =
+          "day-btn";
+
+
+        button.disabled =
+          !quest.enabled;
+
+
+        button.innerHTML = `
+          <strong>
+            ДЕНЬ ${quest.day}
+          </strong>
+
+          <span>
+            ${escapeHtml(
+              quest.title
+            )}
+          </span>
+        `;
+
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            selectedQuestId =
+              id;
+
+
+            document
+              .getElementById(
+                "login-day-label"
+              )
+              .textContent =
+              `ДЕНЬ ${quest.day}`;
+
+
+            document
+              .getElementById(
+                "login-title"
+              )
+              .textContent =
+              quest.title;
+
+
+            document
+              .getElementById(
+                "login-topic"
+              )
+              .textContent =
+              quest.topic;
+
+
+            document
+              .getElementById(
+                "quest-password"
+              )
+              .value =
+              "";
+
+
+            document
+              .getElementById(
+                "password-error"
+              )
+              .textContent =
+              "";
+
+
+            showScreen(
+              "login"
+            );
+
+          }
         );
 
 
-      button.className =
-        "day-btn";
+        grid.appendChild(
+          button
+        );
 
-
-      button.disabled =
-        !quest.enabled;
-
-
-      button.innerHTML = `
-        <strong>
-          ДЕНЬ ${quest.day}
-        </strong>
-
-        <span>
-          ${quest.title}
-        </span>
-      `;
-
-
-      button.addEventListener(
-        "click",
-        () => {
-
-          selectedQuest =
-            quest;
-
-
-          document
-            .getElementById(
-              "login-day-label"
-            )
-            .textContent =
-            `ДЕНЬ ${quest.day}`;
-
-
-          document
-            .getElementById(
-              "login-title"
-            )
-            .textContent =
-            quest.title;
-
-
-          document
-            .getElementById(
-              "login-topic"
-            )
-            .textContent =
-            quest.topic;
-
-
-          passwordInput.value =
-            "";
-
-
-          passwordError.textContent =
-            "";
-
-
-          showScreen(
-            "login"
-          );
-
-        }
-      );
-
-
-      grid.appendChild(
-        button
-      );
-
-    }
-  );
-
+      }
+    );
 }
 
 
-/* =========================================================
-   8. ЗАПУСК КВЕСТА
-========================================================= */
+/* ИГРА */
+
+function currentQuest() {
+  return APP_DATA
+    .quests[
+      selectedQuestId
+    ];
+}
+
 
 function startQuest() {
 
-  currentConfig =
-    QUEST_CONFIG[
-      selectedQuest.id
-    ];
+  gameState =
+    createGameState();
 
 
-  if (!currentConfig) {
-    return;
-  }
-
-
-  gameState = {
-    flags: {},
-    inventory: [],
-    notes: []
-  };
+  const quest =
+    currentQuest();
 
 
   document
@@ -1286,7 +975,7 @@ function startQuest() {
       "game-day-title"
     )
     .textContent =
-    `День ${selectedQuest.day}`;
+    `День ${quest.day}`;
 
 
   renderInventory();
@@ -1296,13 +985,8 @@ function startQuest() {
   showScreen(
     "game"
   );
-
 }
 
-
-/* =========================================================
-   9. HOTSPOTS
-========================================================= */
 
 function renderHotspots() {
 
@@ -1312,19 +996,15 @@ function renderHotspots() {
     );
 
 
-  if (
-    !host ||
-    !currentConfig
-  ) {
-    return;
-  }
-
-
   host.innerHTML =
     "";
 
 
-  currentConfig.objects
+  const quest =
+    currentQuest();
+
+
+  quest.objects
     .filter(
       object =>
         object.active !== false
@@ -1345,21 +1025,14 @@ function renderHotspots() {
         button.style.left =
           `${object.x}%`;
 
-
         button.style.top =
           `${object.y}%`;
-
 
         button.style.width =
           `${object.width}%`;
 
-
         button.style.height =
           `${object.height}%`;
-
-
-        button.title =
-          object.name;
 
 
         button.setAttribute(
@@ -1368,16 +1041,32 @@ function renderHotspots() {
         );
 
 
+        button.title =
+          object.name;
+
+
         button.addEventListener(
           "click",
           () => {
 
-            tapEffect(
-              button
+            button.classList.add(
+              "hotspot--tap"
             );
 
 
-            interactWithObject(
+            setTimeout(
+              () =>
+                button
+                  .classList
+                  .remove(
+                    "hotspot--tap"
+                  ),
+
+              200
+            );
+
+
+            interactObject(
               object
             );
 
@@ -1391,97 +1080,158 @@ function renderHotspots() {
 
       }
     );
-
 }
 
 
-/* =========================================================
-   10. ОБЪЕКТЫ
-========================================================= */
-
-function interactWithObject(
+function requirementPassed(
   object
 ) {
 
-  const interaction =
-    object.interactions.find(
-      interaction =>
-        checkConditions(
-          interaction.conditions || []
-        )
+  if (
+    gameState.unlockedObjects[
+      object.id
+    ]
+  ) {
+    return true;
+  }
+
+
+  const requirement =
+    object.requirement || {
+      type: "none"
+    };
+
+
+  if (
+    requirement.type ===
+    "none"
+  ) {
+    return true;
+  }
+
+
+  if (
+    requirement.type ===
+    "flag"
+  ) {
+    return Boolean(
+      gameState.flags[
+        requirement.key
+      ]
+    );
+  }
+
+
+  if (
+    requirement.type ===
+    "task"
+  ) {
+    return Boolean(
+      gameState.completedTasks[
+        requirement.key
+      ]
+    );
+  }
+
+
+  if (
+    requirement.type ===
+    "item"
+  ) {
+    return hasItem(
+      requirement.key
+    );
+  }
+
+
+  return false;
+}
+
+
+function unlockRequirement(
+  object
+) {
+
+  const requirement =
+    object.requirement;
+
+
+  if (
+    !requirement ||
+    requirement.type ===
+    "none"
+  ) {
+    return;
+  }
+
+
+  if (
+    requirement.type ===
+      "item" &&
+    requirement.consume
+  ) {
+
+    removeItem(
+      requirement.key
     );
 
+  }
 
-  if (!interaction) {
+
+  gameState
+    .unlockedObjects[
+      object.id
+    ] =
+    true;
+}
+
+
+function interactObject(
+  object
+) {
+
+  if (
+    !requirementPassed(
+      object
+    )
+  ) {
+
+    openOverlay(`
+      <h3>
+        ${escapeHtml(
+          object.name
+        )}
+      </h3>
+
+      <div class="locked-box">
+        ${escapeHtml(
+          object.fallback ||
+          "Пока это недоступно."
+        )}
+      </div>
+    `);
+
     return;
   }
 
 
-  runAction(
-    interaction.action
+  unlockRequirement(
+    object
   );
 
+
+  runObjectAction(
+    object
+  );
 }
 
 
-/* =========================================================
-   11. УСЛОВИЯ
-========================================================= */
-
-function checkConditions(
-  conditions
+function runObjectAction(
+  object
 ) {
 
-  return conditions.every(
-    condition => {
-
-      if (
-        condition.type ===
-        "flag"
-      ) {
-
-        return Boolean(
-          gameState.flags[
-            condition.flag
-          ]
-        ) ===
-        condition.value;
-
-      }
-
-
-      if (
-        condition.type ===
-        "hasItem"
-      ) {
-
-        return hasItem(
-          condition.itemId
-        ) ===
-        condition.value;
-
-      }
-
-
-      return true;
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   12. ДЕЙСТВИЯ
-========================================================= */
-
-function runAction(
-  action
-) {
-
-  if (!action) {
-    return;
-  }
+  const action =
+    object.action || {};
 
 
   if (
@@ -1489,9 +1239,20 @@ function runAction(
     "message"
   ) {
 
-    openOverlay(
-      action.html
-    );
+    openOverlay(`
+      <h3>
+        ${escapeHtml(
+          object.name
+        )}
+      </h3>
+
+      <p>
+        ${escapeHtml(
+          action.message ||
+          "Ничего необычного."
+        )}
+      </p>
+    `);
 
     return;
   }
@@ -1515,8 +1276,8 @@ function runAction(
     "giveItem"
   ) {
 
-    showItemAction(
-      action
+    giveObjectItem(
+      object
     );
 
     return;
@@ -1525,11 +1286,11 @@ function runAction(
 
   if (
     action.type ===
-    "unlockWithItem"
+    "passwordTask"
   ) {
 
-    showUnlockAction(
-      action
+    openPasswordTask(
+      object
     );
 
     return;
@@ -1538,210 +1299,105 @@ function runAction(
 
   if (
     action.type ===
-    "password"
+    "codeLock"
   ) {
 
-    showPasswordAction(
-      action
+    openCodeLock(
+      object
     );
 
   }
-
 }
 
 
-/* =========================================================
-   13. ЗАДАНИЯ
-========================================================= */
-
-function openTask(
-  taskId
+function giveObjectItem(
+  object
 ) {
 
-  const task =
-    currentConfig.tasks[
-      taskId
-    ];
+  if (
+    gameState.takenObjects[
+      object.id
+    ]
+  ) {
 
+    openOverlay(`
+      <h3>
+        ${escapeHtml(
+          object.name
+        )}
+      </h3>
 
-  if (!task) {
+      <p>
+        Здесь больше ничего нет.
+      </p>
+    `);
+
     return;
   }
 
 
-  if (
-    task.type ===
-    "singleChoice"
-  ) {
-
-    openSingleChoiceTask(
-      task
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   14. SINGLE CHOICE
-========================================================= */
-
-function openSingleChoiceTask(
-  task
-) {
-
-  const options =
-    task.options
-      .map(
-        (
-          option,
-          index
-        ) => `
-          <button
-            class="choice-btn"
-            data-answer="${index}"
-          >
-            ${escapeHtml(option)}
-          </button>
-        `
-      )
-      .join("");
+  const item =
+    object.action.item;
 
 
   openOverlay(`
     <h3>
       ${escapeHtml(
-        task.title
+        object.name
       )}
     </h3>
 
-    <p>
-      ${escapeHtml(
-        task.question
-      )}
-    </p>
-
-    <div class="choice-list">
-      ${options}
-    </div>
-
-    <p
-      id="question-feedback"
-      class="error-text"
-    ></p>
-  `);
-
-
-  overlayContent
-    .querySelectorAll(
-      "[data-answer]"
-    )
-    .forEach(
-      button => {
-
-        button.addEventListener(
-          "click",
-          () => {
-
-            const answer =
-              Number(
-                button.dataset.answer
-              );
-
-
-            if (
-              answer ===
-              task.correct
-            ) {
-
-              applyEffects(
-                task.successEffects || []
-              );
-
-
-              openOverlay(
-                task.successMessage
-              );
-
-            }
-
-            else {
-
-              document
-                .getElementById(
-                  "question-feedback"
-                )
-                .textContent =
-                "Ответ неверный. Попробуйте еще раз.";
-
-            }
-
-          }
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   15. ВЫДАЧА ПРЕДМЕТА
-========================================================= */
-
-function showItemAction(
-  action
-) {
-
-  openOverlay(`
-    <h3>
-      ${escapeHtml(
-        action.title
-      )}
-    </h3>
-
-    <div class="success-box">
-      ${escapeHtml(
-        action.text
-      )}
+    <div class="clue-card">
+      Найден предмет:
+      <strong>
+        ${escapeHtml(
+          item.name
+        )}
+      </strong>
     </div>
 
     <button
+      id="take-object-item"
       class="object-action-btn"
-      id="take-item-btn"
+      type="button"
     >
-      ${action.buttonText}
+      ${escapeHtml(
+        item.icon ||
+        "📦"
+      )}
+      Забрать
     </button>
   `);
 
 
   document
     .getElementById(
-      "take-item-btn"
+      "take-object-item"
     )
     .addEventListener(
       "click",
       () => {
 
         addItem(
-          action.item
+          item
         );
 
 
-        applyEffects(
-          action.effects || []
-        );
+        gameState
+          .takenObjects[
+            object.id
+          ] =
+          true;
 
 
         openOverlay(`
           <h3>
-            Предмет найден
+            Предмет получен
           </h3>
 
           <p>
             ${escapeHtml(
-              action.item.name
+              item.name
             )}
             добавлен в инвентарь.
           </p>
@@ -1749,97 +1405,42 @@ function showItemAction(
 
       }
     );
-
 }
 
 
-/* =========================================================
-   16. ОТКРЫТИЕ КЛЮЧОМ
-========================================================= */
-
-function showUnlockAction(
-  action
+function openPasswordTask(
+  object
 ) {
+
+  const action =
+    object.action;
+
 
   openOverlay(`
     <h3>
       ${escapeHtml(
-        action.title
+        object.name
       )}
     </h3>
 
-    <p>
-      У вас есть
-      ${escapeHtml(
-        action.itemName
-      )}.
-    </p>
-
-    <button
-      class="object-action-btn"
-      id="unlock-object-btn"
-    >
-      ${action.buttonText}
-    </button>
-  `);
-
-
-  document
-    .getElementById(
-      "unlock-object-btn"
-    )
-    .addEventListener(
-      "click",
-      () => {
-
-        removeItem(
-          action.itemId
-        );
-
-
-        applyEffects(
-          action.effects || []
-        );
-
-
-        openOverlay(
-          action.afterHtml
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   17. ПАРОЛЬ ОБЪЕКТА
-========================================================= */
-
-function showPasswordAction(
-  action
-) {
-
-  openOverlay(`
-    <h3>
-      ${escapeHtml(
-        action.title
-      )}
-    </h3>
+    <div class="locked-box">
+      Требуется пароль.
+    </div>
 
     <input
-      id="object-password"
+      id="object-password-input"
       class="text-input"
       type="text"
       autocomplete="off"
-      placeholder="${escapeHtml(
-        action.placeholder
-      )}"
+      placeholder="Введите пароль"
     >
 
+    <br><br>
+
     <button
+      id="object-password-check"
       class="primary-btn"
-      id="object-password-btn"
+      type="button"
     >
       Ввести
     </button>
@@ -1851,24 +1452,22 @@ function showPasswordAction(
   `);
 
 
-  const input =
-    document.getElementById(
-      "object-password"
-    );
-
-
   const check =
     () => {
 
+      const input =
+        document.getElementById(
+          "object-password-input"
+        );
+
+
       if (
-        input.value
-          .trim()
-          .toUpperCase() !==
-        String(
+        normalize(
+          input.value
+        ) !==
+        normalize(
           action.password
         )
-          .trim()
-          .toUpperCase()
       ) {
 
         document
@@ -1882,13 +1481,8 @@ function showPasswordAction(
       }
 
 
-      applyEffects(
-        action.effects || []
-      );
-
-
-      openOverlay(
-        action.successHtml
+      openTask(
+        action.taskId
       );
 
     };
@@ -1896,90 +1490,946 @@ function showPasswordAction(
 
   document
     .getElementById(
-      "object-password-btn"
+      "object-password-check"
     )
     .addEventListener(
       "click",
       check
     );
+}
 
 
-  input.addEventListener(
-    "keydown",
-    event => {
+function openCodeLock(
+  object
+) {
 
-      if (
-        event.key === "Enter"
-      ) {
+  const action =
+    object.action;
 
-        check();
+
+  openOverlay(`
+    <h3>
+      ${escapeHtml(
+        object.name
+      )}
+    </h3>
+
+    <div class="locked-box">
+      Кодовый замок
+    </div>
+
+    <div class="clue-card">
+      ${escapeHtml(
+        action.hint ||
+        ""
+      )}
+    </div>
+
+    <input
+      id="code-lock-input"
+      class="text-input"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="Введите код"
+    >
+
+    <br><br>
+
+    <button
+      id="code-lock-check"
+      class="primary-btn"
+      type="button"
+    >
+      Открыть
+    </button>
+
+    <p
+      id="code-lock-error"
+      class="error-text"
+    ></p>
+  `);
+
+
+  document
+    .getElementById(
+      "code-lock-check"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const value =
+          document
+            .getElementById(
+              "code-lock-input"
+            )
+            .value
+            .trim();
+
+
+        if (
+          value !==
+          String(
+            action.code
+          )
+        ) {
+
+          document
+            .getElementById(
+              "code-lock-error"
+            )
+            .textContent =
+            "Код неверный.";
+
+          return;
+        }
+
+
+        openOverlay(`
+          <h2>
+            ${escapeHtml(
+              action.success ||
+              "Вы выбрались!"
+            )}
+          </h2>
+
+          <div class="success-box">
+            Дверь открыта.
+          </div>
+        `);
 
       }
+    );
+}
 
-    }
-  );
+
+/* ЗАДАНИЯ */
+
+function openTask(
+  taskId
+) {
+
+  const task =
+    currentQuest()
+      .tasks[
+        taskId
+      ];
+
+
+  if (!task) {
+
+    openOverlay(`
+      <h3>
+        Ошибка
+      </h3>
+
+      <p>
+        Задание не найдено.
+      </p>
+    `);
+
+    return;
+  }
+
+
+  if (
+    gameState.completedTasks[
+      taskId
+    ]
+  ) {
+
+    openOverlay(`
+      <h3>
+        ${escapeHtml(
+          task.title
+        )}
+      </h3>
+
+      <div class="success-box">
+        Это задание уже выполнено.
+      </div>
+
+      <p>
+        ${escapeHtml(
+          task.successMessage ||
+          ""
+        )}
+      </p>
+    `);
+
+    return;
+  }
+
+
+  if (
+    task.type ===
+    "singleChoice"
+  ) {
+    openSingleChoice(
+      task
+    );
+  }
+
+
+  else if (
+    task.type ===
+    "multipleChoice"
+  ) {
+    openMultipleChoice(
+      task
+    );
+  }
+
+
+  else if (
+    task.type ===
+    "textInput"
+  ) {
+    openTextTask(
+      task
+    );
+  }
+
+
+  else if (
+    task.type ===
+    "ordering"
+  ) {
+    openOrderingTask(
+      task
+    );
+  }
+
+
+  else if (
+    task.type ===
+    "matching"
+  ) {
+    openMatchingTask(
+      task
+    );
+  }
 
 }
 
 
-/* =========================================================
-   18. ЭФФЕКТЫ
-========================================================= */
-
-function applyEffects(
-  effects
+function taskHeader(
+  task
 ) {
 
-  effects.forEach(
-    effect => {
+  return `
+    <h3>
+      ${escapeHtml(
+        task.title
+      )}
+    </h3>
 
-      if (
-        effect.type ===
-        "setFlag"
-      ) {
+    <p>
+      ${escapeHtml(
+        task.question
+      )}
+    </p>
+  `;
+}
 
-        gameState.flags[
-          effect.flag
-        ] =
-          effect.value !== undefined
-            ? effect.value
-            : true;
+
+function openSingleChoice(
+  task
+) {
+
+  const html =
+    task.options
+      .map(
+        (option, index) => `
+          <button
+            class="choice-btn"
+            data-single="${index}"
+            type="button"
+          >
+            ${escapeHtml(
+              option
+            )}
+          </button>
+        `
+      )
+      .join("");
+
+
+  openOverlay(
+    taskHeader(task) +
+    `
+      <div class="choice-list">
+        ${html}
+      </div>
+
+      <p
+        id="task-error"
+        class="error-text"
+      ></p>
+    `
+  );
+
+
+  overlayContent
+    .querySelectorAll(
+      "[data-single]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const answer =
+              Number(
+                button.dataset.single
+              );
+
+
+            if (
+              answer ===
+              task.correct[0]
+            ) {
+              completeTask(
+                task
+              );
+            }
+
+            else {
+              taskError();
+            }
+
+          }
+        );
 
       }
+    );
+}
 
 
-      else if (
-        effect.type ===
-        "addNote"
+function openMultipleChoice(
+  task
+) {
+
+  const html =
+    task.options
+      .map(
+        (option, index) => `
+          <label class="choice-check">
+            <input
+              type="checkbox"
+              value="${index}"
+              class="multi-answer"
+            >
+
+            <span>
+              ${escapeHtml(
+                option
+              )}
+            </span>
+          </label>
+        `
+      )
+      .join("");
+
+
+  openOverlay(
+    taskHeader(task) +
+    `
+      <div class="choice-list">
+        ${html}
+      </div>
+
+      <br>
+
+      <button
+        id="multi-check"
+        class="primary-btn"
+        type="button"
+      >
+        Проверить
+      </button>
+
+      <p
+        id="task-error"
+        class="error-text"
+      ></p>
+    `
+  );
+
+
+  document
+    .getElementById(
+      "multi-check"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const selected =
+          [
+            ...overlayContent
+              .querySelectorAll(
+                ".multi-answer:checked"
+              )
+          ]
+            .map(
+              input =>
+                Number(
+                  input.value
+                )
+            )
+            .sort();
+
+
+        const correct =
+          [
+            ...task.correct
+          ].sort();
+
+
+        if (
+          JSON.stringify(
+            selected
+          ) ===
+          JSON.stringify(
+            correct
+          )
+        ) {
+
+          completeTask(
+            task
+          );
+
+        }
+
+        else {
+          taskError();
+        }
+
+      }
+    );
+}
+
+
+function openTextTask(
+  task
+) {
+
+  openOverlay(
+    taskHeader(task) +
+    `
+      <input
+        id="text-task-input"
+        class="text-input"
+        type="text"
+        autocomplete="off"
+      >
+
+      <br><br>
+
+      <button
+        id="text-task-check"
+        class="primary-btn"
+        type="button"
+      >
+        Проверить
+      </button>
+
+      <p
+        id="task-error"
+        class="error-text"
+      ></p>
+    `
+  );
+
+
+  document
+    .getElementById(
+      "text-task-check"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const value =
+          normalize(
+            document
+              .getElementById(
+                "text-task-input"
+              )
+              .value
+          );
+
+
+        const ok =
+          task.answers
+            .map(normalize)
+            .includes(
+              value
+            );
+
+
+        if (ok) {
+          completeTask(
+            task
+          );
+        }
+
+        else {
+          taskError();
+        }
+
+      }
+    );
+}
+
+
+function openOrderingTask(
+  task
+) {
+
+  const order =
+    [...task.order]
+      .sort(
+        () =>
+          Math.random() -
+          0.5
+      );
+
+
+  function render() {
+
+    openOverlay(
+      taskHeader(task) +
+      `
+        <div
+          id="order-list"
+          class="order-list"
+        >
+          ${
+            order
+              .map(
+                (item, index) => `
+                  <div class="order-item">
+
+                    <span>
+                      ${escapeHtml(
+                        item
+                      )}
+                    </span>
+
+                    <div class="order-controls">
+
+                      <button
+                        type="button"
+                        data-up="${index}"
+                      >
+                        ↑
+                      </button>
+
+                      <button
+                        type="button"
+                        data-down="${index}"
+                      >
+                        ↓
+                      </button>
+
+                    </div>
+
+                  </div>
+                `
+              )
+              .join("")
+          }
+        </div>
+
+        <br>
+
+        <button
+          id="order-check"
+          class="primary-btn"
+          type="button"
+        >
+          Проверить
+        </button>
+
+        <p
+          id="task-error"
+          class="error-text"
+        ></p>
+      `
+    );
+
+
+    overlayContent
+      .querySelectorAll(
+        "[data-up]"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            () => {
+
+              const i =
+                Number(
+                  button.dataset.up
+                );
+
+
+              if (i === 0) {
+                return;
+              }
+
+
+              [
+                order[i - 1],
+                order[i]
+              ] =
+              [
+                order[i],
+                order[i - 1]
+              ];
+
+
+              render();
+
+            }
+          );
+
+        }
+      );
+
+
+    overlayContent
+      .querySelectorAll(
+        "[data-down]"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            () => {
+
+              const i =
+                Number(
+                  button.dataset.down
+                );
+
+
+              if (
+                i ===
+                order.length - 1
+              ) {
+                return;
+              }
+
+
+              [
+                order[i + 1],
+                order[i]
+              ] =
+              [
+                order[i],
+                order[i + 1]
+              ];
+
+
+              render();
+
+            }
+          );
+
+        }
+      );
+
+
+    document
+      .getElementById(
+        "order-check"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          if (
+            JSON.stringify(
+              order
+            ) ===
+            JSON.stringify(
+              task.order
+            )
+          ) {
+
+            completeTask(
+              task
+            );
+
+          }
+
+          else {
+            taskError();
+          }
+
+        }
+      );
+
+  }
+
+
+  render();
+}
+
+
+function openMatchingTask(
+  task
+) {
+
+  const rights =
+    task.pairs
+      .map(
+        pair =>
+          pair.right
+      )
+      .sort(
+        () =>
+          Math.random() -
+          0.5
+      );
+
+
+  const rows =
+    task.pairs
+      .map(
+        (pair, index) => `
+          <div class="match-row">
+
+            <div>
+              ${escapeHtml(
+                pair.left
+              )}
+            </div>
+
+            <select
+              class="admin-input match-select"
+              data-match="${index}"
+            >
+
+              <option value="">
+                Выберите
+              </option>
+
+              ${
+                rights
+                  .map(
+                    right => `
+                      <option
+                        value="${escapeHtml(
+                          right
+                        )}"
+                      >
+                        ${escapeHtml(
+                          right
+                        )}
+                      </option>
+                    `
+                  )
+                  .join("")
+              }
+
+            </select>
+
+          </div>
+        `
+      )
+      .join("");
+
+
+  openOverlay(
+    taskHeader(task) +
+    rows +
+    `
+      <button
+        id="matching-check"
+        class="primary-btn"
+        type="button"
+      >
+        Проверить
+      </button>
+
+      <p
+        id="task-error"
+        class="error-text"
+      ></p>
+    `
+  );
+
+
+  document
+    .getElementById(
+      "matching-check"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const selects =
+          [
+            ...overlayContent
+              .querySelectorAll(
+                ".match-select"
+              )
+          ];
+
+
+        const ok =
+          selects.every(
+            select => {
+
+              const index =
+                Number(
+                  select.dataset.match
+                );
+
+
+              return (
+                select.value ===
+                task.pairs[
+                  index
+                ].right
+              );
+
+            }
+          );
+
+
+        if (ok) {
+          completeTask(
+            task
+          );
+        }
+
+        else {
+          taskError();
+        }
+
+      }
+    );
+}
+
+
+function taskError() {
+
+  const target =
+    document.getElementById(
+      "task-error"
+    );
+
+
+  if (target) {
+    target.textContent =
+      "Пока неверно. Попробуйте еще раз.";
+  }
+}
+
+
+function completeTask(
+  task
+) {
+
+  gameState
+    .completedTasks[
+      task.id
+    ] =
+    true;
+
+
+  applyRewards(
+    task.rewards || []
+  );
+
+
+  openOverlay(`
+    <h3>
+      Верно!
+    </h3>
+
+    <div class="success-box">
+      ${escapeHtml(
+        task.successMessage ||
+        "Задание выполнено."
+      )}
+    </div>
+  `);
+}
+
+
+/* НАГРАДЫ */
+
+function applyRewards(
+  rewards
+) {
+
+  rewards.forEach(
+    reward => {
+
+      if (
+        reward.type ===
+        "note"
       ) {
 
         addNote(
-          effect.text
+          reward.value
         );
 
       }
 
 
       else if (
-        effect.type ===
-        "giveItem"
+        reward.type ===
+        "flag"
       ) {
 
-        addItem(
-          effect.item
-        );
+        gameState
+          .flags[
+            reward.value
+          ] =
+          true;
+
+      }
+
+
+      else if (
+        reward.type ===
+        "item"
+      ) {
+
+        addItem({
+          id:
+            reward.value,
+
+          name:
+            reward.name ||
+            reward.value,
+
+          icon:
+            reward.icon ||
+            "📦"
+        });
 
       }
 
     }
   );
-
 }
 
 
-/* =========================================================
-   19. ИНВЕНТАРЬ
-========================================================= */
+/* ИНВЕНТАРЬ */
 
 function addItem(
   item
@@ -1994,58 +2444,76 @@ function addItem(
   }
 
 
-  gameState.inventory.push(
-    item
-  );
-
-
-  renderInventory();
-
-}
-
-
-function removeItem(
-  itemId
-) {
-
-  gameState.inventory =
-    gameState.inventory.filter(
-      item =>
-        item.id !== itemId
+  gameState
+    .inventory
+    .push(
+      item
     );
 
 
   renderInventory();
+}
 
+
+function removeItem(
+  id
+) {
+
+  gameState.inventory =
+    gameState
+      .inventory
+      .filter(
+        item =>
+          item.id !== id
+      );
+
+
+  renderInventory();
 }
 
 
 function hasItem(
-  itemId
+  id
 ) {
 
-  return gameState.inventory.some(
-    item =>
-      item.id === itemId
-  );
+  return gameState
+    .inventory
+    .some(
+      item =>
+        item.id === id
+    );
+}
 
+
+function addNote(
+  text
+) {
+
+  if (
+    !gameState.notes.includes(
+      text
+    )
+  ) {
+
+    gameState
+      .notes
+      .push(
+        text
+      );
+
+  }
 }
 
 
 function renderInventory() {
 
-  const slots =
+  const host =
     document.getElementById(
       "inventory-slots"
     );
 
 
-  if (!slots) {
-    return;
-  }
-
-
-  slots.innerHTML =
+  host.innerHTML =
     "";
 
 
@@ -2071,11 +2539,9 @@ function renderInventory() {
 
     if (item) {
 
-      slot.innerHTML = `
-        <span style="font-size:22px;">
-          ${item.icon || "📦"}
-        </span>
-      `;
+      slot.textContent =
+        item.icon ||
+        "📦";
 
 
       slot.title =
@@ -2084,96 +2550,15 @@ function renderInventory() {
     }
 
 
-    slots.appendChild(
+    host.appendChild(
       slot
     );
 
   }
-
 }
 
 
-/* =========================================================
-   20. ЗАМЕТКИ
-========================================================= */
-
-function addNote(
-  text
-) {
-
-  if (
-    gameState.notes.includes(
-      text
-    )
-  ) {
-    return;
-  }
-
-
-  gameState.notes.push(
-    text
-  );
-
-}
-
-
-/* =========================================================
-   21. OVERLAY
-========================================================= */
-
-function openOverlay(
-  html
-) {
-
-  overlayContent.innerHTML =
-    html;
-
-
-  overlay.hidden =
-    false;
-
-}
-
-
-function closeOverlay() {
-
-  overlay.hidden =
-    true;
-
-}
-
-
-/* =========================================================
-   22. TAP EFFECT
-========================================================= */
-
-function tapEffect(
-  button
-) {
-
-  button.classList.add(
-    "hotspot--tap"
-  );
-
-
-  setTimeout(
-    () => {
-
-      button.classList.remove(
-        "hotspot--tap"
-      );
-
-    },
-
-    220
-  );
-
-}
-
-
-/* =========================================================
-   23. ВХОД В КВЕСТ
-========================================================= */
+/* ВХОД В ИГРУ */
 
 document
   .getElementById(
@@ -2183,20 +2568,32 @@ document
     "click",
     () => {
 
+      const quest =
+        currentQuest();
+
+
+      const input =
+        document
+          .getElementById(
+            "quest-password"
+          )
+          .value;
+
+
       if (
-        passwordInput.value.trim() !==
-        selectedQuest.password
+        input !==
+        quest.password
       ) {
 
-        passwordError.textContent =
-          "Неверный пароль";
+        document
+          .getElementById(
+            "password-error"
+          )
+          .textContent =
+          "Неверный пароль.";
 
         return;
       }
-
-
-      passwordError.textContent =
-        "";
 
 
       startQuest();
@@ -2205,353 +2602,20 @@ document
   );
 
 
-passwordInput.addEventListener(
-  "keydown",
-  event => {
-
-    if (
-      event.key === "Enter"
-    ) {
-
-      document
-        .getElementById(
-          "enter-quest"
-        )
-        .click();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   24. ОБЫЧНАЯ НАВИГАЦИЯ
-========================================================= */
-
 document
   .getElementById(
     "back-to-start"
   )
   .addEventListener(
     "click",
-    () => {
-
+    () =>
       showScreen(
         "start"
-      );
-
-    }
+      )
   );
 
 
-document
-  .getElementById(
-    "overlay-close"
-  )
-  .addEventListener(
-    "click",
-    closeOverlay
-  );
-
-
-overlay.addEventListener(
-  "click",
-  event => {
-
-    if (
-      event.target === overlay
-    ) {
-
-      closeOverlay();
-
-    }
-
-  }
-);
-
-
-/* =========================================================
-   25. ИНВЕНТАРЬ
-========================================================= */
-
-document
-  .getElementById(
-    "inventory-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      const content =
-        gameState.inventory.length
-
-          ? gameState.inventory
-              .map(
-                item => `
-                  <div class="inventory-item">
-
-                    <div class="inventory-item__icon">
-                      ${item.icon || "📦"}
-                    </div>
-
-                    <div>
-                      ${escapeHtml(
-                        item.name
-                      )}
-                    </div>
-
-                  </div>
-                `
-              )
-              .join("")
-
-          : `
-              <p>
-                Пока пусто.
-              </p>
-            `;
-
-
-      openOverlay(`
-        <h3>
-          Инвентарь
-        </h3>
-
-        ${content}
-      `);
-
-    }
-  );
-
-
-/* =========================================================
-   26. ЗАМЕТКИ
-========================================================= */
-
-document
-  .getElementById(
-    "notes-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      const content =
-        gameState.notes.length
-
-          ? gameState.notes
-              .map(
-                note => `
-                  <div class="clue-card">
-                    ${escapeHtml(note)}
-                  </div>
-                `
-              )
-              .join("")
-
-          : `
-              <p>
-                Пока ничего не найдено.
-              </p>
-            `;
-
-
-      openOverlay(`
-        <h3>
-          Заметки
-        </h3>
-
-        ${content}
-      `);
-
-    }
-  );
-
-
-/* =========================================================
-   27. ПОДСКАЗКА
-========================================================= */
-
-document
-  .getElementById(
-    "hint-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      let hint =
-        "Осмотрите предметы в аптеке.";
-
-
-      if (
-        !gameState.flags.phoneSolved
-      ) {
-
-        hint =
-          "Обратите внимание на телефон.";
-
-      }
-
-      else if (
-        gameState.flags.fridgeClueKnown &&
-        !gameState.flags.smallKeyTaken
-      ) {
-
-        hint =
-          "Телефон говорил о месте, где всегда холодно.";
-
-      }
-
-      else if (
-        hasItem("smallKey") &&
-        !gameState.flags.lockerOpened
-      ) {
-
-        hint =
-          "У вас есть маленький ключ.";
-
-      }
-
-      else if (
-        !gameState.flags.journalSolved
-      ) {
-
-        hint =
-          "Изучите журнал на стойке.";
-
-      }
-
-      else if (
-        gameState.flags.computerPasswordKnown &&
-        !gameState.flags.computerUnlocked
-      ) {
-
-        hint =
-          "Найденное слово похоже на пароль.";
-
-      }
-
-
-      openOverlay(`
-        <h3>
-          Подсказка
-        </h3>
-
-        <p>
-          ${escapeHtml(
-            hint
-          )}
-        </p>
-      `);
-
-    }
-  );
-
-
-/* =========================================================
-   28. МЕНЮ
-========================================================= */
-
-document
-  .getElementById(
-    "menu-btn"
-  )
-  .addEventListener(
-    "click",
-    () => {
-
-      openOverlay(`
-        <h3>
-          ${escapeHtml(
-            selectedQuest.title
-          )}
-        </h3>
-
-        <p>
-          ${escapeHtml(
-            selectedQuest.topic
-          )}
-        </p>
-      `);
-
-    }
-  );
-
-
-/* =========================================================
-   29. АДМИН-ВХОД
-========================================================= */
-
-function openAdminLogin() {
-
-  const input =
-    document.getElementById(
-      "admin-password"
-    );
-
-
-  const error =
-    document.getElementById(
-      "admin-password-error"
-    );
-
-
-  input.value =
-    "";
-
-
-  error.textContent =
-    "";
-
-
-  showScreen(
-    "adminLogin"
-  );
-
-}
-
-
-function checkAdminPassword() {
-
-  const input =
-    document.getElementById(
-      "admin-password"
-    );
-
-
-  const error =
-    document.getElementById(
-      "admin-password-error"
-    );
-
-
-  if (
-    input.value.trim() !==
-    ADMIN_PASSWORD
-  ) {
-
-    error.textContent =
-      "Неверный пароль.";
-
-    return;
-  }
-
-
-  error.textContent =
-    "";
-
-
-  showScreen(
-    "admin"
-  );
-
-
-  renderAdminQuestSelect();
-
-}
-
+/* АДМИН-ПАРОЛЬ */
 
 document
   .getElementById(
@@ -2559,7 +2623,33 @@ document
   )
   .addEventListener(
     "click",
-    openAdminLogin
+    () => {
+
+      adminUnlocked =
+        false;
+
+
+      document
+        .getElementById(
+          "admin-password"
+        )
+        .value =
+        "";
+
+
+      document
+        .getElementById(
+          "admin-password-error"
+        )
+        .textContent =
+        "";
+
+
+      showScreen(
+        "adminLogin"
+      );
+
+    }
   );
 
 
@@ -2569,7 +2659,7 @@ document
   )
   .addEventListener(
     "click",
-    checkAdminPassword
+    checkAdminLogin
   );
 
 
@@ -2584,13 +2674,50 @@ document
       if (
         event.key === "Enter"
       ) {
-
-        checkAdminPassword();
-
+        checkAdminLogin();
       }
 
     }
   );
+
+
+function checkAdminLogin() {
+
+  const value =
+    document
+      .getElementById(
+        "admin-password"
+      )
+      .value;
+
+
+  if (
+    value !==
+    ADMIN_PASSWORD
+  ) {
+
+    document
+      .getElementById(
+        "admin-password-error"
+      )
+      .textContent =
+      "Неверный пароль.";
+
+    return;
+  }
+
+
+  adminUnlocked =
+    true;
+
+
+  renderAdminQuestSelect();
+
+
+  showScreen(
+    "admin"
+  );
+}
 
 
 document
@@ -2600,6 +2727,9 @@ document
   .addEventListener(
     "click",
     () => {
+
+      adminUnlocked =
+        false;
 
       showScreen(
         "start"
@@ -2617,6 +2747,9 @@ document
     "click",
     () => {
 
+      adminUnlocked =
+        false;
+
       showScreen(
         "start"
       );
@@ -2625,86 +2758,22 @@ document
   );
 
 
-/* =========================================================
-   30. LOCAL STORAGE
-========================================================= */
+/* АДМИН — ДНИ */
 
-function loadAdminConfig() {
-
-  const saved =
-    localStorage.getItem(
-      ADMIN_STORAGE_KEY
-    );
+function adminQuest() {
+  return APP_DATA
+    .quests[
+      adminQuestId
+    ];
+}
 
 
-  if (!saved) {
+function renderAdminQuestSelect() {
+
+  if (!adminUnlocked) {
     return;
   }
 
-
-  try {
-
-    const parsed =
-      JSON.parse(
-        saved
-      );
-
-
-    Object.keys(
-      parsed
-    ).forEach(
-      questId => {
-
-        if (
-          QUEST_CONFIG[
-            questId
-          ]
-        ) {
-
-          QUEST_CONFIG[
-            questId
-          ] =
-            parsed[
-              questId
-            ];
-
-        }
-
-      }
-    );
-
-  }
-
-  catch (
-    error
-  ) {
-
-    console.error(
-      error
-    );
-
-  }
-
-}
-
-
-function saveAdminConfig() {
-
-  localStorage.setItem(
-    ADMIN_STORAGE_KEY,
-    JSON.stringify(
-      QUEST_CONFIG
-    )
-  );
-
-}
-
-
-/* =========================================================
-   31. АДМИН: КВЕСТЫ
-========================================================= */
-
-function renderAdminQuestSelect() {
 
   const select =
     document.getElementById(
@@ -2716,61 +2785,184 @@ function renderAdminQuestSelect() {
     "";
 
 
-  QUESTS.forEach(
-    quest => {
+  Object.entries(
+    APP_DATA.quests
+  )
+    .sort(
+      (a, b) =>
+        a[1].day -
+        b[1].day
+    )
+    .forEach(
+      ([id, quest]) => {
 
-      if (
-        !QUEST_CONFIG[
-          quest.id
-        ]
-      ) {
-        return;
-      }
+        const option =
+          document.createElement(
+            "option"
+          );
 
 
-      const option =
-        document.createElement(
-          "option"
+        option.value =
+          id;
+
+
+        option.textContent =
+          `День ${quest.day}`;
+
+
+        select.appendChild(
+          option
         );
 
-
-      option.value =
-        quest.id;
-
-
-      option.textContent =
-        `День ${quest.day}: ${quest.title}`;
-
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
+      }
+    );
 
 
   select.value =
     adminQuestId;
 
 
-  renderAdminObjects();
+  loadAdminQuestForm();
 
-  renderAdminTasks();
+  renderAdminTaskList();
 
+  renderAdminObjectList();
 }
 
 
-/* =========================================================
-   32. АДМИН: ОБЪЕКТЫ
-========================================================= */
+function loadAdminQuestForm() {
 
-function renderAdminObjects() {
+  const quest =
+    adminQuest();
 
-  const config =
-    QUEST_CONFIG[
-      adminQuestId
-    ];
+
+  document
+    .getElementById(
+      "admin-quest-enabled"
+    )
+    .checked =
+    quest.enabled;
+
+
+  document
+    .getElementById(
+      "admin-quest-title"
+    )
+    .value =
+    quest.title;
+
+
+  document
+    .getElementById(
+      "admin-quest-topic"
+    )
+    .value =
+    quest.topic;
+
+
+  document
+    .getElementById(
+      "admin-quest-password"
+    )
+    .value =
+    quest.password;
+}
+
+
+document
+  .getElementById(
+    "admin-quest-select"
+  )
+  .addEventListener(
+    "change",
+    event => {
+
+      adminQuestId =
+        event.target.value;
+
+
+      adminTaskId =
+        null;
+
+
+      adminObjectId =
+        null;
+
+
+      loadAdminQuestForm();
+
+      renderAdminTaskList();
+
+      renderAdminObjectList();
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "admin-save-quest"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const quest =
+        adminQuest();
+
+
+      quest.enabled =
+        document
+          .getElementById(
+            "admin-quest-enabled"
+          )
+          .checked;
+
+
+      quest.title =
+        document
+          .getElementById(
+            "admin-quest-title"
+          )
+          .value
+          .trim();
+
+
+      quest.topic =
+        document
+          .getElementById(
+            "admin-quest-topic"
+          )
+          .value
+          .trim();
+
+
+      quest.password =
+        document
+          .getElementById(
+            "admin-quest-password"
+          )
+          .value;
+
+
+      saveData();
+
+      renderDays();
+
+      adminStatus(
+        "Настройки дня сохранены."
+      );
+
+    }
+  );
+
+
+/* АДМИН — ОБЪЕКТЫ */
+
+function renderAdminObjectList() {
+
+  const quest =
+    adminQuest();
 
 
   const select =
@@ -2783,7 +2975,7 @@ function renderAdminObjects() {
     "";
 
 
-  config.objects.forEach(
+  quest.objects.forEach(
     object => {
 
       const option =
@@ -2810,7 +3002,7 @@ function renderAdminObjects() {
 
   if (
     !adminObjectId ||
-    !config.objects.some(
+    !quest.objects.some(
       object =>
         object.id ===
         adminObjectId
@@ -2818,134 +3010,87 @@ function renderAdminObjects() {
   ) {
 
     adminObjectId =
-      config.objects[0]?.id;
+      quest.objects[0]
+        ?.id ||
+      null;
 
   }
-
-
-  select.value =
-    adminObjectId;
-
-
-  loadAdminObjectForm();
-
-}
-
-
-/* =========================================================
-   33. АДМИН: ЗАДАНИЯ
-========================================================= */
-
-function renderAdminTasks() {
-
-  const config =
-    QUEST_CONFIG[
-      adminQuestId
-    ];
-
-
-  const taskSelect =
-    document.getElementById(
-      "admin-task-select"
-    );
-
-
-  const objectTaskSelect =
-    document.getElementById(
-      "admin-object-task"
-    );
-
-
-  taskSelect.innerHTML =
-    "";
-
-
-  objectTaskSelect.innerHTML =
-    "";
-
-
-  Object.entries(
-    config.tasks
-  ).forEach(
-    (
-      [
-        taskId,
-        task
-      ]
-    ) => {
-
-      const option =
-        document.createElement(
-          "option"
-        );
-
-
-      option.value =
-        taskId;
-
-
-      option.textContent =
-        task.title;
-
-
-      taskSelect.appendChild(
-        option
-      );
-
-
-      objectTaskSelect
-        .appendChild(
-          option.cloneNode(
-            true
-          )
-        );
-
-    }
-  );
 
 
   if (
-    !adminTaskId ||
-    !config.tasks[
-      adminTaskId
-    ]
+    adminObjectId
   ) {
 
-    adminTaskId =
-      Object.keys(
-        config.tasks
-      )[0];
+    select.value =
+      adminObjectId;
+
+
+    loadAdminObject();
 
   }
 
+  else {
+    clearAdminObject();
+  }
 
-  taskSelect.value =
-    adminTaskId;
 
-
-  loadAdminTaskForm();
-
+  fillTaskOptions(
+    document.getElementById(
+      "admin-object-task"
+    )
+  );
 }
 
 
-/* =========================================================
-   34. ФОРМА ОБЪЕКТА
-========================================================= */
+function selectedAdminObject() {
 
-function loadAdminObjectForm() {
-
-  const config =
-    QUEST_CONFIG[
-      adminQuestId
-    ];
-
-
-  const object =
-    config.objects.find(
-      item =>
-        item.id ===
+  return adminQuest()
+    .objects
+    .find(
+      object =>
+        object.id ===
         adminObjectId
     );
+}
+
+
+function clearAdminObject() {
+
+  [
+    "admin-object-name",
+    "admin-object-x",
+    "admin-object-y",
+    "admin-object-width",
+    "admin-object-height",
+    "admin-requirement-key",
+    "admin-object-fallback",
+    "admin-object-message",
+    "admin-object-item-id",
+    "admin-object-item-name",
+    "admin-object-item-icon",
+    "admin-object-password",
+    "admin-object-code",
+    "admin-object-code-hint",
+    "admin-object-success"
+  ].forEach(
+    id => {
+
+      document
+        .getElementById(
+          id
+        )
+        .value =
+        "";
+
+    }
+  );
+}
+
+
+function loadAdminObject() {
+
+  const object =
+    selectedAdminObject();
 
 
   if (!object) {
@@ -2966,7 +3111,7 @@ function loadAdminObjectForm() {
       "admin-object-name"
     )
     .value =
-    object.name;
+    object.name || "";
 
 
   document
@@ -2974,7 +3119,7 @@ function loadAdminObjectForm() {
       "admin-object-x"
     )
     .value =
-    object.x;
+    object.x ?? 50;
 
 
   document
@@ -2982,7 +3127,7 @@ function loadAdminObjectForm() {
       "admin-object-y"
     )
     .value =
-    object.y;
+    object.y ?? 50;
 
 
   document
@@ -2990,7 +3135,7 @@ function loadAdminObjectForm() {
       "admin-object-width"
     )
     .value =
-    object.width;
+    object.width ?? 10;
 
 
   document
@@ -2998,643 +3143,141 @@ function loadAdminObjectForm() {
       "admin-object-height"
     )
     .value =
-    object.height;
+    object.height ?? 10;
 
 
-  const interaction =
-    object.interactions[
-      object.interactions.length - 1
-    ];
+  const req =
+    object.requirement || {
+      type: "none",
+      key: "",
+      consume: false
+    };
+
+
+  document
+    .getElementById(
+      "admin-requirement-type"
+    )
+    .value =
+    req.type;
+
+
+  document
+    .getElementById(
+      "admin-requirement-key"
+    )
+    .value =
+    req.key || "";
+
+
+  document
+    .getElementById(
+      "admin-requirement-consume"
+    )
+    .checked =
+    Boolean(
+      req.consume
+    );
+
+
+  document
+    .getElementById(
+      "admin-object-fallback"
+    )
+    .value =
+    object.fallback || "";
 
 
   const action =
-    interaction?.action || {
+    object.action || {
       type: "message"
     };
 
 
-  const actionType =
-    action.type === "task"
-      ? "task"
-      : "message";
-
-
   document
     .getElementById(
-      "admin-action-type"
+      "admin-object-action"
     )
     .value =
-    actionType;
-
-
-  if (
-    actionType === "task"
-  ) {
-
-    document
-      .getElementById(
-        "admin-object-task"
-      )
-      .value =
-      action.taskId;
-
-  }
-
-  else {
-
-    document
-      .getElementById(
-        "admin-object-message"
-      )
-      .value =
-      stripHtml(
-        action.html || ""
-      );
-
-  }
-
-
-  updateAdminActionFields();
-
-}
-
-
-/* =========================================================
-   35. ФОРМА ЗАДАНИЯ
-========================================================= */
-
-function loadAdminTaskForm() {
-
-  const task =
-    QUEST_CONFIG[
-      adminQuestId
-    ]
-      .tasks[
-        adminTaskId
-      ];
-
-
-  if (!task) {
-    return;
-  }
+    action.type;
 
 
   document
     .getElementById(
-      "admin-task-title"
+      "admin-object-message"
     )
     .value =
-    task.title;
+    action.message || "";
 
 
   document
     .getElementById(
-      "admin-task-question"
+      "admin-object-task"
     )
     .value =
-    task.question;
+    action.taskId || "";
 
 
   document
     .getElementById(
-      "admin-task-options"
+      "admin-object-item-id"
     )
     .value =
-    task.options.join(
-      "\n"
-    );
+    action.item?.id || "";
 
 
   document
     .getElementById(
-      "admin-task-correct"
+      "admin-object-item-name"
     )
     .value =
-    task.correct + 1;
-
-}
-
-
-/* =========================================================
-   36. ТИП ДЕЙСТВИЯ
-========================================================= */
-
-function updateAdminActionFields() {
-
-  const type =
-    document
-      .getElementById(
-        "admin-action-type"
-      )
-      .value;
+    action.item?.name || "";
 
 
   document
     .getElementById(
-      "admin-message-fields"
+      "admin-object-item-icon"
     )
-    .hidden =
-    type !== "message";
+    .value =
+    action.item?.icon || "";
 
 
   document
     .getElementById(
-      "admin-task-fields"
+      "admin-object-password"
     )
-    .hidden =
-    type !== "task";
-
-}
-
-
-/* =========================================================
-   37. СОХРАНЕНИЕ ОБЪЕКТА
-========================================================= */
-
-function saveAdminObject() {
-
-  const config =
-    QUEST_CONFIG[
-      adminQuestId
-    ];
-
-
-  const object =
-    config.objects.find(
-      item =>
-        item.id ===
-        adminObjectId
-    );
-
-
-  object.active =
-    document
-      .getElementById(
-        "admin-object-active"
-      )
-      .checked;
-
-
-  object.name =
-    document
-      .getElementById(
-        "admin-object-name"
-      )
-      .value
-      .trim();
-
-
-  object.x =
-    Number(
-      document
-        .getElementById(
-          "admin-object-x"
-        )
-        .value
-    );
-
-
-  object.y =
-    Number(
-      document
-        .getElementById(
-          "admin-object-y"
-        )
-        .value
-    );
-
-
-  object.width =
-    Number(
-      document
-        .getElementById(
-          "admin-object-width"
-        )
-        .value
-    );
-
-
-  object.height =
-    Number(
-      document
-        .getElementById(
-          "admin-object-height"
-        )
-        .value
-    );
-
-
-  const type =
-    document
-      .getElementById(
-        "admin-action-type"
-      )
-      .value;
-
-
-  let interaction =
-    object.interactions[
-      object.interactions.length - 1
-    ];
-
-
-  if (!interaction) {
-
-    interaction = {
-      conditions: [],
-      action: {}
-    };
-
-
-    object.interactions.push(
-      interaction
-    );
-
-  }
-
-
-  interaction.conditions =
-    [];
-
-
-  if (
-    type === "task"
-  ) {
-
-    interaction.action = {
-      type: "task",
-
-      taskId:
-        document
-          .getElementById(
-            "admin-object-task"
-          )
-          .value
-    };
-
-  }
-
-  else {
-
-    const message =
-      document
-        .getElementById(
-          "admin-object-message"
-        )
-        .value
-        .trim();
-
-
-    interaction.action = {
-      type: "message",
-
-      html: `
-        <h3>
-          ${escapeHtml(
-            object.name
-          )}
-        </h3>
-
-        <p>
-          ${escapeHtml(
-            message
-          )}
-        </p>
-      `
-    };
-
-  }
-
-
-  saveAdminConfig();
-
-
-  showAdminStatus(
-    "Предмет сохранен."
-  );
-
-
-  renderAdminObjects();
-
-}
-
-
-/* =========================================================
-   38. СОХРАНЕНИЕ ЗАДАНИЯ
-========================================================= */
-
-function saveAdminTask() {
-
-  const task =
-    QUEST_CONFIG[
-      adminQuestId
-    ]
-      .tasks[
-        adminTaskId
-      ];
-
-
-  const options =
-    document
-      .getElementById(
-        "admin-task-options"
-      )
-      .value
-      .split("\n")
-      .map(
-        item =>
-          item.trim()
-      )
-      .filter(
-        Boolean
-      );
-
-
-  const correct =
-    Number(
-      document
-        .getElementById(
-          "admin-task-correct"
-        )
-        .value
-    ) - 1;
-
-
-  if (
-    options.length < 2
-  ) {
-
-    showAdminStatus(
-      "Нужно минимум два варианта ответа.",
-      true
-    );
-
-    return;
-  }
-
-
-  if (
-    correct < 0 ||
-    correct >=
-    options.length
-  ) {
-
-    showAdminStatus(
-      "Проверьте номер правильного ответа.",
-      true
-    );
-
-    return;
-  }
-
-
-  task.title =
-    document
-      .getElementById(
-        "admin-task-title"
-      )
-      .value
-      .trim();
-
-
-  task.question =
-    document
-      .getElementById(
-        "admin-task-question"
-      )
-      .value
-      .trim();
-
-
-  task.options =
-    options;
-
-
-  task.correct =
-    correct;
-
-
-  saveAdminConfig();
-
-
-  showAdminStatus(
-    "Задание сохранено."
-  );
-
-
-  renderAdminTasks();
-
-}
-
-
-/* =========================================================
-   39. ПРЕДПРОСМОТР
-========================================================= */
-
-function previewAdminQuest() {
-
-  const quest =
-    QUESTS.find(
-      quest =>
-        quest.id ===
-        adminQuestId
-    );
-
-
-  selectedQuest =
-    quest;
-
-
-  currentConfig =
-    QUEST_CONFIG[
-      adminQuestId
-    ];
-
-
-  gameState = {
-    flags: {},
-    inventory: [],
-    notes: []
-  };
+    .value =
+    action.password || "";
 
 
   document
     .getElementById(
-      "game-day-title"
+      "admin-object-code"
     )
-    .textContent =
-    `День ${selectedQuest.day}`;
+    .value =
+    action.code || "";
 
 
-  renderInventory();
+  document
+    .getElementById(
+      "admin-object-code-hint"
+    )
+    .value =
+    action.hint || "";
 
-  renderHotspots();
 
-  showScreen(
-    "game"
-  );
+  document
+    .getElementById(
+      "admin-object-success"
+    )
+    .value =
+    action.success || "";
 
+
+  updateRequirementFields();
+
+  updateObjectActionFields();
 }
-
-
-/* =========================================================
-   40. СБРОС
-========================================================= */
-
-function resetAdminConfig() {
-
-  const confirmed =
-    window.confirm(
-      "Удалить все изменения, сделанные через админ-панель?"
-    );
-
-
-  if (!confirmed) {
-    return;
-  }
-
-
-  localStorage.removeItem(
-    ADMIN_STORAGE_KEY
-  );
-
-
-  window.location.reload();
-
-}
-
-
-/* =========================================================
-   41. СТАТУС
-========================================================= */
-
-function showAdminStatus(
-  text,
-  isError = false
-) {
-
-  const status =
-    document.getElementById(
-      "admin-status"
-    );
-
-
-  status.textContent =
-    text;
-
-
-  status.style.color =
-    isError
-      ? "#ff8d8d"
-      : "";
-
-
-  setTimeout(
-    () => {
-
-      status.textContent =
-        "";
-
-      status.style.color =
-        "";
-
-    },
-
-    2500
-  );
-
-}
-
-
-/* =========================================================
-   42. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-========================================================= */
-
-function stripHtml(
-  html
-) {
-
-  const temp =
-    document.createElement(
-      "div"
-    );
-
-
-  temp.innerHTML =
-    html;
-
-
-  return temp.textContent
-    .replace(
-      /\s+/g,
-      " "
-    )
-    .trim();
-
-}
-
-
-function escapeHtml(
-  text
-) {
-
-  return String(
-    text ?? ""
-  )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
-
-}
-
-
-/* =========================================================
-   43. СОБЫТИЯ АДМИНКИ
-========================================================= */
-
-document
-  .getElementById(
-    "admin-quest-select"
-  )
-  .addEventListener(
-    "change",
-    event => {
-
-      adminQuestId =
-        event.target.value;
-
-
-      adminObjectId =
-        null;
-
-
-      adminTaskId =
-        null;
-
-
-      renderAdminObjects();
-
-      renderAdminTasks();
-
-    }
-  );
 
 
 document
@@ -3649,10 +3292,743 @@ document
         event.target.value;
 
 
-      loadAdminObjectForm();
+      loadAdminObject();
 
     }
   );
+
+
+document
+  .getElementById(
+    "admin-add-object"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const id =
+        uid("object");
+
+
+      adminQuest()
+        .objects
+        .push({
+          id,
+          name:
+            "Новый предмет",
+          active: true,
+
+          x: 50,
+          y: 50,
+          width: 10,
+          height: 10,
+
+          requirement: {
+            type: "none",
+            key: "",
+            consume: false
+          },
+
+          fallback: "",
+
+          action: {
+            type: "message",
+            message:
+              "Новый предмет."
+          }
+        });
+
+
+      adminObjectId =
+        id;
+
+
+      saveData();
+
+      renderAdminObjectList();
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "admin-delete-object"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      if (
+        !adminObjectId
+      ) {
+        return;
+      }
+
+
+      if (
+        !confirm(
+          "Удалить этот предмет?"
+        )
+      ) {
+        return;
+      }
+
+
+      adminQuest().objects =
+        adminQuest()
+          .objects
+          .filter(
+            object =>
+              object.id !==
+              adminObjectId
+          );
+
+
+      adminObjectId =
+        null;
+
+
+      saveData();
+
+      renderAdminObjectList();
+
+    }
+  );
+
+
+function updateRequirementFields() {
+
+  const type =
+    document
+      .getElementById(
+        "admin-requirement-type"
+      )
+      .value;
+
+
+  document
+    .getElementById(
+      "admin-requirement-key-wrap"
+    )
+    .style.display =
+    type === "none"
+      ? "none"
+      : "block";
+
+
+  document
+    .getElementById(
+      "admin-consume-wrap"
+    )
+    .style.display =
+    type === "item"
+      ? "flex"
+      : "none";
+}
+
+
+document
+  .getElementById(
+    "admin-requirement-type"
+  )
+  .addEventListener(
+    "change",
+    updateRequirementFields
+  );
+
+
+function updateObjectActionFields() {
+
+  document
+    .querySelectorAll(
+      ".object-action-fields"
+    )
+    .forEach(
+      element => {
+
+        element.style.display =
+          "none";
+
+      }
+    );
+
+
+  const type =
+    document
+      .getElementById(
+        "admin-object-action"
+      )
+      .value;
+
+
+  if (
+    type === "message"
+  ) {
+    showActionField(
+      "object-action-message"
+    );
+  }
+
+
+  if (
+    type === "task"
+  ) {
+    showActionField(
+      "object-action-task"
+    );
+  }
+
+
+  if (
+    type === "giveItem"
+  ) {
+    showActionField(
+      "object-action-item"
+    );
+  }
+
+
+  if (
+    type ===
+    "passwordTask"
+  ) {
+
+    showActionField(
+      "object-action-password"
+    );
+
+    showActionField(
+      "object-action-task"
+    );
+  }
+
+
+  if (
+    type === "codeLock"
+  ) {
+    showActionField(
+      "object-action-code"
+    );
+  }
+}
+
+
+function showActionField(
+  id
+) {
+
+  document
+    .getElementById(
+      id
+    )
+    .style.display =
+    "block";
+}
+
+
+document
+  .getElementById(
+    "admin-object-action"
+  )
+  .addEventListener(
+    "change",
+    updateObjectActionFields
+  );
+
+
+document
+  .getElementById(
+    "admin-save-object"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const object =
+        selectedAdminObject();
+
+
+      if (!object) {
+        return;
+      }
+
+
+      object.active =
+        document
+          .getElementById(
+            "admin-object-active"
+          )
+          .checked;
+
+
+      object.name =
+        document
+          .getElementById(
+            "admin-object-name"
+          )
+          .value
+          .trim();
+
+
+      object.x =
+        Number(
+          document
+            .getElementById(
+              "admin-object-x"
+            )
+            .value
+        );
+
+
+      object.y =
+        Number(
+          document
+            .getElementById(
+              "admin-object-y"
+            )
+            .value
+        );
+
+
+      object.width =
+        Number(
+          document
+            .getElementById(
+              "admin-object-width"
+            )
+            .value
+        );
+
+
+      object.height =
+        Number(
+          document
+            .getElementById(
+              "admin-object-height"
+            )
+            .value
+        );
+
+
+      object.requirement = {
+        type:
+          document
+            .getElementById(
+              "admin-requirement-type"
+            )
+            .value,
+
+        key:
+          document
+            .getElementById(
+              "admin-requirement-key"
+            )
+            .value
+            .trim(),
+
+        consume:
+          document
+            .getElementById(
+              "admin-requirement-consume"
+            )
+            .checked
+      };
+
+
+      object.fallback =
+        document
+          .getElementById(
+            "admin-object-fallback"
+          )
+          .value
+          .trim();
+
+
+      const type =
+        document
+          .getElementById(
+            "admin-object-action"
+          )
+          .value;
+
+
+      if (
+        type === "message"
+      ) {
+
+        object.action = {
+          type,
+
+          message:
+            document
+              .getElementById(
+                "admin-object-message"
+              )
+              .value
+        };
+
+      }
+
+
+      else if (
+        type === "task"
+      ) {
+
+        object.action = {
+          type,
+
+          taskId:
+            document
+              .getElementById(
+                "admin-object-task"
+              )
+              .value
+        };
+
+      }
+
+
+      else if (
+        type === "giveItem"
+      ) {
+
+        object.action = {
+          type,
+
+          item: {
+            id:
+              document
+                .getElementById(
+                  "admin-object-item-id"
+                )
+                .value
+                .trim(),
+
+            name:
+              document
+                .getElementById(
+                  "admin-object-item-name"
+                )
+                .value
+                .trim(),
+
+            icon:
+              document
+                .getElementById(
+                  "admin-object-item-icon"
+                )
+                .value
+                .trim()
+          }
+        };
+
+      }
+
+
+      else if (
+        type ===
+        "passwordTask"
+      ) {
+
+        object.action = {
+          type,
+
+          password:
+            document
+              .getElementById(
+                "admin-object-password"
+              )
+              .value,
+
+          taskId:
+            document
+              .getElementById(
+                "admin-object-task"
+              )
+              .value
+        };
+
+      }
+
+
+      else if (
+        type ===
+        "codeLock"
+      ) {
+
+        object.action = {
+          type,
+
+          code:
+            document
+              .getElementById(
+                "admin-object-code"
+              )
+              .value,
+
+          hint:
+            document
+              .getElementById(
+                "admin-object-code-hint"
+              )
+              .value,
+
+          success:
+            document
+              .getElementById(
+                "admin-object-success"
+              )
+              .value
+        };
+
+      }
+
+
+      saveData();
+
+      renderAdminObjectList();
+
+      adminStatus(
+        "Предмет сохранен."
+      );
+
+    }
+  );
+
+
+/* АДМИН — ЗАДАНИЯ */
+
+function fillTaskOptions(
+  select
+) {
+
+  select.innerHTML =
+    "";
+
+
+  Object.values(
+    adminQuest().tasks
+  )
+    .forEach(
+      task => {
+
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          task.id;
+
+
+        option.textContent =
+          task.title;
+
+
+        select.appendChild(
+          option
+        );
+
+      }
+    );
+}
+
+
+function renderAdminTaskList() {
+
+  const select =
+    document.getElementById(
+      "admin-task-select"
+    );
+
+
+  fillTaskOptions(
+    select
+  );
+
+
+  if (
+    !adminTaskId ||
+    !adminQuest()
+      .tasks[
+        adminTaskId
+      ]
+  ) {
+
+    adminTaskId =
+      Object.keys(
+        adminQuest().tasks
+      )[0] ||
+      null;
+
+  }
+
+
+  if (
+    adminTaskId
+  ) {
+
+    select.value =
+      adminTaskId;
+
+
+    loadAdminTask();
+
+  }
+
+  else {
+    clearAdminTask();
+  }
+
+
+  fillTaskOptions(
+    document.getElementById(
+      "admin-object-task"
+    )
+  );
+}
+
+
+function selectedAdminTask() {
+
+  return adminQuest()
+    .tasks[
+      adminTaskId
+    ];
+}
+
+
+function clearAdminTask() {
+
+  document
+    .getElementById(
+      "admin-task-title"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-task-question"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-rewards"
+    )
+    .innerHTML =
+    "";
+}
+
+
+function loadAdminTask() {
+
+  const task =
+    selectedAdminTask();
+
+
+  if (!task) {
+    return;
+  }
+
+
+  document
+    .getElementById(
+      "admin-task-title"
+    )
+    .value =
+    task.title || "";
+
+
+  document
+    .getElementById(
+      "admin-task-type"
+    )
+    .value =
+    task.type;
+
+
+  document
+    .getElementById(
+      "admin-task-question"
+    )
+    .value =
+    task.question || "";
+
+
+  document
+    .getElementById(
+      "admin-task-options"
+    )
+    .value =
+    (task.options || [])
+      .join("\n");
+
+
+  document
+    .getElementById(
+      "admin-task-correct"
+    )
+    .value =
+    (task.correct || [])
+      .map(
+        index =>
+          index + 1
+      )
+      .join(",");
+
+
+  document
+    .getElementById(
+      "admin-task-answers"
+    )
+    .value =
+    (task.answers || [])
+      .join("\n");
+
+
+  document
+    .getElementById(
+      "admin-task-order"
+    )
+    .value =
+    (task.order || [])
+      .join("\n");
+
+
+  document
+    .getElementById(
+      "admin-task-pairs"
+    )
+    .value =
+    (task.pairs || [])
+      .map(
+        pair =>
+          `${pair.left} | ${pair.right}`
+      )
+      .join("\n");
+
+
+  document
+    .getElementById(
+      "admin-task-success"
+    )
+    .value =
+    task.successMessage || "";
+
+
+  updateTaskEditor();
+
+  renderRewards(
+    task.rewards || []
+  );
+}
 
 
 document
@@ -3667,7 +4043,7 @@ document
         event.target.value;
 
 
-      loadAdminTaskForm();
+      loadAdminTask();
 
     }
   );
@@ -3675,22 +4051,396 @@ document
 
 document
   .getElementById(
-    "admin-action-type"
+    "admin-add-task"
   )
   .addEventListener(
-    "change",
-    updateAdminActionFields
+    "click",
+    () => {
+
+      const id =
+        uid("task");
+
+
+      adminQuest()
+        .tasks[id] = {
+          id,
+          title:
+            "Новое задание",
+
+          type:
+            "singleChoice",
+
+          question: "",
+
+          options: [
+            "Вариант 1",
+            "Вариант 2"
+          ],
+
+          correct: [0],
+
+          answers: [],
+          order: [],
+          pairs: [],
+
+          successMessage:
+            "Задание выполнено.",
+
+          rewards: []
+        };
+
+
+      adminTaskId =
+        id;
+
+
+      saveData();
+
+      renderAdminTaskList();
+
+    }
   );
 
 
 document
   .getElementById(
-    "admin-save-object"
+    "admin-delete-task"
   )
   .addEventListener(
     "click",
-    saveAdminObject
+    () => {
+
+      if (
+        !adminTaskId
+      ) {
+        return;
+      }
+
+
+      if (
+        !confirm(
+          "Удалить это задание?"
+        )
+      ) {
+        return;
+      }
+
+
+      delete adminQuest()
+        .tasks[
+          adminTaskId
+        ];
+
+
+      adminTaskId =
+        null;
+
+
+      saveData();
+
+      renderAdminTaskList();
+
+    }
   );
+
+
+document
+  .getElementById(
+    "admin-task-type"
+  )
+  .addEventListener(
+    "change",
+    updateTaskEditor
+  );
+
+
+function updateTaskEditor() {
+
+  const type =
+    document
+      .getElementById(
+        "admin-task-type"
+      )
+      .value;
+
+
+  const choice =
+    document.getElementById(
+      "task-editor-choice"
+    );
+
+  const correct =
+    document.getElementById(
+      "task-editor-correct"
+    );
+
+  const text =
+    document.getElementById(
+      "task-editor-text"
+    );
+
+  const ordering =
+    document.getElementById(
+      "task-editor-ordering"
+    );
+
+  const matching =
+    document.getElementById(
+      "task-editor-matching"
+    );
+
+
+  choice.style.display =
+    (
+      type === "singleChoice" ||
+      type === "multipleChoice"
+    )
+      ? "block"
+      : "none";
+
+
+  correct.style.display =
+    (
+      type === "singleChoice" ||
+      type === "multipleChoice"
+    )
+      ? "block"
+      : "none";
+
+
+  text.style.display =
+    type === "textInput"
+      ? "block"
+      : "none";
+
+
+  ordering.style.display =
+    type === "ordering"
+      ? "block"
+      : "none";
+
+
+  matching.style.display =
+    type === "matching"
+      ? "block"
+      : "none";
+
+
+  document
+    .getElementById(
+      "admin-correct-help"
+    )
+    .textContent =
+    type === "multipleChoice"
+      ? "Несколько номеров через запятую: 1,2,4"
+      : "Номер правильного варианта: например 2";
+}
+
+
+/* НАГРАДЫ */
+
+function renderRewards(
+  rewards
+) {
+
+  const host =
+    document.getElementById(
+      "admin-rewards"
+    );
+
+
+  host.innerHTML =
+    "";
+
+
+  rewards.forEach(
+    reward => {
+
+      addRewardRow(
+        reward
+      );
+
+    }
+  );
+}
+
+
+function addRewardRow(
+  reward = {
+    type: "note",
+    value: "",
+    name: "",
+    icon: ""
+  }
+) {
+
+  const host =
+    document.getElementById(
+      "admin-rewards"
+    );
+
+
+  const row =
+    document.createElement(
+      "div"
+    );
+
+
+  row.className =
+    "reward-row";
+
+
+  row.innerHTML = `
+    <select
+      class="admin-input reward-type"
+    >
+      <option value="note">
+        Заметка / подсказка
+      </option>
+
+      <option value="item">
+        Предмет / ключ
+      </option>
+
+      <option value="flag">
+        Игровой флаг
+      </option>
+    </select>
+
+    <input
+      class="admin-input reward-value"
+      type="text"
+      placeholder="Текст или ID"
+    >
+
+    <input
+      class="admin-input reward-name"
+      type="text"
+      placeholder="Название предмета"
+    >
+
+    <input
+      class="admin-input reward-icon"
+      type="text"
+      placeholder="🔑"
+    >
+
+    <button
+      class="reward-delete"
+      type="button"
+    >
+      ×
+    </button>
+  `;
+
+
+  row
+    .querySelector(
+      ".reward-type"
+    )
+    .value =
+    reward.type;
+
+
+  row
+    .querySelector(
+      ".reward-value"
+    )
+    .value =
+    reward.value || "";
+
+
+  row
+    .querySelector(
+      ".reward-name"
+    )
+    .value =
+    reward.name || "";
+
+
+  row
+    .querySelector(
+      ".reward-icon"
+    )
+    .value =
+    reward.icon || "";
+
+
+  row
+    .querySelector(
+      ".reward-delete"
+    )
+    .addEventListener(
+      "click",
+      () =>
+        row.remove()
+    );
+
+
+  host.appendChild(
+    row
+  );
+}
+
+
+document
+  .getElementById(
+    "admin-add-reward"
+  )
+  .addEventListener(
+    "click",
+    () =>
+      addRewardRow()
+  );
+
+
+function collectRewards() {
+
+  return [
+    ...document
+      .querySelectorAll(
+        ".reward-row"
+      )
+  ]
+    .map(
+      row => ({
+        type:
+          row
+            .querySelector(
+              ".reward-type"
+            )
+            .value,
+
+        value:
+          row
+            .querySelector(
+              ".reward-value"
+            )
+            .value
+            .trim(),
+
+        name:
+          row
+            .querySelector(
+              ".reward-name"
+            )
+            .value
+            .trim(),
+
+        icon:
+          row
+            .querySelector(
+              ".reward-icon"
+            )
+            .value
+            .trim()
+      })
+    )
+    .filter(
+      reward =>
+        reward.value
+    );
+}
 
 
 document
@@ -3699,9 +4449,169 @@ document
   )
   .addEventListener(
     "click",
-    saveAdminTask
+    () => {
+
+      const task =
+        selectedAdminTask();
+
+
+      if (!task) {
+        return;
+      }
+
+
+      const type =
+        document
+          .getElementById(
+            "admin-task-type"
+          )
+          .value;
+
+
+      task.title =
+        document
+          .getElementById(
+            "admin-task-title"
+          )
+          .value
+          .trim();
+
+
+      task.type =
+        type;
+
+
+      task.question =
+        document
+          .getElementById(
+            "admin-task-question"
+          )
+          .value
+          .trim();
+
+
+      task.options =
+        document
+          .getElementById(
+            "admin-task-options"
+          )
+          .value
+          .split("\n")
+          .map(
+            value =>
+              value.trim()
+          )
+          .filter(Boolean);
+
+
+      task.correct =
+        document
+          .getElementById(
+            "admin-task-correct"
+          )
+          .value
+          .split(",")
+          .map(
+            value =>
+              Number(
+                value.trim()
+              ) - 1
+          )
+          .filter(
+            value =>
+              value >= 0
+          );
+
+
+      task.answers =
+        document
+          .getElementById(
+            "admin-task-answers"
+          )
+          .value
+          .split("\n")
+          .map(
+            value =>
+              value.trim()
+          )
+          .filter(Boolean);
+
+
+      task.order =
+        document
+          .getElementById(
+            "admin-task-order"
+          )
+          .value
+          .split("\n")
+          .map(
+            value =>
+              value.trim()
+          )
+          .filter(Boolean);
+
+
+      task.pairs =
+        document
+          .getElementById(
+            "admin-task-pairs"
+          )
+          .value
+          .split("\n")
+          .map(
+            line =>
+              line
+                .split("|")
+                .map(
+                  value =>
+                    value.trim()
+                )
+          )
+          .filter(
+            values =>
+              values.length >= 2 &&
+              values[0] &&
+              values[1]
+          )
+          .map(
+            values => ({
+              left:
+                values[0],
+
+              right:
+                values[1]
+            })
+          );
+
+
+      task.successMessage =
+        document
+          .getElementById(
+            "admin-task-success"
+          )
+          .value
+          .trim();
+
+
+      task.rewards =
+        collectRewards();
+
+
+      saveData();
+
+      renderAdminTaskList();
+
+      renderAdminObjectList();
+
+      adminStatus(
+        "Задание сохранено."
+      );
+
+    }
   );
 
+
+/* ПРЕДПРОСМОТР */
 
 document
   .getElementById(
@@ -3709,9 +4619,37 @@ document
   )
   .addEventListener(
     "click",
-    previewAdminQuest
+    () => {
+
+      selectedQuestId =
+        adminQuestId;
+
+
+      gameState =
+        createGameState();
+
+
+      document
+        .getElementById(
+          "game-day-title"
+        )
+        .textContent =
+        `День ${adminQuest().day}`;
+
+
+      renderInventory();
+
+      renderHotspots();
+
+      showScreen(
+        "game"
+      );
+
+    }
   );
 
+
+/* RESET */
 
 document
   .getElementById(
@@ -3719,16 +4657,286 @@ document
   )
   .addEventListener(
     "click",
-    resetAdminConfig
+    () => {
+
+      if (
+        !confirm(
+          "Удалить все настройки конструктора и вернуть исходную версию?"
+        )
+      ) {
+        return;
+      }
+
+
+      localStorage.removeItem(
+        STORAGE_KEY
+      );
+
+
+      APP_DATA =
+        structuredClone(
+          DEFAULT_DATA
+        );
+
+
+      adminQuestId =
+        "day1";
+
+
+      adminTaskId =
+        null;
+
+
+      adminObjectId =
+        null;
+
+
+      renderDays();
+
+      renderAdminQuestSelect();
+
+      adminStatus(
+        "Исходная конфигурация восстановлена."
+      );
+
+    }
   );
 
 
-/* =========================================================
-   44. ЗАПУСК
-========================================================= */
+function adminStatus(
+  text,
+  error = false
+) {
 
-loadAdminConfig();
+  const element =
+    document.getElementById(
+      "admin-status"
+    );
+
+
+  element.textContent =
+    text;
+
+
+  element.style.color =
+    error
+      ? "#ff9999"
+      : "#79e9c2";
+
+
+  setTimeout(
+    () => {
+
+      element.textContent =
+        "";
+
+    },
+
+    2600
+  );
+}
+
+
+/* ИГРОВЫЕ КНОПКИ */
+
+document
+  .getElementById(
+    "inventory-btn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const html =
+        gameState.inventory.length
+          ? gameState.inventory
+              .map(
+                item => `
+                  <div class="inventory-item">
+
+                    <div class="inventory-item__icon">
+                      ${escapeHtml(
+                        item.icon ||
+                        "📦"
+                      )}
+                    </div>
+
+                    <div>
+                      ${escapeHtml(
+                        item.name
+                      )}
+                    </div>
+
+                  </div>
+                `
+              )
+              .join("")
+          : "<p>Пока пусто.</p>";
+
+
+      openOverlay(`
+        <h3>
+          Инвентарь
+        </h3>
+
+        ${html}
+      `);
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "notes-btn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const html =
+        gameState.notes.length
+          ? gameState.notes
+              .map(
+                note => `
+                  <div class="clue-card">
+                    ${escapeHtml(
+                      note
+                    )}
+                  </div>
+                `
+              )
+              .join("")
+          : "<p>Пока ничего не найдено.</p>";
+
+
+      openOverlay(`
+        <h3>
+          Заметки
+        </h3>
+
+        ${html}
+      `);
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "hint-btn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      openOverlay(`
+        <h3>
+          Подсказка
+        </h3>
+
+        <p>
+          Осматривайте предметы комнаты.
+          Некоторые из них становятся полезны
+          только после других находок.
+        </p>
+      `);
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "menu-btn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const quest =
+        currentQuest();
+
+
+      openOverlay(`
+        <h3>
+          ${escapeHtml(
+            quest.title
+          )}
+        </h3>
+
+        <p>
+          ${escapeHtml(
+            quest.topic
+          )}
+        </p>
+
+        <button
+          id="leave-game"
+          class="secondary-btn"
+          type="button"
+        >
+          Выйти из смены
+        </button>
+      `);
+
+
+      document
+        .getElementById(
+          "leave-game"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            closeOverlay();
+
+            showScreen(
+              "start"
+            );
+
+          }
+        );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "overlay-close"
+  )
+  .addEventListener(
+    "click",
+    closeOverlay
+  );
+
+
+overlay.addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target ===
+      overlay
+    ) {
+      closeOverlay();
+    }
+
+  }
+);
+
+
+/* ЗАПУСК */
+
+loadData();
 
 renderDays();
 
 renderInventory();
+
+updateRequirementFields();
+
+updateObjectActionFields();
+
+updateTaskEditor();
