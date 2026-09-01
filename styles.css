@@ -897,3 +897,302 @@ button {
   }
 
 }
+
+/* =========================================================
+   НОРМАЛЬНЫЙ ВИД КНОПОК
+========================================================= */
+
+button {
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* Основная зеленая кнопка */
+
+.primary-btn,
+.object-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 46px;
+
+  padding: 12px 20px;
+
+  border: 1px solid rgba(104, 255, 197, 0.34);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(76, 210, 166, 0.95),
+      rgba(42, 160, 126, 0.95)
+    );
+
+  color: #071712;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 7px 22px rgba(0, 0, 0, 0.22);
+
+  transition:
+    transform 0.16s ease,
+    filter 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+
+.primary-btn:hover,
+.object-action-btn:hover {
+  filter: brightness(1.08);
+
+  transform:
+    translateY(-1px);
+}
+
+
+.primary-btn:active,
+.object-action-btn:active {
+  transform:
+    translateY(1px);
+}
+
+
+
+/* Вторичные кнопки:
+   Назад, Администратор и т.п. */
+
+.secondary-btn,
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding: 10px 16px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.12);
+
+  border-radius: 13px;
+
+  background:
+    rgba(15, 24, 24, 0.72);
+
+  color:
+    rgba(255, 255, 255, 0.9);
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    none;
+
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+
+.secondary-btn:hover,
+.back-btn:hover {
+  background:
+    rgba(54, 198, 160, 0.12);
+
+  border-color:
+    rgba(92, 255, 197, 0.32);
+}
+
+
+.secondary-btn:active,
+.back-btn:active {
+  transform:
+    scale(0.98);
+}
+
+
+
+/* Кнопка администратора */
+
+.admin-entry-btn {
+  margin-top: 26px;
+
+  background:
+    transparent;
+
+  border:
+    1px solid rgba(92, 255, 197, 0.22);
+
+  color:
+    rgba(220, 255, 244, 0.78);
+}
+
+
+.admin-entry-btn:hover {
+  background:
+    rgba(54, 198, 160, 0.09);
+
+  color:
+    #ffffff;
+}
+
+
+
+/* Кнопки верхней панели игры */
+
+.topbar-btn {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 40px;
+
+  padding: 8px 12px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.1);
+
+  border-radius: 12px;
+
+  background:
+    rgba(8, 18, 18, 0.66);
+
+  color:
+    rgba(255, 255, 255, 0.88);
+
+  cursor: pointer;
+
+  box-shadow: none;
+
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+
+.topbar-btn:hover {
+  background:
+    rgba(54, 198, 160, 0.12);
+
+  border-color:
+    rgba(92, 255, 197, 0.28);
+}
+
+
+
+/* Инвентарь */
+
+.inventory-title {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 8px 12px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background:
+    transparent;
+
+  color:
+    rgba(255, 255, 255, 0.86);
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+.inventory-title:hover {
+  background:
+    rgba(255, 255, 255, 0.06);
+}
+
+
+
+/* Кнопки вариантов ответа */
+
+.choice-btn {
+  width: 100%;
+
+  padding: 13px 15px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.11);
+
+  border-radius: 13px;
+
+  background:
+    rgba(255, 255, 255, 0.055);
+
+  color:
+    rgba(255, 255, 255, 0.92);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+
+.choice-btn:hover {
+  background:
+    rgba(54, 198, 160, 0.11);
+
+  border-color:
+    rgba(92, 255, 197, 0.28);
+
+  transform:
+    translateX(2px);
+}
+
+
+
+/* Убираем стандартные белые стили браузера */
+
+button:focus-visible {
+  outline:
+    2px solid rgba(92, 255, 197, 0.7);
+
+  outline-offset:
+    2px;
+}
+
+
+
+/* На телефоне убираем подписи,
+   если верхняя панель становится тесной */
+
+@media (max-width: 620px) {
+
+  .topbar-btn span {
+    display: none;
+  }
+
+
+  .topbar-btn {
+    width: 42px;
+
+    padding:
+      8px;
+  }
+
+}
