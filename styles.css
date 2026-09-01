@@ -343,39 +343,57 @@ button {
 
   pointer-events: none;
 }
-
 .hotspot {
   position: absolute;
 
-  width: 44px;
-  height: 44px;
+  transform: translate(-50%, -50%);
 
-  transform:
-    translate(-50%, -50%);
+  border: 0;
+  border-radius: 18px;
 
-  border-radius: 50%;
-
-  border:
-    2px solid #e7f6c5;
-
-  background:
-    rgba(34, 90, 62, 0.72);
-
-  color: white;
-
-  font-weight: 900;
-
-  box-shadow:
-    0 0 0 4px rgba(0, 0, 0, 0.18);
+  background: transparent;
 
   pointer-events: auto;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
 }
 
-.hotspot:hover,
-.hotspot:focus {
-  background: var(--accent);
+/*
+  На компьютере предмет слегка
+  подсвечивается при наведении.
+*/
 
-  color: #0d211b;
+.hotspot:hover,
+.hotspot:focus-visible {
+  background:
+    rgba(92, 255, 197, 0.12);
+
+  box-shadow:
+    0 0 24px rgba(92, 255, 197, 0.32);
+
+  transform:
+    translate(-50%, -50%)
+    scale(1.03);
+
+  outline: none;
+}
+
+/*
+  Короткая реакция после тапа
+  на телефоне.
+*/
+
+.hotspot.hotspot--tap {
+  background:
+    rgba(92, 255, 197, 0.16);
+
+  box-shadow:
+    0 0 28px rgba(92, 255, 197, 0.38);
 }
 
 /* НИЖНЯЯ ПАНЕЛЬ */
