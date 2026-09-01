@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Аптека — учебный квест</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+
+    <!-- СТАРТОВАЯ СТРАНИЦА -->
+    <section id="start-screen" class="screen screen--active">
+      <div class="start-card">
+        <div class="eyebrow">Учебный квест</div>
+        <h1>АПТЕКА</h1>
+        <p class="subtitle">Психология общения</p>
+
+        <div class="days-grid" id="days-grid"></div>
+      </div>
+    </section>
+
+    <!-- ВВОД ПАРОЛЯ -->
+    <section id="login-screen" class="screen">
+      <div class="modal-card">
+        <button class="ghost-btn" id="back-to-start">← Назад</button>
+
+        <div class="eyebrow" id="login-day-label">ДЕНЬ 1</div>
+
+        <h2 id="login-title">Первый день в аптеке</h2>
+
+        <p id="login-topic">
+          Введение в психологию общения
+        </p>
+
+        <label class="field-label" for="quest-password">
+          Пароль квеста
+        </label>
+
+        <input
+          id="quest-password"
+          class="text-input"
+          type="password"
+          autocomplete="off"
+          placeholder="Введите пароль"
+        />
+
+        <button class="primary-btn" id="enter-quest">
+          Начать смену
+        </button>
+
+        <p
+          class="error-text"
+          id="password-error"
+          aria-live="polite"
+        ></p>
+      </div>
+    </section>
+
+    <!-- ИГРОВАЯ КОМНАТА -->
+    <section id="game-screen" class="screen game-screen">
+
+      <header class="game-topbar">
+        <div>
+          <div class="eyebrow">ДЕНЬ 1</div>
+          <strong>Первый день в аптеке</strong>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="icon-btn" id="hint-btn">?</button>
+          <button class="icon-btn" id="menu-btn">☰</button>
+        </div>
+      </header>
+
+      <div class="scene-wrap" id="scene-wrap">
+
+        <img
+          src="assets/pharmacy-concept.png"
+          alt="Игровая аптека"
+          class="scene-image"
+          id="scene-image"
+        />
+
+        <div class="hotspots" id="hotspots"></div>
+
+      </div>
+
+      <footer class="game-bottom">
+
+        <button class="inventory-btn" id="inventory-btn">
+          🎒
+          <span>Инвентарь</span>
+        </button>
+
+        <div
+          class="inventory-slots"
+          id="inventory-slots"
+        ></div>
+
+        <button class="inventory-btn" id="notes-btn">
+          📘
+          <span>Заметки</span>
+        </button>
+
+      </footer>
+
+    </section>
+
+  </main>
+
+  <!-- ВСПЛЫВАЮЩЕЕ ОКНО -->
+  <div class="overlay" id="overlay" hidden>
+    <div class="overlay-card">
+
+      <button
+        class="close-btn"
+        id="overlay-close"
+      >
+        ×
+      </button>
+
+      <div id="overlay-content"></div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
