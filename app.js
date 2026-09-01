@@ -55,29 +55,28 @@ const QUESTS = [
 
 
 /* =========================================================
-   2. КОНФИГУРАЦИЯ КВЕСТА
+   2. НАСТРОЙКИ
+========================================================= */
 
-   Это содержательная часть.
+const ADMIN_PASSWORD = "admin2026";
 
-   Позже эти данные будут загружаться
-   из Google Sheets через Apps Script.
+const ADMIN_STORAGE_KEY =
+  "psychologyEscapeAdminConfig";
+
+
+/* =========================================================
+   3. КОНФИГУРАЦИЯ ДНЯ 1
 ========================================================= */
 
 const QUEST_CONFIG = {
 
   day1: {
 
-    /* =====================================================
-       УЧЕБНЫЕ ЗАДАНИЯ
-    ===================================================== */
-
     tasks: {
 
       psychology: {
         id: "psychology",
-
         type: "singleChoice",
-
         title: "Телефон",
 
         question:
@@ -131,9 +130,7 @@ const QUEST_CONFIG = {
 
       psyche: {
         id: "psyche",
-
         type: "singleChoice",
-
         title: "Карточка в шкафчике",
 
         question:
@@ -171,23 +168,15 @@ const QUEST_CONFIG = {
 
           <div class="clue-card">
             На ней выгравирована цифра:
-            <strong style="font-size:32px;">
-              7
-            </strong>
+            <strong style="font-size:32px;">7</strong>
           </div>
-
-          <p>
-            Цифра сохранена в заметках.
-          </p>
         `
       },
 
 
       history: {
         id: "history",
-
         type: "singleChoice",
-
         title: "Запись в журнале",
 
         question:
@@ -241,9 +230,7 @@ const QUEST_CONFIG = {
 
       mentalActivity: {
         id: "mentalActivity",
-
         type: "singleChoice",
-
         title: "Файл на компьютере",
 
         question:
@@ -280,39 +267,23 @@ const QUEST_CONFIG = {
           </p>
 
           <div class="clue-card">
-            <strong style="font-size:32px;">
-              2
-            </strong>
+            <strong style="font-size:32px;">2</strong>
           </div>
-
-          <p>
-            Цифра сохранена в заметках.
-          </p>
         `
       }
 
     },
 
 
-    /* =====================================================
-       ПРЕДМЕТЫ КОМНАТЫ
-    ===================================================== */
-
     objects: [
-
-      /* =======================
-         ТЕЛЕФОН
-      ======================= */
 
       {
         id: "phone",
         name: "Телефон",
-
         active: true,
 
         x: 10.5,
         y: 79,
-
         width: 13,
         height: 22,
 
@@ -347,7 +318,6 @@ const QUEST_CONFIG = {
             }
           },
 
-
           {
             conditions: [],
 
@@ -361,19 +331,13 @@ const QUEST_CONFIG = {
       },
 
 
-      /* =======================
-         ХОЛОДИЛЬНИК
-      ======================= */
-
       {
         id: "fridge",
         name: "Холодильник",
-
         active: true,
 
         x: 5.5,
         y: 47,
-
         width: 11,
         height: 41,
 
@@ -401,7 +365,6 @@ const QUEST_CONFIG = {
             }
           },
 
-
           {
             conditions: [
               {
@@ -423,7 +386,6 @@ const QUEST_CONFIG = {
               `
             }
           },
-
 
           {
             conditions: [
@@ -460,7 +422,6 @@ const QUEST_CONFIG = {
             }
           },
 
-
           {
             conditions: [],
 
@@ -486,19 +447,13 @@ const QUEST_CONFIG = {
       },
 
 
-      /* =======================
-         СЛУЖЕБНЫЙ ШКАФЧИК
-      ======================= */
-
       {
         id: "locker",
         name: "Служебный шкафчик",
-
         active: true,
 
         x: 49.5,
         y: 42,
-
         width: 13,
         height: 43,
 
@@ -519,10 +474,6 @@ const QUEST_CONFIG = {
               html: `
                 <h3>Служебный шкафчик</h3>
 
-                <p>
-                  Шкафчик открыт.
-                </p>
-
                 <div class="clue-card">
                   Найденная цифра:
                   <strong>7</strong>
@@ -530,7 +481,6 @@ const QUEST_CONFIG = {
               `
             }
           },
-
 
           {
             conditions: [
@@ -546,7 +496,6 @@ const QUEST_CONFIG = {
               taskId: "psyche"
             }
           },
-
 
           {
             conditions: [
@@ -592,13 +541,11 @@ const QUEST_CONFIG = {
                 </p>
 
                 <p>
-                  Нажмите на шкафчик еще раз,
-                  чтобы изучить ее.
+                  Нажмите на шкафчик еще раз.
                 </p>
               `
             }
           },
-
 
           {
             conditions: [],
@@ -625,19 +572,13 @@ const QUEST_CONFIG = {
       },
 
 
-      /* =======================
-         ЖУРНАЛ
-      ======================= */
-
       {
         id: "journal",
         name: "Журнал",
-
         active: true,
 
         x: 51,
         y: 80,
-
         width: 19,
         height: 22,
 
@@ -658,10 +599,6 @@ const QUEST_CONFIG = {
               html: `
                 <h3>Журнал учета</h3>
 
-                <p>
-                  Вы уже изучили эту страницу.
-                </p>
-
                 <div class="clue-card">
                   На полях записано:
                   <strong>PAVLOV</strong>
@@ -669,7 +606,6 @@ const QUEST_CONFIG = {
               `
             }
           },
-
 
           {
             conditions: [],
@@ -684,19 +620,13 @@ const QUEST_CONFIG = {
       },
 
 
-      /* =======================
-         КОМПЬЮТЕР
-      ======================= */
-
       {
         id: "computer",
         name: "Компьютер",
-
         active: true,
 
         x: 28,
         y: 72,
-
         width: 22,
         height: 29,
 
@@ -717,10 +647,6 @@ const QUEST_CONFIG = {
               html: `
                 <h3>Компьютер</h3>
 
-                <p>
-                  Файл уже изучен.
-                </p>
-
                 <div class="clue-card">
                   На экране:
                   <strong>2</strong>
@@ -728,7 +654,6 @@ const QUEST_CONFIG = {
               `
             }
           },
-
 
           {
             conditions: [
@@ -744,7 +669,6 @@ const QUEST_CONFIG = {
               taskId: "mentalActivity"
             }
           },
-
 
           {
             conditions: [
@@ -786,13 +710,11 @@ const QUEST_CONFIG = {
                 </p>
 
                 <p>
-                  Нажмите на компьютер еще раз,
-                  чтобы открыть его.
+                  Нажмите на компьютер еще раз.
                 </p>
               `
             }
           },
-
 
           {
             conditions: [],
@@ -818,24 +740,17 @@ const QUEST_CONFIG = {
       },
 
 
-      /* =======================
-         ШКАФ ПРЕПАРАТОВ
-      ======================= */
-
       {
         id: "medicineCabinet",
         name: "Шкаф препаратов",
-
         active: true,
 
         x: 19,
         y: 31,
-
         width: 18,
         height: 47,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -848,37 +763,24 @@ const QUEST_CONFIG = {
                 <p>
                   На полках множество упаковок.
                 </p>
-
-                <p>
-                  Пока здесь ничего
-                  необычного не найдено.
-                </p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         КАССА
-      ======================= */
-
       {
         id: "cashbox",
         name: "Касса",
-
         active: true,
 
         x: 72.5,
         y: 80,
-
         width: 20,
         height: 22,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -894,29 +796,21 @@ const QUEST_CONFIG = {
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         СЕЙФ
-      ======================= */
-
       {
         id: "safe",
         name: "Сейф",
-
         active: true,
 
         x: 61,
         y: 47,
-
         width: 11,
         height: 31,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -925,36 +819,25 @@ const QUEST_CONFIG = {
 
               html: `
                 <h3>Сейф</h3>
-
-                <p>
-                  Сейф закрыт.
-                </p>
+                <p>Сейф закрыт.</p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         КОРОБКА
-      ======================= */
-
       {
         id: "box",
         name: "Коробка",
-
         active: true,
 
         x: 39,
         y: 51,
-
         width: 9,
         height: 15,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -963,36 +846,25 @@ const QUEST_CONFIG = {
 
               html: `
                 <h3>Коробка</h3>
-
-                <p>
-                  Ничего интересного.
-                </p>
+                <p>Ничего интересного.</p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         ДОСКА ОБЪЯВЛЕНИЙ
-      ======================= */
-
       {
         id: "board",
         name: "Доска объявлений",
-
         active: true,
 
         x: 31,
         y: 28,
-
         width: 11,
         height: 19,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -1001,36 +873,25 @@ const QUEST_CONFIG = {
 
               html: `
                 <h3>Доска объявлений</h3>
-
-                <p>
-                  Пока ничего полезного.
-                </p>
+                <p>Пока ничего полезного.</p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         ЧАСЫ
-      ======================= */
-
       {
         id: "clock",
         name: "Часы",
-
         active: true,
 
         x: 33,
         y: 12,
-
         width: 8,
         height: 12,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -1039,36 +900,25 @@ const QUEST_CONFIG = {
 
               html: `
                 <h3>Часы</h3>
-
-                <p>
-                  Часы продолжают идти.
-                </p>
+                <p>Часы продолжают идти.</p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         КАЛЕНДАРЬ
-      ======================= */
-
       {
         id: "calendar",
         name: "Календарь",
-
         active: true,
 
         x: 40,
         y: 28,
-
         width: 7,
         height: 16,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -1077,37 +927,25 @@ const QUEST_CONFIG = {
 
               html: `
                 <h3>Календарь</h3>
-
-                <p>
-                  Сейчас он выглядит
-                  совершенно обычно.
-                </p>
+                <p>Обычный календарь.</p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         КОРЗИНА
-      ======================= */
-
       {
         id: "trash",
         name: "Корзина",
-
         active: true,
 
         x: 83,
         y: 61,
-
         width: 8,
         height: 18,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -1116,41 +954,25 @@ const QUEST_CONFIG = {
 
               html: `
                 <h3>Корзина</h3>
-
-                <p>
-                  Вы осмотрели даже мусор.
-                </p>
-
-                <p>
-                  Для escape room
-                  это вполне разумное решение.
-                </p>
+                <p>Ничего полезного.</p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         АПТЕЧКА
-      ======================= */
-
       {
         id: "firstAid",
         name: "Аптечка",
-
         active: true,
 
         x: 35.5,
         y: 39,
-
         width: 9,
         height: 11,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -1159,36 +981,25 @@ const QUEST_CONFIG = {
 
               html: `
                 <h3>Аптечка</h3>
-
-                <p>
-                  Пока она вам не нужна.
-                </p>
+                <p>Пока она вам не нужна.</p>
               `
             }
           }
-
         ]
       },
 
 
-      /* =======================
-         ДВЕРЬ
-      ======================= */
-
       {
         id: "door",
         name: "Выход",
-
         active: true,
 
         x: 76,
         y: 39,
-
         width: 13,
         height: 43,
 
         interactions: [
-
           {
             conditions: [],
 
@@ -1206,14 +1017,9 @@ const QUEST_CONFIG = {
                   Рядом расположен
                   электронный кодовый замок.
                 </p>
-
-                <p>
-                  Нужно найти код.
-                </p>
               `
             }
           }
-
         ]
       }
 
@@ -1224,7 +1030,7 @@ const QUEST_CONFIG = {
 
 
 /* =========================================================
-   3. СОСТОЯНИЕ ИГРЫ
+   4. СОСТОЯНИЕ
 ========================================================= */
 
 let gameState = {
@@ -1242,8 +1048,20 @@ let currentConfig =
   null;
 
 
+let adminQuestId =
+  "day1";
+
+
+let adminObjectId =
+  null;
+
+
+let adminTaskId =
+  null;
+
+
 /* =========================================================
-   4. ЭЛЕМЕНТЫ СТРАНИЦЫ
+   5. ЭЛЕМЕНТЫ
 ========================================================= */
 
 const screens = {
@@ -1256,6 +1074,11 @@ const screens = {
   login:
     document.getElementById(
       "login-screen"
+    ),
+
+  adminLogin:
+    document.getElementById(
+      "admin-login-screen"
     ),
 
   game:
@@ -1296,7 +1119,7 @@ const passwordError =
 
 
 /* =========================================================
-   5. ЭКРАНЫ
+   6. ЭКРАНЫ
 ========================================================= */
 
 function showScreen(name) {
@@ -1309,7 +1132,6 @@ function showScreen(name) {
       if (!screen) {
         return;
       }
-
 
       screen.classList.remove(
         "screen--active"
@@ -1334,7 +1156,7 @@ function showScreen(name) {
 
 
 /* =========================================================
-   6. СТАРТОВАЯ СТРАНИЦА
+   7. СТАРТОВАЯ СТРАНИЦА
 ========================================================= */
 
 function renderDays() {
@@ -1343,11 +1165,6 @@ function renderDays() {
     document.getElementById(
       "days-grid"
     );
-
-
-  if (!grid) {
-    return;
-  }
 
 
   grid.innerHTML =
@@ -1441,7 +1258,7 @@ function renderDays() {
 
 
 /* =========================================================
-   7. ЗАПУСК КВЕСТА
+   8. ЗАПУСК КВЕСТА
 ========================================================= */
 
 function startQuest() {
@@ -1453,11 +1270,6 @@ function startQuest() {
 
 
   if (!currentConfig) {
-
-    console.error(
-      "Конфигурация квеста не найдена"
-    );
-
     return;
   }
 
@@ -1467,6 +1279,14 @@ function startQuest() {
     inventory: [],
     notes: []
   };
+
+
+  document
+    .getElementById(
+      "game-day-title"
+    )
+    .textContent =
+    `День ${selectedQuest.day}`;
 
 
   renderInventory();
@@ -1481,7 +1301,7 @@ function startQuest() {
 
 
 /* =========================================================
-   8. ИНТЕРАКТИВНЫЕ ЗОНЫ
+   9. HOTSPOTS
 ========================================================= */
 
 function renderHotspots() {
@@ -1576,7 +1396,7 @@ function renderHotspots() {
 
 
 /* =========================================================
-   9. ВЗАИМОДЕЙСТВИЕ С ПРЕДМЕТОМ
+   10. ОБЪЕКТЫ
 ========================================================= */
 
 function interactWithObject(
@@ -1593,19 +1413,6 @@ function interactWithObject(
 
 
   if (!interaction) {
-
-    openOverlay(`
-      <h3>
-        ${escapeHtml(
-          object.name
-        )}
-      </h3>
-
-      <p>
-        Здесь пока ничего не происходит.
-      </p>
-    `);
-
     return;
   }
 
@@ -1618,7 +1425,7 @@ function interactWithObject(
 
 
 /* =========================================================
-   10. ПРОВЕРКА УСЛОВИЙ
+   11. УСЛОВИЯ
 ========================================================= */
 
 function checkConditions(
@@ -1665,7 +1472,7 @@ function checkConditions(
 
 
 /* =========================================================
-   11. УНИВЕРСАЛЬНЫЕ ДЕЙСТВИЯ
+   12. ДЕЙСТВИЯ
 ========================================================= */
 
 function runAction(
@@ -1738,20 +1545,13 @@ function runAction(
       action
     );
 
-    return;
   }
-
-
-  console.warn(
-    "Неизвестный тип действия:",
-    action.type
-  );
 
 }
 
 
 /* =========================================================
-   12. ЗАПУСК УЧЕБНОГО ЗАДАНИЯ
+   13. ЗАДАНИЯ
 ========================================================= */
 
 function openTask(
@@ -1765,12 +1565,6 @@ function openTask(
 
 
   if (!task) {
-
-    console.error(
-      "Задание не найдено:",
-      taskId
-    );
-
     return;
   }
 
@@ -1784,26 +1578,13 @@ function openTask(
       task
     );
 
-    return;
   }
-
-
-  openOverlay(`
-    <h3>
-      Задание
-    </h3>
-
-    <p>
-      Этот тип задания
-      пока не поддерживается.
-    </p>
-  `);
 
 }
 
 
 /* =========================================================
-   13. ЗАДАНИЕ: ОДИН ПРАВИЛЬНЫЙ ОТВЕТ
+   14. SINGLE CHOICE
 ========================================================= */
 
 function openSingleChoiceTask(
@@ -1821,9 +1602,7 @@ function openSingleChoiceTask(
             class="choice-btn"
             data-answer="${index}"
           >
-            ${escapeHtml(
-              option
-            )}
+            ${escapeHtml(option)}
           </button>
         `
       )
@@ -1882,32 +1661,19 @@ function openSingleChoiceTask(
 
 
               openOverlay(
-                task.successMessage ||
-                `
-                  <h3>Верно!</h3>
-
-                  <p>
-                    Задание выполнено.
-                  </p>
-                `
+                task.successMessage
               );
 
             }
 
             else {
 
-              const feedback =
-                document.getElementById(
+              document
+                .getElementById(
                   "question-feedback"
-                );
-
-
-              if (feedback) {
-
-                feedback.textContent =
-                  "Ответ неверный. Попробуйте еще раз.";
-
-              }
+                )
+                .textContent =
+                "Ответ неверный. Попробуйте еще раз.";
 
             }
 
@@ -1921,7 +1687,7 @@ function openSingleChoiceTask(
 
 
 /* =========================================================
-   14. ПОЛУЧЕНИЕ ПРЕДМЕТА
+   15. ВЫДАЧА ПРЕДМЕТА
 ========================================================= */
 
 function showItemAction(
@@ -1931,13 +1697,13 @@ function showItemAction(
   openOverlay(`
     <h3>
       ${escapeHtml(
-        action.title || "Предмет"
+        action.title
       )}
     </h3>
 
     <div class="success-box">
       ${escapeHtml(
-        action.text || ""
+        action.text
       )}
     </div>
 
@@ -1945,57 +1711,50 @@ function showItemAction(
       class="object-action-btn"
       id="take-item-btn"
     >
-      ${action.buttonText || "Забрать"}
+      ${action.buttonText}
     </button>
   `);
 
 
-  const button =
-    document.getElementById(
+  document
+    .getElementById(
       "take-item-btn"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        addItem(
+          action.item
+        );
+
+
+        applyEffects(
+          action.effects || []
+        );
+
+
+        openOverlay(`
+          <h3>
+            Предмет найден
+          </h3>
+
+          <p>
+            ${escapeHtml(
+              action.item.name
+            )}
+            добавлен в инвентарь.
+          </p>
+        `);
+
+      }
     );
-
-
-  if (!button) {
-    return;
-  }
-
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      addItem(
-        action.item
-      );
-
-
-      applyEffects(
-        action.effects || []
-      );
-
-
-      openOverlay(`
-        <h3>
-          Предмет найден
-        </h3>
-
-        <p>
-          ${escapeHtml(
-            action.item.name
-          )}
-          добавлен в инвентарь.
-        </p>
-      `);
-
-    }
-  );
 
 }
 
 
 /* =========================================================
-   15. ОТКРЫТИЕ ПРЕДМЕТА КЛЮЧОМ
+   16. ОТКРЫТИЕ КЛЮЧОМ
 ========================================================= */
 
 function showUnlockAction(
@@ -2005,14 +1764,14 @@ function showUnlockAction(
   openOverlay(`
     <h3>
       ${escapeHtml(
-        action.title || "Запертый предмет"
+        action.title
       )}
     </h3>
 
     <p>
       У вас есть
       ${escapeHtml(
-        action.itemName || "подходящий предмет"
+        action.itemName
       )}.
     </p>
 
@@ -2020,53 +1779,41 @@ function showUnlockAction(
       class="object-action-btn"
       id="unlock-object-btn"
     >
-      ${action.buttonText || "Открыть"}
+      ${action.buttonText}
     </button>
   `);
 
 
-  const button =
-    document.getElementById(
+  document
+    .getElementById(
       "unlock-object-btn"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        removeItem(
+          action.itemId
+        );
+
+
+        applyEffects(
+          action.effects || []
+        );
+
+
+        openOverlay(
+          action.afterHtml
+        );
+
+      }
     );
-
-
-  if (!button) {
-    return;
-  }
-
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      removeItem(
-        action.itemId
-      );
-
-
-      applyEffects(
-        action.effects || []
-      );
-
-
-      openOverlay(
-        action.afterHtml ||
-        `
-          <h3>
-            Открыто
-          </h3>
-        `
-      );
-
-    }
-  );
 
 }
 
 
 /* =========================================================
-   16. ВВОД ПАРОЛЯ
+   17. ПАРОЛЬ ОБЪЕКТА
 ========================================================= */
 
 function showPasswordAction(
@@ -2076,7 +1823,7 @@ function showPasswordAction(
   openOverlay(`
     <h3>
       ${escapeHtml(
-        action.title || "Пароль"
+        action.title
       )}
     </h3>
 
@@ -2086,8 +1833,7 @@ function showPasswordAction(
       type="text"
       autocomplete="off"
       placeholder="${escapeHtml(
-        action.placeholder ||
-        "Введите пароль"
+        action.placeholder
       )}"
     >
 
@@ -2111,55 +1857,26 @@ function showPasswordAction(
     );
 
 
-  const button =
-    document.getElementById(
-      "object-password-btn"
-    );
-
-
-  if (
-    !input ||
-    !button
-  ) {
-    return;
-  }
-
-
   const check =
     () => {
 
-      const value =
+      if (
         input.value
           .trim()
-          .toUpperCase();
-
-
-      const correctPassword =
+          .toUpperCase() !==
         String(
           action.password
         )
           .trim()
-          .toUpperCase();
-
-
-      if (
-        value !==
-        correctPassword
+          .toUpperCase()
       ) {
 
-        const error =
-          document.getElementById(
+        document
+          .getElementById(
             "object-password-error"
-          );
-
-
-        if (error) {
-
-          error.textContent =
-            "Пароль не подходит.";
-
-        }
-
+          )
+          .textContent =
+          "Пароль не подходит.";
 
         return;
       }
@@ -2171,21 +1888,20 @@ function showPasswordAction(
 
 
       openOverlay(
-        action.successHtml ||
-        `
-          <h3>
-            Доступ разрешен
-          </h3>
-        `
+        action.successHtml
       );
 
     };
 
 
-  button.addEventListener(
-    "click",
-    check
-  );
+  document
+    .getElementById(
+      "object-password-btn"
+    )
+    .addEventListener(
+      "click",
+      check
+    );
 
 
   input.addEventListener(
@@ -2207,14 +1923,7 @@ function showPasswordAction(
 
 
 /* =========================================================
-   17. ЭФФЕКТЫ
-
-   Это основа конструктора.
-
-   Задание или предмет может:
-   - установить флаг;
-   - добавить заметку;
-   - выдать предмет.
+   18. ЭФФЕКТЫ
 ========================================================= */
 
 function applyEffects(
@@ -2236,12 +1945,10 @@ function applyEffects(
             ? effect.value
             : true;
 
-
-        return;
       }
 
 
-      if (
+      else if (
         effect.type ===
         "addNote"
       ) {
@@ -2250,12 +1957,10 @@ function applyEffects(
           effect.text
         );
 
-
-        return;
       }
 
 
-      if (
+      else if (
         effect.type ===
         "giveItem"
       ) {
@@ -2264,15 +1969,7 @@ function applyEffects(
           effect.item
         );
 
-
-        return;
       }
-
-
-      console.warn(
-        "Неизвестный эффект:",
-        effect.type
-      );
 
     }
   );
@@ -2281,20 +1978,12 @@ function applyEffects(
 
 
 /* =========================================================
-   18. ИНВЕНТАРЬ
+   19. ИНВЕНТАРЬ
 ========================================================= */
 
 function addItem(
   item
 ) {
-
-  if (
-    !item ||
-    !item.id
-  ) {
-    return;
-  }
-
 
   if (
     hasItem(
@@ -2343,39 +2032,6 @@ function hasItem(
 }
 
 
-/* =========================================================
-   19. ЗАМЕТКИ
-========================================================= */
-
-function addNote(
-  text
-) {
-
-  if (!text) {
-    return;
-  }
-
-
-  if (
-    gameState.notes.includes(
-      text
-    )
-  ) {
-    return;
-  }
-
-
-  gameState.notes.push(
-    text
-  );
-
-}
-
-
-/* =========================================================
-   20. НИЖНИЙ ИНВЕНТАРЬ
-========================================================= */
-
 function renderInventory() {
 
   const slots =
@@ -2423,7 +2079,7 @@ function renderInventory() {
 
 
       slot.title =
-        item.name || "Предмет";
+        item.name;
 
     }
 
@@ -2438,20 +2094,36 @@ function renderInventory() {
 
 
 /* =========================================================
-   21. МОДАЛЬНОЕ ОКНО
+   20. ЗАМЕТКИ
+========================================================= */
+
+function addNote(
+  text
+) {
+
+  if (
+    gameState.notes.includes(
+      text
+    )
+  ) {
+    return;
+  }
+
+
+  gameState.notes.push(
+    text
+  );
+
+}
+
+
+/* =========================================================
+   21. OVERLAY
 ========================================================= */
 
 function openOverlay(
   html
 ) {
-
-  if (
-    !overlay ||
-    !overlayContent
-  ) {
-    return;
-  }
-
 
   overlayContent.innerHTML =
     html;
@@ -2465,11 +2137,6 @@ function openOverlay(
 
 function closeOverlay() {
 
-  if (!overlay) {
-    return;
-  }
-
-
   overlay.hidden =
     true;
 
@@ -2477,7 +2144,7 @@ function closeOverlay() {
 
 
 /* =========================================================
-   22. ВИЗУАЛЬНАЯ РЕАКЦИЯ НА НАЖАТИЕ
+   22. TAP EFFECT
 ========================================================= */
 
 function tapEffect(
@@ -2508,23 +2175,16 @@ function tapEffect(
    23. ВХОД В КВЕСТ
 ========================================================= */
 
-const enterQuestButton =
-  document.getElementById(
+document
+  .getElementById(
     "enter-quest"
-  );
-
-
-if (
-  enterQuestButton
-) {
-
-  enterQuestButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     () => {
 
       if (
-        passwordInput.value
-          .trim() !==
+        passwordInput.value.trim() !==
         selectedQuest.password
       ) {
 
@@ -2541,75 +2201,39 @@ if (
 
       startQuest();
 
-
-      requestAnimationFrame(
-        () => {
-
-          if (
-            window.innerWidth < 760
-          ) {
-
-            const scene =
-              document.getElementById(
-                "scene-wrap"
-              );
-
-
-            if (scene) {
-
-              scene.scrollLeft =
-                180;
-
-            }
-
-          }
-
-        }
-      );
-
     }
   );
 
-}
 
+passwordInput.addEventListener(
+  "keydown",
+  event => {
 
-if (
-  passwordInput
-) {
+    if (
+      event.key === "Enter"
+    ) {
 
-  passwordInput.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Enter"
-      ) {
-
-        enterQuestButton?.click();
-
-      }
+      document
+        .getElementById(
+          "enter-quest"
+        )
+        .click();
 
     }
-  );
 
-}
+  }
+);
 
 
 /* =========================================================
-   24. НАВИГАЦИЯ
+   24. ОБЫЧНАЯ НАВИГАЦИЯ
 ========================================================= */
 
-const backToStartButton =
-  document.getElementById(
+document
+  .getElementById(
     "back-to-start"
-  );
-
-
-if (
-  backToStartButton
-) {
-
-  backToStartButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     () => {
 
@@ -2620,64 +2244,42 @@ if (
     }
   );
 
-}
 
-
-const overlayCloseButton =
-  document.getElementById(
+document
+  .getElementById(
     "overlay-close"
-  );
-
-
-if (
-  overlayCloseButton
-) {
-
-  overlayCloseButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     closeOverlay
   );
 
-}
 
+overlay.addEventListener(
+  "click",
+  event => {
 
-if (
-  overlay
-) {
+    if (
+      event.target === overlay
+    ) {
 
-  overlay.addEventListener(
-    "click",
-    event => {
-
-      if (
-        event.target === overlay
-      ) {
-
-        closeOverlay();
-
-      }
+      closeOverlay();
 
     }
-  );
 
-}
+  }
+);
 
 
 /* =========================================================
-   25. КНОПКА ИНВЕНТАРЯ
+   25. ИНВЕНТАРЬ
 ========================================================= */
 
-const inventoryButton =
-  document.getElementById(
+document
+  .getElementById(
     "inventory-btn"
-  );
-
-
-if (
-  inventoryButton
-) {
-
-  inventoryButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     () => {
 
@@ -2695,7 +2297,7 @@ if (
 
                     <div>
                       ${escapeHtml(
-                        item.name || "Предмет"
+                        item.name
                       )}
                     </div>
 
@@ -2722,24 +2324,16 @@ if (
     }
   );
 
-}
-
 
 /* =========================================================
-   26. КНОПКА ЗАМЕТОК
+   26. ЗАМЕТКИ
 ========================================================= */
 
-const notesButton =
-  document.getElementById(
+document
+  .getElementById(
     "notes-btn"
-  );
-
-
-if (
-  notesButton
-) {
-
-  notesButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     () => {
 
@@ -2750,9 +2344,7 @@ if (
               .map(
                 note => `
                   <div class="clue-card">
-                    ${escapeHtml(
-                      note
-                    )}
+                    ${escapeHtml(note)}
                   </div>
                 `
               )
@@ -2776,29 +2368,21 @@ if (
     }
   );
 
-}
-
 
 /* =========================================================
    27. ПОДСКАЗКА
 ========================================================= */
 
-const hintButton =
-  document.getElementById(
+document
+  .getElementById(
     "hint-btn"
-  );
-
-
-if (
-  hintButton
-) {
-
-  hintButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     () => {
 
       let hint =
-        "Осмотрите предметы на стойке и в помещении.";
+        "Осмотрите предметы в аптеке.";
 
 
       if (
@@ -2826,17 +2410,7 @@ if (
       ) {
 
         hint =
-          "У вас есть маленький ключ. Поищите небольшую замочную скважину.";
-
-      }
-
-      else if (
-        gameState.flags.lockerOpened &&
-        !gameState.flags.lockerSolved
-      ) {
-
-        hint =
-          "В открытом шкафчике осталась карточка.";
+          "У вас есть маленький ключ.";
 
       }
 
@@ -2855,24 +2429,7 @@ if (
       ) {
 
         hint =
-          "Вы нашли слово, похожее на пароль. Возможно, оно подходит к компьютеру.";
-
-      }
-
-      else if (
-        gameState.flags.computerUnlocked &&
-        !gameState.flags.computerSolved
-      ) {
-
-        hint =
-          "Компьютер разблокирован. Откройте найденный файл.";
-
-      }
-
-      else {
-
-        hint =
-          "Две ветки уже можно пройти. Третью мы подключим через конструктор.";
+          "Найденное слово похоже на пароль.";
 
       }
 
@@ -2892,24 +2449,16 @@ if (
     }
   );
 
-}
-
 
 /* =========================================================
    28. МЕНЮ
 ========================================================= */
 
-const menuButton =
-  document.getElementById(
+document
+  .getElementById(
     "menu-btn"
-  );
-
-
-if (
-  menuButton
-) {
-
-  menuButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     () => {
 
@@ -2930,31 +2479,154 @@ if (
     }
   );
 
+
+/* =========================================================
+   29. АДМИН-ВХОД
+========================================================= */
+
+function openAdminLogin() {
+
+  const input =
+    document.getElementById(
+      "admin-password"
+    );
+
+
+  const error =
+    document.getElementById(
+      "admin-password-error"
+    );
+
+
+  input.value =
+    "";
+
+
+  error.textContent =
+    "";
+
+
+  showScreen(
+    "adminLogin"
+  );
+
 }
 
 
+function checkAdminPassword() {
+
+  const input =
+    document.getElementById(
+      "admin-password"
+    );
+
+
+  const error =
+    document.getElementById(
+      "admin-password-error"
+    );
+
+
+  if (
+    input.value.trim() !==
+    ADMIN_PASSWORD
+  ) {
+
+    error.textContent =
+      "Неверный пароль.";
+
+    return;
+  }
+
+
+  error.textContent =
+    "";
+
+
+  showScreen(
+    "admin"
+  );
+
+
+  renderAdminQuestSelect();
+
+}
+
+
+document
+  .getElementById(
+    "open-admin"
+  )
+  .addEventListener(
+    "click",
+    openAdminLogin
+  );
+
+
+document
+  .getElementById(
+    "enter-admin"
+  )
+  .addEventListener(
+    "click",
+    checkAdminPassword
+  );
+
+
+document
+  .getElementById(
+    "admin-password"
+  )
+  .addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key === "Enter"
+      ) {
+
+        checkAdminPassword();
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "admin-login-back"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      showScreen(
+        "start"
+      );
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "admin-back"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      showScreen(
+        "start"
+      );
+
+    }
+  );
+
+
 /* =========================================================
-   29. АДМИН-ПАНЕЛЬ
-========================================================= */
-
-const ADMIN_STORAGE_KEY =
-  "psychologyEscapeAdminConfig";
-
-
-let adminQuestId =
-  "day1";
-
-
-let adminObjectId =
-  null;
-
-
-let adminTaskId =
-  null;
-
-
-/* =========================================================
-   30. ЗАГРУЗКА СОХРАНЕННОЙ КОНФИГУРАЦИИ
+   30. LOCAL STORAGE
 ========================================================= */
 
 function loadAdminConfig() {
@@ -3008,7 +2680,6 @@ function loadAdminConfig() {
   ) {
 
     console.error(
-      "Не удалось загрузить настройки администратора:",
       error
     );
 
@@ -3016,10 +2687,6 @@ function loadAdminConfig() {
 
 }
 
-
-/* =========================================================
-   31. СОХРАНЕНИЕ КОНФИГУРАЦИИ
-========================================================= */
 
 function saveAdminConfig() {
 
@@ -3034,23 +2701,7 @@ function saveAdminConfig() {
 
 
 /* =========================================================
-   32. ОТКРЫТИЕ АДМИНКИ
-========================================================= */
-
-function openAdmin() {
-
-  showScreen(
-    "admin"
-  );
-
-
-  renderAdminQuestSelect();
-
-}
-
-
-/* =========================================================
-   33. ВЫБОР КВЕСТА В АДМИНКЕ
+   31. АДМИН: КВЕСТЫ
 ========================================================= */
 
 function renderAdminQuestSelect() {
@@ -3059,11 +2710,6 @@ function renderAdminQuestSelect() {
     document.getElementById(
       "admin-quest-select"
     );
-
-
-  if (!select) {
-    return;
-  }
 
 
   select.innerHTML =
@@ -3078,7 +2724,6 @@ function renderAdminQuestSelect() {
           quest.id
         ]
       ) {
-
         return;
       }
 
@@ -3117,7 +2762,7 @@ function renderAdminQuestSelect() {
 
 
 /* =========================================================
-   34. СПИСОК ПРЕДМЕТОВ
+   32. АДМИН: ОБЪЕКТЫ
 ========================================================= */
 
 function renderAdminObjects() {
@@ -3128,20 +2773,10 @@ function renderAdminObjects() {
     ];
 
 
-  if (!config) {
-    return;
-  }
-
-
   const select =
     document.getElementById(
       "admin-object-select"
     );
-
-
-  if (!select) {
-    return;
-  }
 
 
   select.innerHTML =
@@ -3183,20 +2818,13 @@ function renderAdminObjects() {
   ) {
 
     adminObjectId =
-      config.objects[0]?.id ||
-      null;
+      config.objects[0]?.id;
 
   }
 
 
-  if (
-    adminObjectId
-  ) {
-
-    select.value =
-      adminObjectId;
-
-  }
+  select.value =
+    adminObjectId;
 
 
   loadAdminObjectForm();
@@ -3205,7 +2833,7 @@ function renderAdminObjects() {
 
 
 /* =========================================================
-   35. СПИСОК ЗАДАНИЙ
+   33. АДМИН: ЗАДАНИЯ
 ========================================================= */
 
 function renderAdminTasks() {
@@ -3214,11 +2842,6 @@ function renderAdminTasks() {
     QUEST_CONFIG[
       adminQuestId
     ];
-
-
-  if (!config) {
-    return;
-  }
 
 
   const taskSelect =
@@ -3231,15 +2854,6 @@ function renderAdminTasks() {
     document.getElementById(
       "admin-object-task"
     );
-
-
-  if (
-    !taskSelect ||
-    !objectTaskSelect
-  ) {
-
-    return;
-  }
 
 
   taskSelect.innerHTML =
@@ -3260,35 +2874,30 @@ function renderAdminTasks() {
       ]
     ) => {
 
-      const option1 =
+      const option =
         document.createElement(
           "option"
         );
 
 
-      option1.value =
+      option.value =
         taskId;
 
 
-      option1.textContent =
-        task.title ||
-        taskId;
+      option.textContent =
+        task.title;
 
 
       taskSelect.appendChild(
-        option1
+        option
       );
-
-
-      const option2 =
-        option1.cloneNode(
-          true
-        );
 
 
       objectTaskSelect
         .appendChild(
-          option2
+          option.cloneNode(
+            true
+          )
         );
 
     }
@@ -3305,20 +2914,13 @@ function renderAdminTasks() {
     adminTaskId =
       Object.keys(
         config.tasks
-      )[0] ||
-      null;
+      )[0];
 
   }
 
 
-  if (
-    adminTaskId
-  ) {
-
-    taskSelect.value =
-      adminTaskId;
-
-  }
+  taskSelect.value =
+    adminTaskId;
 
 
   loadAdminTaskForm();
@@ -3327,7 +2929,7 @@ function renderAdminTasks() {
 
 
 /* =========================================================
-   36. ЗАГРУЗКА ПРЕДМЕТА В ФОРМУ
+   34. ФОРМА ОБЪЕКТА
 ========================================================= */
 
 function loadAdminObjectForm() {
@@ -3336,11 +2938,6 @@ function loadAdminObjectForm() {
     QUEST_CONFIG[
       adminQuestId
     ];
-
-
-  if (!config) {
-    return;
-  }
 
 
   const object =
@@ -3356,84 +2953,53 @@ function loadAdminObjectForm() {
   }
 
 
-  const activeInput =
-    document.getElementById(
+  document
+    .getElementById(
       "admin-object-active"
-    );
-
-
-  const nameInput =
-    document.getElementById(
-      "admin-object-name"
-    );
-
-
-  const xInput =
-    document.getElementById(
-      "admin-object-x"
-    );
-
-
-  const yInput =
-    document.getElementById(
-      "admin-object-y"
-    );
-
-
-  const widthInput =
-    document.getElementById(
-      "admin-object-width"
-    );
-
-
-  const heightInput =
-    document.getElementById(
-      "admin-object-height"
-    );
-
-
-  if (
-    !activeInput ||
-    !nameInput ||
-    !xInput ||
-    !yInput ||
-    !widthInput ||
-    !heightInput
-  ) {
-
-    return;
-  }
-
-
-  activeInput.checked =
+    )
+    .checked =
     object.active !== false;
 
 
-  nameInput.value =
-    object.name || "";
+  document
+    .getElementById(
+      "admin-object-name"
+    )
+    .value =
+    object.name;
 
 
-  xInput.value =
-    object.x ?? 0;
+  document
+    .getElementById(
+      "admin-object-x"
+    )
+    .value =
+    object.x;
 
 
-  yInput.value =
-    object.y ?? 0;
+  document
+    .getElementById(
+      "admin-object-y"
+    )
+    .value =
+    object.y;
 
 
-  widthInput.value =
-    object.width ?? 10;
+  document
+    .getElementById(
+      "admin-object-width"
+    )
+    .value =
+    object.width;
 
 
-  heightInput.value =
-    object.height ?? 10;
+  document
+    .getElementById(
+      "admin-object-height"
+    )
+    .value =
+    object.height;
 
-
-  /*
-    В первой версии админки
-    редактируем базовое взаимодействие:
-    последнее взаимодействие объекта.
-  */
 
   const interaction =
     object.interactions[
@@ -3447,63 +3013,43 @@ function loadAdminObjectForm() {
     };
 
 
-  const actionTypeSelect =
-    document.getElementById(
-      "admin-action-type"
-    );
-
-
-  if (!actionTypeSelect) {
-    return;
-  }
-
-
-  actionTypeSelect.value =
+  const actionType =
     action.type === "task"
       ? "task"
       : "message";
 
 
-  const objectTaskSelect =
-    document.getElementById(
-      "admin-object-task"
-    );
-
-
-  const messageInput =
-    document.getElementById(
-      "admin-object-message"
-    );
+  document
+    .getElementById(
+      "admin-action-type"
+    )
+    .value =
+    actionType;
 
 
   if (
-    action.type ===
-    "task"
+    actionType === "task"
   ) {
 
-    if (
-      objectTaskSelect
-    ) {
-
-      objectTaskSelect.value =
-        action.taskId || "";
-
-    }
+    document
+      .getElementById(
+        "admin-object-task"
+      )
+      .value =
+      action.taskId;
 
   }
 
   else {
 
-    if (
-      messageInput
-    ) {
-
-      messageInput.value =
-        stripHtml(
-          action.html || ""
-        );
-
-    }
+    document
+      .getElementById(
+        "admin-object-message"
+      )
+      .value =
+      stripHtml(
+        action.html || ""
+      );
 
   }
 
@@ -3514,30 +3060,18 @@ function loadAdminObjectForm() {
 
 
 /* =========================================================
-   37. ЗАГРУЗКА ЗАДАНИЯ В ФОРМУ
+   35. ФОРМА ЗАДАНИЯ
 ========================================================= */
 
 function loadAdminTaskForm() {
 
-  const config =
+  const task =
     QUEST_CONFIG[
       adminQuestId
-    ];
-
-
-  if (
-    !config ||
-    !adminTaskId
-  ) {
-
-    return;
-  }
-
-
-  const task =
-    config.tasks[
-      adminTaskId
-    ];
+    ]
+      .tasks[
+        adminTaskId
+      ];
 
 
   if (!task) {
@@ -3545,123 +3079,76 @@ function loadAdminTaskForm() {
   }
 
 
-  const titleInput =
-    document.getElementById(
+  document
+    .getElementById(
       "admin-task-title"
-    );
+    )
+    .value =
+    task.title;
 
 
-  const questionInput =
-    document.getElementById(
+  document
+    .getElementById(
       "admin-task-question"
-    );
+    )
+    .value =
+    task.question;
 
 
-  const optionsInput =
-    document.getElementById(
+  document
+    .getElementById(
       "admin-task-options"
-    );
-
-
-  const correctInput =
-    document.getElementById(
-      "admin-task-correct"
-    );
-
-
-  if (
-    !titleInput ||
-    !questionInput ||
-    !optionsInput ||
-    !correctInput
-  ) {
-
-    return;
-  }
-
-
-  titleInput.value =
-    task.title || "";
-
-
-  questionInput.value =
-    task.question || "";
-
-
-  optionsInput.value =
-    (
-      task.options ||
-      []
-    ).join(
+    )
+    .value =
+    task.options.join(
       "\n"
     );
 
 
-  correctInput.value =
-    Number(
-      task.correct || 0
-    ) + 1;
+  document
+    .getElementById(
+      "admin-task-correct"
+    )
+    .value =
+    task.correct + 1;
 
 }
 
 
 /* =========================================================
-   38. ПЕРЕКЛЮЧЕНИЕ ПОЛЕЙ ДЕЙСТВИЯ
+   36. ТИП ДЕЙСТВИЯ
 ========================================================= */
 
 function updateAdminActionFields() {
 
-  const select =
-    document.getElementById(
-      "admin-action-type"
-    );
-
-
-  if (!select) {
-    return;
-  }
-
-
   const type =
-    select.value;
+    document
+      .getElementById(
+        "admin-action-type"
+      )
+      .value;
 
 
-  const messageFields =
-    document.getElementById(
+  document
+    .getElementById(
       "admin-message-fields"
-    );
+    )
+    .hidden =
+    type !== "message";
 
 
-  const taskFields =
-    document.getElementById(
+  document
+    .getElementById(
       "admin-task-fields"
-    );
-
-
-  if (
-    messageFields
-  ) {
-
-    messageFields.hidden =
-      type !== "message";
-
-  }
-
-
-  if (
-    taskFields
-  ) {
-
-    taskFields.hidden =
-      type !== "task";
-
-  }
+    )
+    .hidden =
+    type !== "task";
 
 }
 
 
 /* =========================================================
-   39. СОХРАНЕНИЕ ПРЕДМЕТА
+   37. СОХРАНЕНИЕ ОБЪЕКТА
 ========================================================= */
 
 function saveAdminObject() {
@@ -3672,22 +3159,12 @@ function saveAdminObject() {
     ];
 
 
-  if (!config) {
-    return;
-  }
-
-
   const object =
     config.objects.find(
       item =>
         item.id ===
         adminObjectId
     );
-
-
-  if (!object) {
-    return;
-  }
 
 
   object.active =
@@ -3843,34 +3320,18 @@ function saveAdminObject() {
 
 
 /* =========================================================
-   40. СОХРАНЕНИЕ ЗАДАНИЯ
+   38. СОХРАНЕНИЕ ЗАДАНИЯ
 ========================================================= */
 
 function saveAdminTask() {
 
-  const config =
+  const task =
     QUEST_CONFIG[
       adminQuestId
-    ];
-
-
-  if (
-    !config ||
-    !adminTaskId
-  ) {
-    return;
-  }
-
-
-  const task =
-    config.tasks[
-      adminTaskId
-    ];
-
-
-  if (!task) {
-    return;
-  }
+    ]
+      .tasks[
+        adminTaskId
+      ];
 
 
   const options =
@@ -3967,7 +3428,7 @@ function saveAdminTask() {
 
 
 /* =========================================================
-   41. ПРЕДПРОСМОТР КВЕСТА ИЗ АДМИНКИ
+   39. ПРЕДПРОСМОТР
 ========================================================= */
 
 function previewAdminQuest() {
@@ -3978,11 +3439,6 @@ function previewAdminQuest() {
         quest.id ===
         adminQuestId
     );
-
-
-  if (!quest) {
-    return;
-  }
 
 
   selectedQuest =
@@ -4002,6 +3458,14 @@ function previewAdminQuest() {
   };
 
 
+  document
+    .getElementById(
+      "game-day-title"
+    )
+    .textContent =
+    `День ${selectedQuest.day}`;
+
+
   renderInventory();
 
   renderHotspots();
@@ -4014,7 +3478,7 @@ function previewAdminQuest() {
 
 
 /* =========================================================
-   42. СБРОС ЛОКАЛЬНЫХ ИЗМЕНЕНИЙ
+   40. СБРОС
 ========================================================= */
 
 function resetAdminConfig() {
@@ -4041,7 +3505,7 @@ function resetAdminConfig() {
 
 
 /* =========================================================
-   43. СТАТУС АДМИНКИ
+   41. СТАТУС
 ========================================================= */
 
 function showAdminStatus(
@@ -4053,11 +3517,6 @@ function showAdminStatus(
     document.getElementById(
       "admin-status"
     );
-
-
-  if (!status) {
-    return;
-  }
 
 
   status.textContent =
@@ -4088,8 +3547,7 @@ function showAdminStatus(
 
 
 /* =========================================================
-   44. ВСПОМОГАТЕЛЬНАЯ ФУНКЦИЯ:
-       УБРАТЬ HTML ИЗ ТЕКСТА
+   42. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 ========================================================= */
 
 function stripHtml(
@@ -4115,10 +3573,6 @@ function stripHtml(
 
 }
 
-
-/* =========================================================
-   45. ЗАЩИТА ТЕКСТА ДЛЯ HTML
-========================================================= */
 
 function escapeHtml(
   text
@@ -4152,62 +3606,14 @@ function escapeHtml(
 
 
 /* =========================================================
-   46. СОБЫТИЯ АДМИНКИ
+   43. СОБЫТИЯ АДМИНКИ
 ========================================================= */
 
-const openAdminButton =
-  document.getElementById(
-    "open-admin"
-  );
-
-
-if (
-  openAdminButton
-) {
-
-  openAdminButton.addEventListener(
-    "click",
-    openAdmin
-  );
-
-}
-
-
-const adminBackButton =
-  document.getElementById(
-    "admin-back"
-  );
-
-
-if (
-  adminBackButton
-) {
-
-  adminBackButton.addEventListener(
-    "click",
-    () => {
-
-      showScreen(
-        "start"
-      );
-
-    }
-  );
-
-}
-
-
-const adminQuestSelect =
-  document.getElementById(
+document
+  .getElementById(
     "admin-quest-select"
-  );
-
-
-if (
-  adminQuestSelect
-) {
-
-  adminQuestSelect.addEventListener(
+  )
+  .addEventListener(
     "change",
     event => {
 
@@ -4230,20 +3636,12 @@ if (
     }
   );
 
-}
 
-
-const adminObjectSelect =
-  document.getElementById(
+document
+  .getElementById(
     "admin-object-select"
-  );
-
-
-if (
-  adminObjectSelect
-) {
-
-  adminObjectSelect.addEventListener(
+  )
+  .addEventListener(
     "change",
     event => {
 
@@ -4256,20 +3654,12 @@ if (
     }
   );
 
-}
 
-
-const adminTaskSelect =
-  document.getElementById(
+document
+  .getElementById(
     "admin-task-select"
-  );
-
-
-if (
-  adminTaskSelect
-) {
-
-  adminTaskSelect.addEventListener(
+  )
+  .addEventListener(
     "change",
     event => {
 
@@ -4282,101 +3672,59 @@ if (
     }
   );
 
-}
 
-
-const adminActionType =
-  document.getElementById(
+document
+  .getElementById(
     "admin-action-type"
-  );
-
-
-if (
-  adminActionType
-) {
-
-  adminActionType.addEventListener(
+  )
+  .addEventListener(
     "change",
     updateAdminActionFields
   );
 
-}
 
-
-const adminSaveObjectButton =
-  document.getElementById(
+document
+  .getElementById(
     "admin-save-object"
-  );
-
-
-if (
-  adminSaveObjectButton
-) {
-
-  adminSaveObjectButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     saveAdminObject
   );
 
-}
 
-
-const adminSaveTaskButton =
-  document.getElementById(
+document
+  .getElementById(
     "admin-save-task"
-  );
-
-
-if (
-  adminSaveTaskButton
-) {
-
-  adminSaveTaskButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     saveAdminTask
   );
 
-}
 
-
-const adminPreviewButton =
-  document.getElementById(
+document
+  .getElementById(
     "admin-preview"
-  );
-
-
-if (
-  adminPreviewButton
-) {
-
-  adminPreviewButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     previewAdminQuest
   );
 
-}
 
-
-const adminResetButton =
-  document.getElementById(
+document
+  .getElementById(
     "admin-reset"
-  );
-
-
-if (
-  adminResetButton
-) {
-
-  adminResetButton.addEventListener(
+  )
+  .addEventListener(
     "click",
     resetAdminConfig
   );
 
-}
-
 
 /* =========================================================
-   47. ЗАПУСК САЙТА
+   44. ЗАПУСК
 ========================================================= */
 
 loadAdminConfig();
