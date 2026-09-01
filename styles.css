@@ -1,0 +1,585 @@
+:root {
+  --bg: #17181e;
+  --panel: #24262f;
+  --panel-2: #2f313c;
+
+  --text: #f8f4e9;
+  --muted: #b6b6be;
+
+  --accent: #36c6a0;
+  --accent-2: #f0c85e;
+
+  --danger: #ff6f6f;
+
+  --shadow:
+    0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+
+  background: var(--bg);
+  color: var(--text);
+
+  font-family:
+    Inter,
+    Arial,
+    sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* ЭКРАНЫ */
+
+.screen {
+  display: none;
+  min-height: 100vh;
+}
+
+.screen--active {
+  display: flex;
+}
+
+/* СТАРТ */
+
+#start-screen,
+#login-screen {
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #2c3d3a,
+      #17181e 55%
+    );
+}
+
+.start-card,
+.modal-card {
+  width: min(860px, 100%);
+
+  background:
+    rgba(30, 32, 38, 0.94);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 28px;
+
+  padding: 32px;
+
+  box-shadow: var(--shadow);
+}
+
+.start-card h1 {
+  font-size:
+    clamp(42px, 8vw, 88px);
+
+  margin: 0;
+
+  letter-spacing: 0.04em;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.eyebrow {
+  font-size: 13px;
+
+  letter-spacing: 0.16em;
+
+  text-transform: uppercase;
+
+  color: var(--accent);
+
+  margin-bottom: 8px;
+}
+
+/* ДНИ */
+
+.days-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-top: 28px;
+}
+
+.day-btn {
+  min-height: 120px;
+
+  border: 0;
+
+  border-radius: 22px;
+
+  padding: 18px;
+
+  text-align: left;
+
+  color: var(--text);
+
+  background:
+    linear-gradient(
+      145deg,
+      #2d3740,
+      #22252d
+    );
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.05);
+
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.day-btn:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(54, 198, 160, 0.6);
+}
+
+.day-btn strong {
+  display: block;
+  font-size: 24px;
+}
+
+.day-btn span {
+  display: block;
+
+  margin-top: 8px;
+
+  color: var(--muted);
+
+  font-size: 14px;
+}
+
+.day-btn[disabled] {
+  opacity: 0.4;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+/* ВХОД */
+
+.modal-card {
+  width: min(520px, 100%);
+}
+
+.ghost-btn,
+.primary-btn {
+  border: 0;
+
+  border-radius: 14px;
+
+  padding: 12px 16px;
+}
+
+.ghost-btn {
+  background: transparent;
+
+  color: var(--muted);
+
+  padding-left: 0;
+}
+
+.primary-btn {
+  width: 100%;
+
+  background: var(--accent);
+
+  color: #10221d;
+
+  font-weight: 800;
+
+  margin-top: 12px;
+}
+
+.field-label {
+  display: block;
+
+  margin: 22px 0 8px;
+
+  color: var(--muted);
+}
+
+.text-input {
+  width: 100%;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.12);
+
+  background: #15171c;
+
+  color: var(--text);
+
+  padding: 14px 16px;
+
+  border-radius: 14px;
+
+  outline: none;
+}
+
+.text-input:focus {
+  border-color: var(--accent);
+}
+
+.error-text {
+  color: var(--danger);
+
+  min-height: 20px;
+}
+
+/* ИГРА */
+
+.game-screen {
+  flex-direction: column;
+
+  background: #0e1014;
+
+  overflow: hidden;
+}
+
+.game-topbar {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 12px 16px;
+
+  background: #17191f;
+
+  border-bottom:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  z-index: 3;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+
+  border: 0;
+
+  border-radius: 14px;
+
+  background: var(--panel-2);
+
+  color: var(--text);
+
+  font-weight: 800;
+}
+
+/* КОМНАТА */
+
+.scene-wrap {
+  position: relative;
+
+  flex: 1;
+
+  overflow: auto;
+
+  background: #111319;
+
+  touch-action: pan-x pan-y;
+}
+
+.scene-image {
+  display: block;
+
+  width: max(100%, 1100px);
+
+  height: auto;
+
+  user-select: none;
+
+  pointer-events: none;
+}
+
+.hotspots {
+  position: absolute;
+
+  inset: 0;
+
+  width: max(100%, 1100px);
+
+  height: 100%;
+
+  pointer-events: none;
+}
+
+.hotspot {
+  position: absolute;
+
+  width: 44px;
+  height: 44px;
+
+  transform:
+    translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  border:
+    2px solid #e7f6c5;
+
+  background:
+    rgba(34, 90, 62, 0.72);
+
+  color: white;
+
+  font-weight: 900;
+
+  box-shadow:
+    0 0 0 4px rgba(0, 0, 0, 0.18);
+
+  pointer-events: auto;
+}
+
+.hotspot:hover,
+.hotspot:focus {
+  background: var(--accent);
+
+  color: #0d211b;
+}
+
+/* НИЖНЯЯ ПАНЕЛЬ */
+
+.game-bottom {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 10px 12px;
+
+  background: #17191f;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.06);
+}
+
+.inventory-btn {
+  min-width: 118px;
+
+  border: 0;
+
+  border-radius: 16px;
+
+  background: var(--panel-2);
+
+  color: var(--text);
+
+  padding: 12px;
+}
+
+.inventory-slots {
+  flex: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(36px, 1fr));
+
+  gap: 8px;
+}
+
+.inventory-slot {
+  min-height: 48px;
+
+  border:
+    1px dashed rgba(255, 255, 255, 0.18);
+
+  border-radius: 12px;
+
+  display: grid;
+
+  place-items: center;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+/* МОДАЛЬНОЕ ОКНО */
+
+.overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 10;
+
+  background:
+    rgba(3, 4, 7, 0.72);
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 18px;
+}
+
+.overlay[hidden] {
+  display: none;
+}
+
+.overlay-card {
+  position: relative;
+
+  width: min(620px, 100%);
+
+  max-height: 88vh;
+
+  overflow: auto;
+
+  background: #22252c;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 22px;
+
+  padding: 24px;
+
+  box-shadow: var(--shadow);
+}
+
+.close-btn {
+  position: absolute;
+
+  right: 12px;
+  top: 12px;
+
+  width: 36px;
+  height: 36px;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #363944;
+
+  color: var(--text);
+
+  font-size: 24px;
+}
+
+.overlay-card h3 {
+  margin-top: 0;
+}
+
+/* ВАРИАНТЫ ОТВЕТА */
+
+.choice-list {
+  display: grid;
+
+  gap: 10px;
+
+  margin-top: 16px;
+}
+
+.choice-btn {
+  text-align: left;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.09);
+
+  border-radius: 14px;
+
+  padding: 12px 14px;
+
+  background: #2b2e36;
+
+  color: var(--text);
+}
+
+.choice-btn:hover {
+  border-color: var(--accent);
+}
+
+.meta-note {
+  color: var(--muted);
+
+  font-size: 14px;
+}
+
+/* ТЕЛЕФОН */
+
+@media (max-width: 760px) {
+
+  .days-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .start-card,
+  .modal-card {
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .game-topbar strong {
+    font-size: 14px;
+  }
+
+  .scene-image,
+  .hotspots {
+    width: 1350px;
+  }
+
+  .game-bottom {
+    position: sticky;
+    bottom: 0;
+  }
+
+  .inventory-btn {
+    min-width: 54px;
+    width: 54px;
+  }
+
+  .inventory-btn span {
+    display: none;
+  }
+
+  .inventory-slots {
+    grid-template-columns:
+      repeat(4, minmax(34px, 1fr));
+  }
+}
