@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-
   <meta charset="UTF-8">
 
   <meta
@@ -12,436 +10,433 @@
 
   <meta
     name="theme-color"
-    content="#14181b"
+    content="#111716"
   >
 
-  <title>
-    Аптека — Психология общения
-  </title>
+  <title>Аптека — Психология общения</title>
 
   <link
     rel="stylesheet"
     href="styles.css"
   >
-
 </head>
-
 
 <body>
 
+<main class="app">
 
-  <main class="app">
+  <!-- СТАРТ -->
 
+  <section
+    id="start-screen"
+    class="screen screen--active"
+  >
+    <div class="start-card">
 
-    <!-- =====================================================
-         СТАРТОВЫЙ ЭКРАН
-    ====================================================== -->
-
-    <section
-      id="start-screen"
-      class="screen screen--active"
-    >
-
-      <div class="start-card">
-
-        <div class="eyebrow">
-          УЧЕБНЫЙ ESCAPE ROOM
-        </div>
-
-
-        <h1>
-          АПТЕКА
-        </h1>
-
-
-        <p class="subtitle">
-          Психология общения
-        </p>
-
-
-        <p class="start-description">
-          Выберите смену.
-        </p>
-
-
-        <div
-          id="days-grid"
-          class="days-grid"
-        ></div>
-
-
-        <button
-          id="open-admin"
-          class="secondary-btn admin-entry-btn"
-          type="button"
-        >
-          ⚙ Администратор
-        </button>
-
+      <div class="eyebrow">
+        УЧЕБНЫЙ ESCAPE ROOM
       </div>
 
-    </section>
+      <h1>АПТЕКА</h1>
+
+      <p class="subtitle">
+        Психология общения
+      </p>
+
+      <p class="start-description">
+        Выберите смену
+      </p>
+
+      <div
+        id="days-grid"
+        class="days-grid"
+      ></div>
+
+      <button
+        id="open-admin"
+        class="secondary-btn admin-entry-btn"
+        type="button"
+      >
+        ⚙ Администратор
+      </button>
+
+    </div>
+  </section>
 
 
+  <!-- ВХОД В ИГРУ -->
 
-    <!-- =====================================================
-         ЭКРАН ВХОДА В КВЕСТ
-    ====================================================== -->
+  <section
+    id="login-screen"
+    class="screen"
+  >
+    <div class="login-card">
 
-    <section
-      id="login-screen"
-      class="screen"
-    >
+      <button
+        id="back-to-start"
+        class="back-btn"
+        type="button"
+      >
+        ← Назад
+      </button>
 
-      <div class="login-card">
+      <div
+        id="login-day-label"
+        class="eyebrow"
+      ></div>
+
+      <h2 id="login-title"></h2>
+
+      <p
+        id="login-topic"
+        class="subtitle"
+      ></p>
+
+      <div class="login-form">
+
+        <label
+          for="quest-password"
+          class="input-label"
+        >
+          Пароль смены
+        </label>
+
+        <input
+          id="quest-password"
+          class="text-input"
+          type="password"
+          autocomplete="off"
+          placeholder="Введите пароль"
+        >
 
         <button
-          id="back-to-start"
-          class="back-btn"
+          id="enter-quest"
+          class="primary-btn"
           type="button"
         >
-          ← Назад
+          Начать смену
         </button>
-
-
-        <div
-          id="login-day-label"
-          class="eyebrow"
-        >
-          ДЕНЬ 1
-        </div>
-
-
-        <h2
-          id="login-title"
-        >
-          Первый день в аптеке
-        </h2>
-
 
         <p
-          id="login-topic"
-          class="subtitle"
-        >
-          Введение в психологию общения
-        </p>
-
-
-        <div class="login-form">
-
-          <label
-            for="quest-password"
-            class="input-label"
-          >
-            Пароль смены
-          </label>
-
-
-          <input
-            id="quest-password"
-            class="text-input"
-            type="password"
-            autocomplete="off"
-            placeholder="Введите пароль"
-          >
-
-
-          <button
-            id="enter-quest"
-            class="primary-btn"
-            type="button"
-          >
-            Начать смену
-          </button>
-
-
-          <p
-            id="password-error"
-            class="error-text"
-          ></p>
-
-        </div>
+          id="password-error"
+          class="error-text"
+        ></p>
 
       </div>
 
-    </section>
+    </div>
+  </section>
 
 
+  <!-- ВХОД В АДМИНКУ -->
 
-    <!-- =====================================================
-         ВХОД В АДМИН-ПАНЕЛЬ
-    ====================================================== -->
+  <section
+    id="admin-login-screen"
+    class="screen"
+  >
+    <div class="login-card">
 
-    <section
-      id="admin-login-screen"
-      class="screen"
-    >
+      <button
+        id="admin-login-back"
+        class="back-btn"
+        type="button"
+      >
+        ← Назад
+      </button>
 
-      <div class="login-card">
+      <div class="eyebrow">
+        СЛУЖЕБНЫЙ ДОСТУП
+      </div>
+
+      <h2>
+        Администратор
+      </h2>
+
+      <p class="subtitle">
+        Вход в конструктор квестов
+      </p>
+
+      <div class="login-form">
+
+        <label
+          for="admin-password"
+          class="input-label"
+        >
+          Пароль администратора
+        </label>
+
+        <input
+          id="admin-password"
+          class="text-input"
+          type="password"
+          autocomplete="off"
+          placeholder="Введите пароль"
+        >
 
         <button
-          id="admin-login-back"
-          class="back-btn"
+          id="enter-admin"
+          class="primary-btn"
           type="button"
         >
-          ← Назад
+          Войти
         </button>
 
-
-        <div class="eyebrow">
-          СЛУЖЕБНЫЙ ДОСТУП
-        </div>
-
-
-        <h2>
-          Администратор
-        </h2>
-
-
-        <p class="subtitle">
-          Введите пароль для доступа
-          к конструктору квестов.
-        </p>
-
-
-        <div class="login-form">
-
-          <label
-            for="admin-password"
-            class="input-label"
-          >
-            Пароль администратора
-          </label>
-
-
-          <input
-            id="admin-password"
-            class="text-input"
-            type="password"
-            autocomplete="off"
-            placeholder="Введите пароль"
-          >
-
-
-          <button
-            id="enter-admin"
-            class="primary-btn"
-            type="button"
-          >
-            Войти
-          </button>
-
-
-          <p
-            id="admin-password-error"
-            class="error-text"
-          ></p>
-
-        </div>
+        <p
+          id="admin-password-error"
+          class="error-text"
+        ></p>
 
       </div>
 
-    </section>
+    </div>
+  </section>
 
 
+  <!-- ИГРА -->
 
-    <!-- =====================================================
-         ИГРОВОЙ ЭКРАН
-    ====================================================== -->
+  <section
+    id="game-screen"
+    class="screen game-screen"
+  >
 
-    <section
-      id="game-screen"
-      class="screen game-screen"
+    <header class="game-topbar">
+
+      <div class="game-title">
+
+        <span class="game-title__small">
+          АПТЕКА
+        </span>
+
+        <strong id="game-day-title">
+          Смена
+        </strong>
+
+      </div>
+
+      <div class="game-actions">
+
+        <button
+          id="notes-btn"
+          class="topbar-btn"
+          type="button"
+        >
+          📝
+          <span>Заметки</span>
+        </button>
+
+        <button
+          id="hint-btn"
+          class="topbar-btn"
+          type="button"
+        >
+          💡
+          <span>Подсказка</span>
+        </button>
+
+        <button
+          id="menu-btn"
+          class="topbar-btn"
+          type="button"
+        >
+          ☰
+          <span>Меню</span>
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <div
+      id="scene-wrap"
+      class="scene-wrap"
     >
 
+      <div class="scene-stage">
 
-      <header class="game-topbar">
+        <img
+          id="scene-image"
+          class="scene-image"
+          src="pharmacy-concept.png"
+          alt="Игровая аптека"
+          draggable="false"
+        >
 
-        <div class="game-title">
+        <div
+          id="hotspots"
+          class="hotspots"
+        ></div>
 
-          <span class="game-title__small">
-            АПТЕКА
-          </span>
+      </div>
 
-          <strong id="game-day-title">
-            Первый день
-          </strong>
+    </div>
 
+
+    <div class="game-bottom-bar">
+
+      <button
+        id="inventory-btn"
+        class="inventory-title"
+        type="button"
+      >
+        🎒 Инвентарь
+      </button>
+
+      <div
+        id="inventory-slots"
+        class="inventory-slots"
+      ></div>
+
+    </div>
+
+  </section>
+
+
+  <!-- АДМИНКА -->
+
+  <section
+    id="admin-screen"
+    class="screen"
+  >
+
+    <div class="admin-page">
+
+      <header class="admin-header">
+
+        <div>
+          <div class="eyebrow">
+            КОНСТРУКТОР КВЕСТОВ
+          </div>
+
+          <h2>
+            Администратор
+          </h2>
         </div>
 
-
-        <div class="game-actions">
-
-          <button
-            id="notes-btn"
-            class="topbar-btn"
-            type="button"
-          >
-            📝
-            <span>
-              Заметки
-            </span>
-          </button>
-
-
-          <button
-            id="hint-btn"
-            class="topbar-btn"
-            type="button"
-          >
-            💡
-            <span>
-              Подсказка
-            </span>
-          </button>
-
-
-          <button
-            id="menu-btn"
-            class="topbar-btn"
-            type="button"
-          >
-            ☰
-            <span>
-              Меню
-            </span>
-          </button>
-
-        </div>
+        <button
+          id="admin-back"
+          class="secondary-btn"
+          type="button"
+        >
+          ← Выйти
+        </button>
 
       </header>
 
 
+      <!-- НАСТРОЙКИ ДНЯ -->
 
-      <div
-        id="scene-wrap"
-        class="scene-wrap"
-      >
+      <section class="admin-card admin-card--wide">
 
-        <div class="scene-stage">
+        <h3>
+          Настройки дня
+        </h3>
 
-          <img
-            id="scene-image"
-            class="scene-image"
-            src="pharmacy-concept.png"
-            alt="Игровая аптека"
-            draggable="false"
-          >
+        <div class="admin-row">
 
+          <label class="admin-field">
+            <span>День</span>
 
-          <div
-            id="hotspots"
-            class="hotspots"
-          ></div>
+            <select
+              id="admin-quest-select"
+              class="admin-input"
+            ></select>
+          </label>
+
+          <label class="admin-check">
+            <input
+              id="admin-quest-enabled"
+              type="checkbox"
+            >
+
+            <span>
+              День открыт для студентов
+            </span>
+          </label>
 
         </div>
 
-      </div>
 
+        <div class="admin-grid-3">
 
+          <label class="admin-field">
+            <span>Название</span>
 
-      <div class="game-bottom-bar">
+            <input
+              id="admin-quest-title"
+              class="admin-input"
+              type="text"
+            >
+          </label>
+
+          <label class="admin-field">
+            <span>Тема</span>
+
+            <input
+              id="admin-quest-topic"
+              class="admin-input"
+              type="text"
+            >
+          </label>
+
+          <label class="admin-field">
+            <span>Пароль для студентов</span>
+
+            <input
+              id="admin-quest-password"
+              class="admin-input"
+              type="text"
+            >
+          </label>
+
+        </div>
 
         <button
-          id="inventory-btn"
-          class="inventory-title"
+          id="admin-save-quest"
+          class="primary-btn"
           type="button"
         >
-          🎒 Инвентарь
+          Сохранить настройки дня
         </button>
 
-
-        <div
-          id="inventory-slots"
-          class="inventory-slots"
-        ></div>
-
-      </div>
+      </section>
 
 
-    </section>
+      <div class="admin-grid">
 
 
+        <!-- ОБЪЕКТ -->
 
-    <!-- =====================================================
-         АДМИН-ПАНЕЛЬ
-    ====================================================== -->
+        <section class="admin-card">
 
-    <section
-      id="admin-screen"
-      class="screen"
-    >
-
-      <div class="admin-page">
-
-
-        <div class="admin-header">
-
-          <div>
-
-            <div class="eyebrow">
-              КОНСТРУКТОР КВЕСТОВ
-            </div>
-
-
-            <h2>
-              Администратор
-            </h2>
-
-          </div>
-
-
-          <button
-            id="admin-back"
-            class="secondary-btn"
-            type="button"
-          >
-            ← На главную
-          </button>
-
-        </div>
-
-
-
-        <div class="admin-grid">
-
-
-          <section class="admin-card">
+          <div class="admin-card-title">
 
             <h3>
               Предмет комнаты
             </h3>
 
+            <button
+              id="admin-add-object"
+              class="small-action-btn"
+              type="button"
+            >
+              + Добавить
+            </button>
 
-            <label class="admin-field">
-
-              <span>
-                Квест
-              </span>
-
-
-              <select
-                id="admin-quest-select"
-                class="admin-input"
-              ></select>
-
-            </label>
+          </div>
 
 
-            <label class="admin-field">
+          <label class="admin-field">
+            <span>Предмет</span>
 
-              <span>
-                Предмет
-              </span>
+            <select
+              id="admin-object-select"
+              class="admin-input"
+            ></select>
+          </label>
 
 
-              <select
-                id="admin-object-select"
-                class="admin-input"
-              ></select>
-
-            </label>
-
+          <div class="admin-inline-actions">
 
             <label class="admin-check">
 
@@ -450,388 +445,639 @@
                 type="checkbox"
               >
 
-
               <span>
-                Предмет активен
+                Активен
               </span>
 
             </label>
 
+            <button
+              id="admin-delete-object"
+              class="danger-btn"
+              type="button"
+            >
+              Удалить
+            </button>
+
+          </div>
+
+
+          <label class="admin-field">
+            <span>Название</span>
+
+            <input
+              id="admin-object-name"
+              class="admin-input"
+              type="text"
+            >
+          </label>
+
+
+          <div class="admin-grid-4">
 
             <label class="admin-field">
-
-              <span>
-                Название
-              </span>
-
+              <span>X</span>
 
               <input
-                id="admin-object-name"
+                id="admin-object-x"
+                class="admin-input"
+                type="number"
+                step="0.1"
+              >
+            </label>
+
+            <label class="admin-field">
+              <span>Y</span>
+
+              <input
+                id="admin-object-y"
+                class="admin-input"
+                type="number"
+                step="0.1"
+              >
+            </label>
+
+            <label class="admin-field">
+              <span>Ширина</span>
+
+              <input
+                id="admin-object-width"
+                class="admin-input"
+                type="number"
+                step="0.1"
+              >
+            </label>
+
+            <label class="admin-field">
+              <span>Высота</span>
+
+              <input
+                id="admin-object-height"
+                class="admin-input"
+                type="number"
+                step="0.1"
+              >
+            </label>
+
+          </div>
+
+
+          <hr class="admin-divider">
+
+
+          <h4>
+            Условие доступа
+          </h4>
+
+          <label class="admin-field">
+            <span>
+              Что нужно, чтобы предмет сработал
+            </span>
+
+            <select
+              id="admin-requirement-type"
+              class="admin-input"
+            >
+              <option value="none">
+                Ничего
+              </option>
+
+              <option value="item">
+                Иметь предмет / ключ
+              </option>
+
+              <option value="flag">
+                Получить игровой флаг
+              </option>
+
+              <option value="task">
+                Выполнить другое задание
+              </option>
+            </select>
+          </label>
+
+
+          <div id="admin-requirement-key-wrap">
+
+            <label class="admin-field">
+              <span>
+                ID предмета / флага / задания
+              </span>
+
+              <input
+                id="admin-requirement-key"
                 class="admin-input"
                 type="text"
               >
-
             </label>
 
-
-            <div class="admin-coordinates">
-
-
-              <label class="admin-field">
-
-                <span>
-                  X
-                </span>
+          </div>
 
 
-                <input
-                  id="admin-object-x"
-                  class="admin-input"
-                  type="number"
-                  step="0.1"
-                >
+          <label
+            id="admin-consume-wrap"
+            class="admin-check"
+          >
+            <input
+              id="admin-requirement-consume"
+              type="checkbox"
+            >
 
-              </label>
-
-
-              <label class="admin-field">
-
-                <span>
-                  Y
-                </span>
+            <span>
+              Забрать предмет после использования
+            </span>
+          </label>
 
 
-                <input
-                  id="admin-object-y"
-                  class="admin-input"
-                  type="number"
-                  step="0.1"
-                >
+          <label class="admin-field">
+            <span>
+              Что показать, если условие не выполнено
+            </span>
 
-              </label>
-
-
-              <label class="admin-field">
-
-                <span>
-                  Ширина
-                </span>
+            <textarea
+              id="admin-object-fallback"
+              class="admin-input admin-textarea"
+            ></textarea>
+          </label>
 
 
-                <input
-                  id="admin-object-width"
-                  class="admin-input"
-                  type="number"
-                  step="0.1"
-                >
-
-              </label>
+          <hr class="admin-divider">
 
 
-              <label class="admin-field">
+          <h4>
+            Действие предмета
+          </h4>
 
-                <span>
-                  Высота
-                </span>
+          <label class="admin-field">
+            <span>Тип действия</span>
+
+            <select
+              id="admin-object-action"
+              class="admin-input"
+            >
+              <option value="message">
+                Показать сообщение
+              </option>
+
+              <option value="task">
+                Запустить задание
+              </option>
+
+              <option value="giveItem">
+                Выдать предмет
+              </option>
+
+              <option value="passwordTask">
+                Пароль → задание
+              </option>
+
+              <option value="codeLock">
+                Кодовый замок
+              </option>
+            </select>
+          </label>
 
 
-                <input
-                  id="admin-object-height"
-                  class="admin-input"
-                  type="number"
-                  step="0.1"
-                >
-
-              </label>
-
-
-            </div>
-
-
-            <hr class="admin-divider">
-
-
+          <div
+            id="object-action-message"
+            class="object-action-fields"
+          >
             <label class="admin-field">
+              <span>Сообщение</span>
 
-              <span>
-                Базовое действие
-              </span>
+              <textarea
+                id="admin-object-message"
+                class="admin-input admin-textarea"
+              ></textarea>
+            </label>
+          </div>
 
+
+          <div
+            id="object-action-task"
+            class="object-action-fields"
+          >
+            <label class="admin-field">
+              <span>Задание</span>
 
               <select
-                id="admin-action-type"
+                id="admin-object-task"
                 class="admin-input"
+              ></select>
+            </label>
+          </div>
+
+
+          <div
+            id="object-action-item"
+            class="object-action-fields"
+          >
+
+            <label class="admin-field">
+              <span>ID предмета</span>
+
+              <input
+                id="admin-object-item-id"
+                class="admin-input"
+                type="text"
+                placeholder="cashKey"
               >
-
-                <option value="message">
-                  Показать текст
-                </option>
-
-
-                <option value="task">
-                  Запустить задание
-                </option>
-
-              </select>
-
             </label>
 
+            <label class="admin-field">
+              <span>Название предмета</span>
 
-            <div
-              id="admin-message-fields"
-            >
+              <input
+                id="admin-object-item-name"
+                class="admin-input"
+                type="text"
+                placeholder="Ключ от кассы"
+              >
+            </label>
 
-              <label class="admin-field">
+            <label class="admin-field">
+              <span>Значок</span>
 
-                <span>
-                  Текст при нажатии
-                </span>
+              <input
+                id="admin-object-item-icon"
+                class="admin-input"
+                type="text"
+                placeholder="🔑"
+              >
+            </label>
 
-
-                <textarea
-                  id="admin-object-message"
-                  class="admin-input admin-textarea"
-                  placeholder="Что увидит игрок при нажатии на предмет"
-                ></textarea>
-
-              </label>
-
-            </div>
-
-
-            <div
-              id="admin-task-fields"
-              hidden
-            >
-
-              <label class="admin-field">
-
-                <span>
-                  Какое задание запустить
-                </span>
+          </div>
 
 
-                <select
-                  id="admin-object-task"
-                  class="admin-input"
-                ></select>
+          <div
+            id="object-action-password"
+            class="object-action-fields"
+          >
 
-              </label>
+            <label class="admin-field">
+              <span>Пароль</span>
 
-            </div>
+              <input
+                id="admin-object-password"
+                class="admin-input"
+                type="text"
+              >
+            </label>
 
-
-            <button
-              id="admin-save-object"
-              class="primary-btn"
-              type="button"
-            >
-              Сохранить предмет
-            </button>
-
-
-          </section>
+          </div>
 
 
+          <div
+            id="object-action-code"
+            class="object-action-fields"
+          >
 
-          <section class="admin-card">
+            <label class="admin-field">
+              <span>Правильный код</span>
+
+              <input
+                id="admin-object-code"
+                class="admin-input"
+                type="text"
+              >
+            </label>
+
+            <label class="admin-field">
+              <span>Подсказка у замка</span>
+
+              <textarea
+                id="admin-object-code-hint"
+                class="admin-input admin-textarea"
+              ></textarea>
+            </label>
+
+            <label class="admin-field">
+              <span>Текст после открытия</span>
+
+              <textarea
+                id="admin-object-success"
+                class="admin-input admin-textarea"
+              ></textarea>
+            </label>
+
+          </div>
+
+
+          <button
+            id="admin-save-object"
+            class="primary-btn"
+            type="button"
+          >
+            Сохранить предмет
+          </button>
+
+        </section>
+
+
+        <!-- ЗАДАНИЕ -->
+
+        <section class="admin-card">
+
+          <div class="admin-card-title">
 
             <h3>
               Учебное задание
             </h3>
 
+            <button
+              id="admin-add-task"
+              class="small-action-btn"
+              type="button"
+            >
+              + Добавить
+            </button>
+
+          </div>
+
+
+          <label class="admin-field">
+            <span>Задание</span>
+
+            <select
+              id="admin-task-select"
+              class="admin-input"
+            ></select>
+          </label>
+
+
+          <div class="admin-inline-actions">
+
+            <div></div>
+
+            <button
+              id="admin-delete-task"
+              class="danger-btn"
+              type="button"
+            >
+              Удалить
+            </button>
+
+          </div>
+
+
+          <label class="admin-field">
+            <span>Название</span>
+
+            <input
+              id="admin-task-title"
+              class="admin-input"
+              type="text"
+            >
+          </label>
+
+
+          <label class="admin-field">
+            <span>Шаблон задания</span>
+
+            <select
+              id="admin-task-type"
+              class="admin-input"
+            >
+
+              <option value="singleChoice">
+                Один правильный ответ
+              </option>
+
+              <option value="multipleChoice">
+                Несколько правильных ответов
+              </option>
+
+              <option value="textInput">
+                Ввод слова / ответа
+              </option>
+
+              <option value="ordering">
+                Расставить по порядку
+              </option>
+
+              <option value="matching">
+                Сопоставление
+              </option>
+
+            </select>
+          </label>
+
+
+          <label class="admin-field">
+            <span>Вопрос / инструкция</span>
+
+            <textarea
+              id="admin-task-question"
+              class="admin-input admin-textarea"
+            ></textarea>
+          </label>
+
+
+          <div id="task-editor-choice">
 
             <label class="admin-field">
-
               <span>
-                Задание
+                Варианты ответа — по одному на строку
               </span>
-
-
-              <select
-                id="admin-task-select"
-                class="admin-input"
-              ></select>
-
-            </label>
-
-
-            <label class="admin-field">
-
-              <span>
-                Заголовок
-              </span>
-
-
-              <input
-                id="admin-task-title"
-                class="admin-input"
-                type="text"
-              >
-
-            </label>
-
-
-            <label class="admin-field">
-
-              <span>
-                Вопрос
-              </span>
-
-
-              <textarea
-                id="admin-task-question"
-                class="admin-input admin-textarea"
-              ></textarea>
-
-            </label>
-
-
-            <label class="admin-field">
-
-              <span>
-                Варианты ответа
-              </span>
-
 
               <textarea
                 id="admin-task-options"
                 class="admin-input admin-textarea admin-options"
-                placeholder="Один вариант на строку"
               ></textarea>
-
             </label>
 
+          </div>
+
+
+          <div id="task-editor-correct">
 
             <label class="admin-field">
-
               <span>
-                Номер правильного варианта
+                Правильный ответ
               </span>
-
 
               <input
                 id="admin-task-correct"
                 class="admin-input"
-                type="number"
-                min="1"
-                step="1"
+                type="text"
               >
 
-
-              <small>
-                Например: 1 — первый вариант
+              <small id="admin-correct-help">
+                Для одного ответа: номер, например 2
               </small>
 
             </label>
 
+          </div>
+
+
+          <div id="task-editor-text">
+
+            <label class="admin-field">
+              <span>
+                Допустимые ответы — по одному на строку
+              </span>
+
+              <textarea
+                id="admin-task-answers"
+                class="admin-input admin-textarea"
+              ></textarea>
+            </label>
+
+          </div>
+
+
+          <div id="task-editor-ordering">
+
+            <label class="admin-field">
+              <span>
+                Элементы в правильном порядке
+              </span>
+
+              <textarea
+                id="admin-task-order"
+                class="admin-input admin-textarea"
+              ></textarea>
+            </label>
+
+          </div>
+
+
+          <div id="task-editor-matching">
+
+            <label class="admin-field">
+              <span>
+                Пары: одна строка = левая часть | правая часть
+              </span>
+
+              <textarea
+                id="admin-task-pairs"
+                class="admin-input admin-textarea"
+                placeholder="Психология | наука о психике"
+              ></textarea>
+            </label>
+
+          </div>
+
+
+          <label class="admin-field">
+            <span>
+              Сообщение после правильного ответа
+            </span>
+
+            <textarea
+              id="admin-task-success"
+              class="admin-input admin-textarea"
+            ></textarea>
+          </label>
+
+
+          <hr class="admin-divider">
+
+
+          <div class="admin-card-title">
+
+            <h4>
+              Награды за решение
+            </h4>
 
             <button
-              id="admin-save-task"
-              class="primary-btn"
+              id="admin-add-reward"
+              class="small-action-btn"
               type="button"
             >
-              Сохранить задание
+              + Награда
             </button>
 
-
-            <div class="admin-note">
-
-              Сейчас доступен шаблон:
-              один правильный ответ.
-
-              Позже добавим другие типы
-              заданий и награды.
-
-            </div>
+          </div>
 
 
-          </section>
+          <div
+            id="admin-rewards"
+            class="reward-list"
+          ></div>
 
-
-        </div>
-
-
-
-        <div
-          id="admin-status"
-          class="admin-status"
-          aria-live="polite"
-        ></div>
-
-
-
-        <div class="admin-bottom-actions">
 
           <button
-            id="admin-preview"
+            id="admin-save-task"
             class="primary-btn"
             type="button"
           >
-            ▶ Проверить квест
+            Сохранить задание
           </button>
 
-
-          <button
-            id="admin-reset"
-            class="secondary-btn"
-            type="button"
-          >
-            Сбросить локальные изменения
-          </button>
-
-        </div>
-
+        </section>
 
       </div>
 
-    </section>
-
-
-  </main>
-
-
-
-  <!-- =====================================================
-       ОБЩЕЕ МОДАЛЬНОЕ ОКНО
-  ====================================================== -->
-
-  <div
-    id="overlay"
-    class="overlay"
-    hidden
-  >
-
-    <div
-      class="overlay-card"
-      role="dialog"
-      aria-modal="true"
-    >
-
-      <button
-        id="overlay-close"
-        class="overlay-close"
-        type="button"
-        aria-label="Закрыть"
-      >
-        ×
-      </button>
-
 
       <div
-        id="overlay-content"
-        class="overlay-content"
+        id="admin-status"
+        class="admin-status"
+        aria-live="polite"
       ></div>
+
+
+      <div class="admin-bottom-actions">
+
+        <button
+          id="admin-preview"
+          class="primary-btn"
+          type="button"
+        >
+          ▶ Проверить квест
+        </button>
+
+        <button
+          id="admin-reset"
+          class="secondary-btn"
+          type="button"
+        >
+          Сбросить изменения
+        </button>
+
+      </div>
 
     </div>
 
+  </section>
+
+</main>
+
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+
+<div
+  id="overlay"
+  class="overlay"
+  hidden
+>
+
+  <div
+    class="overlay-card"
+    role="dialog"
+    aria-modal="true"
+  >
+
+    <button
+      id="overlay-close"
+      class="overlay-close"
+      type="button"
+    >
+      ×
+    </button>
+
+    <div
+      id="overlay-content"
+      class="overlay-content"
+    ></div>
+
   </div>
 
+</div>
 
 
-  <script src="app.js"></script>
-
+<script src="app.js"></script>
 
 </body>
-
 </html>
