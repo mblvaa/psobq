@@ -257,21 +257,39 @@ button {
   min-height: 20px;
 }
 
-/* ИГРА */
+/* =========================================================
+   ИГРА
+   Верхняя и нижняя панели неподвижны.
+   Прокручивается ТОЛЬКО сцена аптеки.
+========================================================= */
 
 .game-screen {
   flex-direction: column;
 
+  /*
+    Важное изменение:
+    игровой экран занимает ровно видимую
+    высоту окна браузера.
+  */
+  height: 100vh;
+  height: 100dvh;
+
+  min-height: 0;
+
   background: #0e1014;
 
+  /*
+    Сам игровой экран прокручивать нельзя.
+  */
   overflow: hidden;
 }
+
+/* ВЕРХНЯЯ ПАНЕЛЬ */
 
 .game-topbar {
   display: flex;
 
   justify-content: space-between;
-
   align-items: center;
 
   gap: 18px;
@@ -283,7 +301,15 @@ button {
   border-bottom:
     1px solid rgba(255, 255, 255, 0.06);
 
-  z-index: 3;
+  /*
+    Панель не должна сжиматься,
+    когда сцене не хватает места.
+  */
+  flex: 0 0 auto;
+
+  position: relative;
+
+  z-index: 4;
 }
 
 .topbar-actions {
@@ -306,19 +332,51 @@ button {
   font-weight: 800;
 }
 
-/* КОМНАТА */
+/* =========================================================
+   ОКНО С АПТЕКОЙ
+========================================================= */
 
 .scene-wrap {
   position: relative;
 
-  flex: 1;
+  /*
+    Только этот блок получает все свободное
+    пространство между двумя панелями.
+  */
+  flex: 1 1 auto;
 
+  /*
+    Критично для flex:
+    разрешаем сцене стать меньше собственного
+    содержимого, иначе она вытолкнет нижнюю панель.
+  */
+  min-height: 0;
+  min-width: 0;
+
+  /*
+    И только здесь разрешаем прокрутку.
+  */
   overflow: auto;
+
+  overscroll-behavior: contain;
+
+  -webkit-overflow-scrolling: touch;
 
   background: #111319;
 
   touch-action: pan-x pan-y;
+
+  /*
+    Полосы прокрутки остаются внутри сцены,
+    а не у всей страницы.
+  */
+  scrollbar-gutter: stable;
 }
+
+/*
+  Изображение аптеки и слой хотспотов
+  должны иметь одинаковый размер.
+*/
 
 .scene-image {
   display: block;
@@ -330,6 +388,8 @@ button {
   user-select: none;
 
   pointer-events: none;
+
+  -webkit-user-drag: none;
 }
 
 .hotspots {
@@ -343,12 +403,15 @@ button {
 
   pointer-events: none;
 }
+
 .hotspot {
   position: absolute;
 
-  transform: translate(-50%, -50%);
+  transform:
+    translate(-50%, -50%);
 
   border: 0;
+
   border-radius: 18px;
 
   background: transparent;
@@ -363,10 +426,7 @@ button {
     transform 0.18s ease;
 }
 
-/*
-  На компьютере предмет слегка
-  подсвечивается при наведении.
-*/
+/* На компьютере предмет слегка подсвечивается */
 
 .hotspot:hover,
 .hotspot:focus-visible {
@@ -374,7 +434,8 @@ button {
     rgba(92, 255, 197, 0.12);
 
   box-shadow:
-    0 0 24px rgba(92, 255, 197, 0.32);
+    0 0 24px
+    rgba(92, 255, 197, 0.32);
 
   transform:
     translate(-50%, -50%)
@@ -383,20 +444,20 @@ button {
   outline: none;
 }
 
-/*
-  Короткая реакция после тапа
-  на телефоне.
-*/
+/* Короткая реакция после тапа */
 
 .hotspot.hotspot--tap {
   background:
     rgba(92, 255, 197, 0.16);
 
   box-shadow:
-    0 0 28px rgba(92, 255, 197, 0.38);
+    0 0 28px
+    rgba(92, 255, 197, 0.38);
 }
 
-/* НИЖНЯЯ ПАНЕЛЬ */
+/* =========================================================
+   НИЖНЯЯ ПАНЕЛЬ
+========================================================= */
 
 .game-bottom {
   display: flex;
@@ -411,6 +472,18 @@ button {
 
   border-top:
     1px solid rgba(255, 255, 255, 0.06);
+
+  /*
+    Нижняя панель является обычной частью
+    flex-каркаса, но никогда не прокручивается,
+    потому что прокрутка разрешена только
+    у .scene-wrap.
+  */
+  flex: 0 0 auto;
+
+  position: relative;
+
+  z-index: 4;
 }
 
 .inventory-btn {
@@ -442,7 +515,8 @@ button {
   min-height: 48px;
 
   border:
-    1px dashed rgba(255, 255, 255, 0.18);
+    1px dashed
+    rgba(255, 255, 255, 0.18);
 
   border-radius: 12px;
 
@@ -455,7 +529,9 @@ button {
   font-size: 12px;
 }
 
-/* МОДАЛЬНОЕ ОКНО */
+/* =========================================================
+   МОДАЛЬНОЕ ОКНО
+========================================================= */
 
 .overlay {
   position: fixed;
@@ -484,6 +560,7 @@ button {
   width: min(620px, 100%);
 
   max-height: 88vh;
+  max-height: 88dvh;
 
   overflow: auto;
 
@@ -558,7 +635,9 @@ button {
   font-size: 14px;
 }
 
-/* ТЕЛЕФОН */
+/* =========================================================
+   ТЕЛЕФОН
+========================================================= */
 
 @media (max-width: 760px) {
 
@@ -570,25 +649,50 @@ button {
   .start-card,
   .modal-card {
     padding: 22px;
+
     border-radius: 22px;
+  }
+
+  .game-topbar {
+    /*
+      Делаем панель компактнее,
+      но она по-прежнему остается сверху.
+    */
+    padding: 8px 10px;
+
+    gap: 8px;
   }
 
   .game-topbar strong {
     font-size: 14px;
   }
 
+  /*
+    На телефоне аптека намеренно шире экрана.
+    Поэтому игрок двигает именно комнату
+    влево и вправо.
+  */
   .scene-image,
   .hotspots {
     width: 1350px;
   }
 
+  /*
+    Старый position: sticky здесь больше
+    НЕ нужен. Панель и без него находится
+    вне прокручиваемой сцены.
+  */
   .game-bottom {
-    position: sticky;
-    bottom: 0;
+    position: relative;
+
+    bottom: auto;
+
+    padding: 7px 8px;
   }
 
   .inventory-btn {
     min-width: 54px;
+
     width: 54px;
   }
 
@@ -599,15 +703,26 @@ button {
   .inventory-slots {
     grid-template-columns:
       repeat(4, minmax(34px, 1fr));
+
+    gap: 6px;
+  }
+
+  .inventory-slot {
+    min-height: 42px;
   }
 }
 
+/* ИНВЕНТАРЬ */
+
 .inventory-item {
   display: flex;
+
   align-items: center;
+
   gap: 12px;
 
   padding: 12px 14px;
+
   margin-bottom: 10px;
 
   border-radius: 14px;
@@ -624,6 +739,7 @@ button {
 
 .clue-card {
   padding: 14px 16px;
+
   margin: 10px 0;
 
   border-radius: 14px;
@@ -667,6 +783,7 @@ button {
   padding: 13px 16px;
 
   border: 0;
+
   border-radius: 14px;
 
   background: var(--accent-2);
@@ -684,7 +801,6 @@ button {
   margin-top: 24px;
 }
 
-
 .admin-page {
   width: min(1180px, calc(100% - 32px));
 
@@ -693,7 +809,6 @@ button {
   padding:
     32px 0 60px;
 }
-
 
 .admin-header {
   display: flex;
@@ -706,12 +821,10 @@ button {
   margin-bottom: 28px;
 }
 
-
 .admin-header h2 {
   margin:
     5px 0 0;
 }
-
 
 .admin-grid {
   display: grid;
@@ -721,7 +834,6 @@ button {
 
   gap: 24px;
 }
-
 
 .admin-card {
   padding: 24px;
@@ -735,11 +847,9 @@ button {
     1px solid rgba(255, 255, 255, 0.08);
 }
 
-
 .admin-card h3 {
   margin-top: 0;
 }
-
 
 .admin-field {
   display: flex;
@@ -751,16 +861,13 @@ button {
   margin-bottom: 18px;
 }
 
-
 .admin-field > span {
   font-weight: 700;
 }
 
-
 .admin-field small {
   opacity: 0.65;
 }
-
 
 .admin-input {
   width: 100%;
@@ -782,11 +889,9 @@ button {
   font: inherit;
 }
 
-
 .admin-input option {
   color: #111;
 }
-
 
 .admin-textarea {
   min-height: 110px;
@@ -794,11 +899,9 @@ button {
   resize: vertical;
 }
 
-
 .admin-options {
   min-height: 160px;
 }
-
 
 .admin-check {
   display: flex;
@@ -812,12 +915,10 @@ button {
   cursor: pointer;
 }
 
-
 .admin-check input {
   width: 18px;
   height: 18px;
 }
-
 
 .admin-coordinates {
   display: grid;
@@ -828,7 +929,6 @@ button {
   gap: 10px;
 }
 
-
 .admin-divider {
   border: 0;
 
@@ -838,7 +938,6 @@ button {
   margin:
     8px 0 22px;
 }
-
 
 .admin-note {
   margin-top: 20px;
@@ -855,7 +954,6 @@ button {
   opacity: 0.8;
 }
 
-
 .admin-status {
   min-height: 26px;
 
@@ -863,7 +961,6 @@ button {
 
   font-weight: 700;
 }
-
 
 .admin-bottom-actions {
   display: flex;
@@ -875,7 +972,6 @@ button {
   margin-top: 18px;
 }
 
-
 @media (max-width: 800px) {
 
   .admin-grid {
@@ -883,20 +979,18 @@ button {
       1fr;
   }
 
-
   .admin-coordinates {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
   }
-
 
   .admin-header {
     align-items: flex-start;
 
     flex-direction: column;
   }
-
 }
+
 
 /* =========================================================
    НОРМАЛЬНЫЙ ВИД КНОПОК
@@ -904,7 +998,9 @@ button {
 
 button {
   font: inherit;
-  -webkit-tap-highlight-color: transparent;
+
+  -webkit-tap-highlight-color:
+    transparent;
 }
 
 
@@ -913,6 +1009,7 @@ button {
 .primary-btn,
 .object-action-btn {
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
 
@@ -920,7 +1017,10 @@ button {
 
   padding: 12px 20px;
 
-  border: 1px solid rgba(104, 255, 197, 0.34);
+  border:
+    1px solid
+    rgba(104, 255, 197, 0.34);
+
   border-radius: 14px;
 
   background:
@@ -937,7 +1037,8 @@ button {
   cursor: pointer;
 
   box-shadow:
-    0 7px 22px rgba(0, 0, 0, 0.22);
+    0 7px 22px
+    rgba(0, 0, 0, 0.22);
 
   transition:
     transform 0.16s ease,
@@ -945,15 +1046,14 @@ button {
     box-shadow 0.16s ease;
 }
 
-
 .primary-btn:hover,
 .object-action-btn:hover {
-  filter: brightness(1.08);
+  filter:
+    brightness(1.08);
 
   transform:
     translateY(-1px);
 }
-
 
 .primary-btn:active,
 .object-action-btn:active {
@@ -962,13 +1062,12 @@ button {
 }
 
 
-
-/* Вторичные кнопки:
-   Назад, Администратор и т.п. */
+/* Вторичные кнопки */
 
 .secondary-btn,
 .back-btn {
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
 
@@ -977,7 +1076,8 @@ button {
   padding: 10px 16px;
 
   border:
-    1px solid rgba(255, 255, 255, 0.12);
+    1px solid
+    rgba(255, 255, 255, 0.12);
 
   border-radius: 13px;
 
@@ -991,15 +1091,13 @@ button {
 
   cursor: pointer;
 
-  box-shadow:
-    none;
+  box-shadow: none;
 
   transition:
     background 0.16s ease,
     border-color 0.16s ease,
     transform 0.16s ease;
 }
-
 
 .secondary-btn:hover,
 .back-btn:hover {
@@ -1010,13 +1108,11 @@ button {
     rgba(92, 255, 197, 0.32);
 }
 
-
 .secondary-btn:active,
 .back-btn:active {
   transform:
     scale(0.98);
 }
-
 
 
 /* Кнопка администратора */
@@ -1028,21 +1124,19 @@ button {
     transparent;
 
   border:
-    1px solid rgba(92, 255, 197, 0.22);
+    1px solid
+    rgba(92, 255, 197, 0.22);
 
   color:
     rgba(220, 255, 244, 0.78);
 }
 
-
 .admin-entry-btn:hover {
   background:
     rgba(54, 198, 160, 0.09);
 
-  color:
-    #ffffff;
+  color: #ffffff;
 }
-
 
 
 /* Кнопки верхней панели игры */
@@ -1060,7 +1154,8 @@ button {
   padding: 8px 12px;
 
   border:
-    1px solid rgba(255, 255, 255, 0.1);
+    1px solid
+    rgba(255, 255, 255, 0.1);
 
   border-radius: 12px;
 
@@ -1079,7 +1174,6 @@ button {
     border-color 0.16s ease;
 }
 
-
 .topbar-btn:hover {
   background:
     rgba(54, 198, 160, 0.12);
@@ -1087,7 +1181,6 @@ button {
   border-color:
     rgba(92, 255, 197, 0.28);
 }
-
 
 
 /* Инвентарь */
@@ -1116,12 +1209,10 @@ button {
   cursor: pointer;
 }
 
-
 .inventory-title:hover {
   background:
     rgba(255, 255, 255, 0.06);
 }
-
 
 
 /* Кнопки вариантов ответа */
@@ -1132,7 +1223,8 @@ button {
   padding: 13px 15px;
 
   border:
-    1px solid rgba(255, 255, 255, 0.11);
+    1px solid
+    rgba(255, 255, 255, 0.11);
 
   border-radius: 13px;
 
@@ -1152,7 +1244,6 @@ button {
     transform 0.15s ease;
 }
 
-
 .choice-btn:hover {
   background:
     rgba(54, 198, 160, 0.11);
@@ -1165,21 +1256,20 @@ button {
 }
 
 
-
-/* Убираем стандартные белые стили браузера */
+/* Фокус клавиатурой */
 
 button:focus-visible {
   outline:
-    2px solid rgba(92, 255, 197, 0.7);
+    2px solid
+    rgba(92, 255, 197, 0.7);
 
-  outline-offset:
-    2px;
+  outline-offset: 2px;
 }
 
 
-
-/* На телефоне убираем подписи,
-   если верхняя панель становится тесной */
+/* =========================================================
+   МОБИЛЬНАЯ ВЕРХНЯЯ ПАНЕЛЬ
+========================================================= */
 
 @media (max-width: 620px) {
 
@@ -1187,12 +1277,93 @@ button:focus-visible {
     display: none;
   }
 
-
   .topbar-btn {
     width: 42px;
 
-    padding:
-      8px;
+    padding: 8px;
+  }
+
+}
+
+
+/* =========================================================
+   МОБИЛЬНЫЙ VIEWPORT
+
+   Не даем самому документу двигаться,
+   когда открыт игровой экран.
+========================================================= */
+
+@media (max-width: 760px) {
+
+  /*
+    dvh учитывает изменение реальной высоты
+    экрана при появлении/исчезновении
+    адресной строки мобильного браузера.
+  */
+
+  .game-screen.screen--active {
+    height: 100vh;
+    height: 100dvh;
+
+    max-height: 100dvh;
+
+    overflow: hidden;
+  }
+
+  /*
+    Верхняя и нижняя панели находятся
+    вне scroll-контейнера.
+  */
+
+  .game-topbar,
+  .game-bottom {
+    flex-shrink: 0;
+  }
+
+  /*
+    Единственное место, которое можно
+    двигать пальцем.
+  */
+
+  .scene-wrap {
+    flex: 1 1 0;
+
+    min-height: 0;
+
+    overflow-x: auto;
+    overflow-y: auto;
+
+    touch-action:
+      pan-x pan-y;
+
+    overscroll-behavior:
+      contain;
+  }
+
+}
+
+
+/* =========================================================
+   НЕБОЛЬШИЕ ЭКРАНЫ
+========================================================= */
+
+@media (max-width: 420px) {
+
+  .game-topbar {
+    min-height: 52px;
+  }
+
+  .game-bottom {
+    min-height: 58px;
+  }
+
+  .inventory-slots {
+    grid-template-columns:
+      repeat(4, minmax(30px, 1fr));
+  }
+
+  .inventory-slot {
+    min-height: 38px;
   }
 
 }
