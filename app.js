@@ -1,5 +1,47 @@
-const ADMIN_PASSWORD = "admin2026";
+const API_URL = "https://script.google.com/macros/s/AKfycbzPITphK0shtoO5PAhIVxFhb4rIG-ETi8UfkCGr0zsyeZ4TZZRtJygBlsoDWx5agDyX/exec";
 const STORAGE_KEY = "psychologyEscapeBuilderV3";
+
+let playToken = "";
+let adminToken = "";
+let gameStartedAt = 0;
+let gameErrors = 0;
+let gameHints = 0;
+let previewMode = false;
+let questCompleting = false;
+
+
+async function apiPost(action, data = {}) {
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify({
+      action,
+      ...data
+    })
+  });
+
+  const text = await response.text();
+
+  let result;
+
+  try {
+    result = JSON.parse(text);
+  } catch (error) {
+    throw new Error("Сервер вернул некорректный ответ.");
+  }
+
+  if (!response.ok || result.ok === false) {
+    throw new Error(
+      result.error ||
+      result.message ||
+      "Ошибка связи с сервером."
+    );
+  }
+
+  return result;
+}
 
 
 function makeEmptyQuest(day) {
@@ -44,11 +86,8 @@ const DEFAULT_DATA = {
           ],
 
           correct: [0],
-
           answers: [],
-
           order: [],
-
           pairs: [],
 
           successMessage:
@@ -262,8 +301,7 @@ const DEFAULT_DATA = {
             consume: false
           },
 
-          fallback:
-            "",
+          fallback: "",
 
           action: {
             type: "task",
@@ -965,6 +1003,11 @@ function startQuest() {
   gameState =
     createGameState();
 
+  gameStartedAt = Date.now();
+  gameErrors = 0;
+  gameHints = 0;
+  questCompleting = false;
+
 
   const quest =
     currentQuest();
@@ -1470,6 +1513,10 @@ function openPasswordTask(
         )
       ) {
 
+        if (!previewMode) {
+          gameErrors += 1;
+        }
+
         document
           .getElementById(
             "object-password-error"
@@ -1575,6 +1622,10 @@ function openCodeLock(
           )
         ) {
 
+          if (!previewMode) {
+            gameErrors += 1;
+          }
+
           document
             .getElementById(
               "code-lock-error"
@@ -1586,21 +1637,196 @@ function openCodeLock(
         }
 
 
-        openOverlay(`
-          <h2>
-            ${escapeHtml(
-              action.success ||
-              "Вы выбрались!"
-            )}
-          </h2>
-
-          <div class="success-box">
-            Дверь открыта.
-          </div>
-        `);
+        finishQuest(action);
 
       }
     );
+}
+
+
+async function finishQuest(action) {
+
+  if (questCompleting) {
+    return;
+  }
+
+
+  if (previewMode) {
+
+    openOverlay(`
+      <h2>
+        ${escapeHtml(
+          action.success ||
+          "Вы выбрались!"
+        )}
+      </h2>
+
+      <div class="success-box">
+        Дверь открыта.
+      </div>
+
+      <p>
+        Это предпросмотр администратора.
+        Результат не записан и персональный код не создан.
+      </p>
+    `);
+
+    return;
+  }
+
+
+  if (!playToken) {
+
+    openOverlay(`
+      <h3>
+        Ошибка
+      </h3>
+
+      <p>
+        Игровая сессия не найдена.
+        Вернитесь на стартовую страницу и войдите в квест заново.
+      </p>
+    `);
+
+    return;
+  }
+
+
+  questCompleting = true;
+
+
+  openOverlay(`
+    <h2>
+      ${escapeHtml(
+        action.success ||
+        "Вы выбрались!"
+      )}
+    </h2>
+
+    <div class="success-box">
+      Дверь открыта.
+    </div>
+
+    <p>
+      Создаем ваш персональный код...
+    </p>
+  `);
+
+
+  const quest =
+    currentQuest();
+
+
+  const durationSec =
+    Math.max(
+      0,
+      Math.round(
+        (Date.now() - gameStartedAt) / 1000
+      )
+    );
+
+
+  try {
+
+    const result =
+      await apiPost(
+        "completeQuest",
+        {
+          playToken,
+          questId:
+            selectedQuestId,
+          day:
+            quest.day,
+          errors:
+            gameErrors,
+          hints:
+            gameHints,
+          durationSec
+        }
+      );
+
+
+    const code =
+      result.code ||
+      result.completionCode ||
+      "";
+
+
+    if (!code) {
+      throw new Error(
+        "Сервер не вернул персональный код."
+      );
+    }
+
+
+    openOverlay(`
+      <h2>
+        ${escapeHtml(
+          action.success ||
+          "ПОЗДРАВЛЯЕМ С УСПЕШНЫМ ЗАВЕРШЕНИЕМ СМЕНЫ!"
+        )}
+      </h2>
+
+      <div class="success-box">
+        Дверь открыта.
+      </div>
+
+      <p>
+        Ваш персональный код:
+      </p>
+
+      <div class="clue-card">
+        <strong style="font-size:1.45em;letter-spacing:.08em;">
+          ${escapeHtml(code)}
+        </strong>
+      </div>
+
+      <p>
+        Сохраните этот код и предъявите преподавателю.
+      </p>
+    `);
+
+  }
+
+  catch (error) {
+
+    questCompleting =
+      false;
+
+
+    openOverlay(`
+      <h3>
+        Дверь открыта, но код пока не получен
+      </h3>
+
+      <p>
+        ${escapeHtml(
+          error.message ||
+          "Не удалось связаться с сервером."
+        )}
+      </p>
+
+      <button
+        id="retry-completion"
+        class="primary-btn"
+        type="button"
+      >
+        Получить код еще раз
+      </button>
+    `);
+
+
+    document
+      .getElementById(
+        "retry-completion"
+      )
+      ?.addEventListener(
+        "click",
+        () =>
+          finishQuest(action)
+      );
+
+  }
 }
 
 
@@ -2325,6 +2551,11 @@ function openMatchingTask(
 
 function taskError() {
 
+  if (!previewMode) {
+    gameErrors += 1;
+  }
+
+
   const target =
     document.getElementById(
       "task-error"
@@ -2566,7 +2797,7 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       const quest =
         currentQuest();
@@ -2580,23 +2811,76 @@ document
           .value;
 
 
-      if (
-        input !==
-        quest.password
-      ) {
-
+      const errorElement =
         document
           .getElementById(
             "password-error"
-          )
-          .textContent =
-          "Неверный пароль.";
+          );
 
-        return;
+
+      errorElement.textContent =
+        "Проверяем пароль...";
+
+
+      try {
+
+        const result =
+          await apiPost(
+            "startQuest",
+            {
+              questId:
+                selectedQuestId,
+
+              day:
+                quest.day,
+
+              password:
+                input
+            }
+          );
+
+
+        playToken =
+          result.playToken ||
+          result.token ||
+          "";
+
+
+        if (!playToken) {
+          throw new Error(
+            "Сервер не создал игровую сессию."
+          );
+        }
+
+
+        previewMode =
+          false;
+
+
+        errorElement.textContent =
+          "";
+
+
+        startQuest();
+
       }
 
+      catch (error) {
 
-      startQuest();
+        playToken =
+          "";
+
+
+        errorElement.textContent =
+          error.message ===
+          "INVALID_PASSWORD"
+            ? "Неверный пароль."
+            : (
+                error.message ||
+                "Не удалось войти в квест."
+              );
+
+      }
 
     }
   );
@@ -2627,6 +2911,10 @@ document
 
       adminUnlocked =
         false;
+
+
+      adminToken =
+        "";
 
 
       document
@@ -2681,7 +2969,7 @@ document
   );
 
 
-function checkAdminLogin() {
+async function checkAdminLogin() {
 
   const value =
     document
@@ -2691,32 +2979,79 @@ function checkAdminLogin() {
       .value;
 
 
-  if (
-    value !==
-    ADMIN_PASSWORD
-  ) {
-
+  const errorElement =
     document
       .getElementById(
         "admin-password-error"
-      )
-      .textContent =
-      "Неверный пароль.";
+      );
 
-    return;
+
+  errorElement.textContent =
+    "Проверяем пароль...";
+
+
+  try {
+
+    const result =
+      await apiPost(
+        "adminLogin",
+        {
+          password:
+            value
+        }
+      );
+
+
+    adminToken =
+      result.adminToken ||
+      result.token ||
+      "";
+
+
+    if (!adminToken) {
+      throw new Error(
+        "Сервер не создал сессию администратора."
+      );
+    }
+
+
+    adminUnlocked =
+      true;
+
+
+    errorElement.textContent =
+      "";
+
+
+    renderAdminQuestSelect();
+
+
+    showScreen(
+      "admin"
+    );
+
   }
 
+  catch (error) {
 
-  adminUnlocked =
-    true;
-
-
-  renderAdminQuestSelect();
+    adminUnlocked =
+      false;
 
 
-  showScreen(
-    "admin"
-  );
+    adminToken =
+      "";
+
+
+    errorElement.textContent =
+      error.message ===
+      "INVALID_ADMIN_PASSWORD"
+        ? "Неверный пароль."
+        : (
+            error.message ||
+            "Не удалось войти в админ-панель."
+          );
+
+  }
 }
 
 
@@ -2730,6 +3065,9 @@ document
 
       adminUnlocked =
         false;
+
+      adminToken =
+        "";
 
       showScreen(
         "start"
@@ -2749,6 +3087,9 @@ document
 
       adminUnlocked =
         false;
+
+      adminToken =
+        "";
 
       showScreen(
         "start"
@@ -2905,7 +3246,7 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       const quest =
         adminQuest();
@@ -2945,17 +3286,44 @@ document
           .value;
 
 
-      saveData();
+      try {
 
-      renderDays();
+        await apiPost(
+          "setQuestPassword",
+          {
+            adminToken,
+            questId:
+              adminQuestId,
+            day:
+              quest.day,
+            password:
+              quest.password
+          }
+        );
 
-      adminStatus(
-        "Настройки дня сохранены."
-      );
 
+        saveData();
+
+        renderDays();
+
+
+        adminStatus(
+          "Настройки дня и пароль сохранены."
+        );
+
+      }
+
+      catch (error) {
+
+        adminStatus(
+          error.message ||
+          "Не удалось сохранить пароль дня на сервере.",
+          true
+        );
+
+      }
     }
   );
-
 
 /* АДМИН — ОБЪЕКТЫ */
 
@@ -4625,6 +4993,30 @@ document
         adminQuestId;
 
 
+      previewMode =
+        true;
+
+
+      playToken =
+        "";
+
+
+      gameStartedAt =
+        Date.now();
+
+
+      gameErrors =
+        0;
+
+
+      gameHints =
+        0;
+
+
+      questCompleting =
+        false;
+
+
       gameState =
         createGameState();
 
@@ -4830,6 +5222,13 @@ document
     "click",
     () => {
 
+      if (
+        !previewMode
+      ) {
+        gameHints += 1;
+      }
+
+
       openOverlay(`
         <h3>
           Подсказка
@@ -4890,6 +5289,19 @@ document
           () => {
 
             closeOverlay();
+
+
+            playToken =
+              "";
+
+
+            previewMode =
+              false;
+
+
+            questCompleting =
+              false;
+
 
             showScreen(
               "start"
