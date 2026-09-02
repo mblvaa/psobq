@@ -113,6 +113,7 @@ button {
 
 .subtitle {
   color: var(--muted);
+
   margin-top: 8px;
 }
 
@@ -148,7 +149,6 @@ button {
   min-height: 120px;
 
   border: 0;
-
   border-radius: 22px;
 
   padding: 18px;
@@ -184,6 +184,7 @@ button {
 
 .day-btn strong {
   display: block;
+
   font-size: 24px;
 }
 
@@ -207,7 +208,7 @@ button {
 
 
 /* =========================================================
-   ПОЛЯ ВВОДА
+   ВХОД
 ========================================================= */
 
 .login-form {
@@ -254,8 +255,9 @@ button {
 /* =========================================================
    ИГРОВОЙ ЭКРАН
 
-   Панели остаются на месте.
-   Скроллится только сцена между ними.
+   Никакой нижней панели больше нет.
+   Верхняя панель остается на месте.
+   Все остальное пространство получает аптека.
 ========================================================= */
 
 .game-screen {
@@ -306,6 +308,8 @@ button {
   flex-direction: column;
 
   gap: 2px;
+
+  min-width: 0;
 }
 
 .game-title__small {
@@ -320,21 +324,20 @@ button {
   display: flex;
 
   gap: 8px;
-}
 
-.topbar-actions {
-  display: flex;
+  align-items: center;
 
-  gap: 8px;
+  flex: 0 0 auto;
 }
 
 
 /* =========================================================
    СЦЕНА
 
-   ВАЖНО:
-   scene-stage — единая система координат
-   для картинки и всех hotspot.
+   Внутри scene-stage находятся одновременно
+   изображение и hotspots.
+
+   Поэтому их координаты совпадают.
 ========================================================= */
 
 .scene-wrap {
@@ -354,15 +357,6 @@ button {
   -webkit-overflow-scrolling: touch;
 }
 
-
-/*
-  Этот блок имеет ровно тот же размер,
-  что и изображение аптеки.
-
-  Именно относительно него считаются
-  проценты X, Y, ширины и высоты hotspot.
-*/
-
 .scene-stage {
   position: relative;
 
@@ -372,13 +366,6 @@ button {
 
   line-height: 0;
 }
-
-
-/*
-  Картинка занимает всю ширину stage.
-  Высота вычисляется автоматически
-  по ее настоящим пропорциям.
-*/
 
 .scene-image {
   display: block;
@@ -392,14 +379,6 @@ button {
 
   -webkit-user-drag: none;
 }
-
-
-/*
-  Слой зон натянут ТОЧНО поверх картинки.
-
-  Не задаем ему отдельную высоту
-  относительно окна браузера.
-*/
 
 .hotspots {
   position: absolute;
@@ -463,89 +442,14 @@ button {
 
 
 /* =========================================================
-   НИЖНЯЯ ПАНЕЛЬ
+   СКРЫТЫЕ ТЕХНИЧЕСКИЕ СЛОТЫ ИНВЕНТАРЯ
 
-   В HTML она называется game-bottom-bar.
+   app.js продолжает их заполнять,
+   но игрок их не видит.
 ========================================================= */
 
-.game-bottom-bar {
-  flex: 0 0 auto;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 10px;
-
-  padding: 10px 12px;
-
-  background: #17191f;
-
-  border-top:
-    1px solid rgba(255, 255, 255, 0.06);
-
-  position: relative;
-
-  z-index: 5;
-}
-
-.inventory-title {
-  flex: 0 0 auto;
-
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 8px 12px;
-
-  border: 0;
-
-  border-radius: 10px;
-
-  background: transparent;
-
-  color:
-    rgba(255, 255, 255, 0.86);
-
-  font-weight: 800;
-
-  cursor: pointer;
-}
-
-.inventory-title:hover {
-  background:
-    rgba(255, 255, 255, 0.06);
-}
-
-.inventory-slots {
-  flex: 1;
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(6, minmax(36px, 1fr));
-
-  gap: 8px;
-}
-
-.inventory-slot {
-  min-height: 48px;
-
-  border:
-    1px dashed
-    rgba(255, 255, 255, 0.18);
-
-  border-radius: 12px;
-
-  display: grid;
-
-  place-items: center;
-
-  color: var(--muted);
-
-  font-size: 12px;
+.inventory-slots--hidden {
+  display: none !important;
 }
 
 
@@ -680,7 +584,7 @@ button {
 
 
 /* =========================================================
-   ИНВЕНТАРЬ / ПОДСКАЗКИ
+   СОДЕРЖИМОЕ ИНВЕНТАРЯ
 ========================================================= */
 
 .inventory-item {
@@ -895,6 +799,9 @@ button {
   color: #ffffff;
 }
 
+
+/* Верхняя панель */
+
 .topbar-btn {
   display: inline-flex;
 
@@ -922,6 +829,8 @@ button {
   cursor: pointer;
 
   box-shadow: none;
+
+  white-space: nowrap;
 
   transition:
     background 0.16s ease,
@@ -1222,6 +1131,24 @@ button:focus-visible {
 
 
 /* =========================================================
+   ПЛАНШЕТ
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .topbar-btn span {
+    display: none;
+  }
+
+  .topbar-btn {
+    width: 42px;
+
+    padding: 8px;
+  }
+}
+
+
+/* =========================================================
    ТЕЛЕФОН
 ========================================================= */
 
@@ -1250,42 +1177,20 @@ button:focus-visible {
     font-size: 14px;
   }
 
+  .game-title__small {
+    font-size: 9px;
+  }
 
   /*
-    На телефоне широкой становится именно
-    единая сцена, а не картинка и hotspots
-    по отдельности.
-
-    Благодаря этому они никогда
-    не разъедутся.
+    Вся сцена увеличивается целиком.
+    Картинка и hotspots остаются
+    в одной системе координат.
   */
 
   .scene-stage {
     width: 1350px;
 
     min-width: 1350px;
-  }
-
-
-  .game-bottom-bar {
-    padding: 7px 8px;
-  }
-
-  .inventory-title {
-    min-width: 48px;
-
-    padding: 8px;
-  }
-
-  .inventory-slots {
-    grid-template-columns:
-      repeat(4, minmax(34px, 1fr));
-
-    gap: 6px;
-  }
-
-  .inventory-slot {
-    min-height: 42px;
   }
 
   .admin-grid,
@@ -1313,22 +1218,8 @@ button:focus-visible {
 
 
 /* =========================================================
-   ОЧЕНЬ УЗКИЙ ЭКРАН
+   ОЧЕНЬ УЗКИЕ ЭКРАНЫ
 ========================================================= */
-
-@media (max-width: 620px) {
-
-  .topbar-btn span {
-    display: none;
-  }
-
-  .topbar-btn {
-    width: 42px;
-
-    padding: 8px;
-  }
-}
-
 
 @media (max-width: 420px) {
 
@@ -1336,16 +1227,15 @@ button:focus-visible {
     min-height: 52px;
   }
 
-  .game-bottom-bar {
-    min-height: 58px;
+  .game-actions {
+    gap: 5px;
   }
 
-  .inventory-slots {
-    grid-template-columns:
-      repeat(4, minmax(30px, 1fr));
-  }
+  .topbar-btn {
+    width: 38px;
 
-  .inventory-slot {
     min-height: 38px;
+
+    padding: 6px;
   }
 }
