@@ -670,6 +670,32 @@ const DEFAULT_DATA = {
 };
 
 
+/* =========================================================
+   ОБЩАЯ БИБЛИОТЕКА ПРЕДМЕТОВ КОМНАТЫ
+
+   Геометрия предметов (название, X, Y, ширина и высота)
+   общая для всех дней.
+
+   В каждом дне отдельно хранятся только:
+   - активность предмета;
+   - условие доступа;
+   - действие;
+   - связанное задание / пароль / награда.
+========================================================= */
+
+DEFAULT_DATA.roomObjects =
+  DEFAULT_DATA.quests.day1.objects.map(
+    object => ({
+      id: object.id,
+      name: object.name,
+      x: object.x,
+      y: object.y,
+      width: object.width,
+      height: object.height
+    })
+  );
+
+
 let APP_DATA =
   structuredClone(
     DEFAULT_DATA
@@ -851,24 +877,262 @@ function loadData() {
     );
 
 
-  if (!raw) {
-    return;
+  if (raw) {
+
+    try {
+      APP_DATA =
+        JSON.parse(
+          raw
+        );
+    }
+
+    catch (error) {
+      console.error(
+        "Ошибка загрузки конфигурации",
+        error
+      );
+    }
   }
 
 
-  try {
-    APP_DATA =
-      JSON.parse(
-        raw
+  migrateRoomObjects();
+}
+
+
+function roomObjectFromLegacy(
+  object
+) {
+
+  return {
+    id: object.id,
+    name:
+      object.name ||
+      "Предмет",
+    x:
+      Number.isFinite(
+        Number(object.x)
+      )
+        ? Number(object.x)
+        : 50,
+    y:
+      Number.isFinite(
+        Number(object.y)
+      )
+        ? Number(object.y)
+        : 50,
+    width:
+      Number.isFinite(
+        Number(object.width)
+      )
+        ? Number(object.width)
+        : 10,
+    height:
+      Number.isFinite(
+        Number(object.height)
+      )
+        ? Number(object.height)
+        : 10
+  };
+}
+
+
+function defaultQuestObjectConfig(
+  id,
+  active = false
+) {
+
+  return {
+    id,
+    active,
+
+    requirement: {
+      type: "none",
+      key: "",
+      consume: false
+    },
+
+    fallback: "",
+
+    action: {
+      type: "message",
+      message:
+        "Пока здесь ничего полезного."
+    }
+  };
+}
+
+
+function migrateRoomObjects() {
+
+  if (
+    !Array.isArray(
+      APP_DATA.roomObjects
+    ) ||
+    APP_DATA.roomObjects.length === 0
+  ) {
+
+    const day1Objects =
+      APP_DATA.quests?.day1?.objects;
+
+
+    const source =
+      Array.isArray(day1Objects) &&
+      day1Objects.length
+        ? day1Objects
+        : DEFAULT_DATA.roomObjects;
+
+
+    APP_DATA.roomObjects =
+      source.map(
+        roomObjectFromLegacy
       );
   }
 
-  catch (error) {
-    console.error(
-      "Ошибка загрузки конфигурации",
-      error
+
+  const knownIds =
+    new Set(
+      APP_DATA.roomObjects.map(
+        object => object.id
+      )
+    );
+
+
+  Object.values(
+    APP_DATA.quests || {}
+  ).forEach(
+    quest => {
+
+      if (!Array.isArray(quest.objects)) {
+        quest.objects = [];
+      }
+
+
+      quest.objects.forEach(
+        object => {
+
+          if (
+            object?.id &&
+            !knownIds.has(
+              object.id
+            )
+          ) {
+
+            APP_DATA.roomObjects.push(
+              roomObjectFromLegacy(
+                object
+              )
+            );
+
+            knownIds.add(
+              object.id
+            );
+          }
+        }
+      );
+    }
+  );
+
+
+  APP_DATA.roomObjects =
+    APP_DATA.roomObjects.map(
+      roomObjectFromLegacy
+    );
+}
+
+
+function roomObjectDefinition(
+  id
+) {
+
+  return APP_DATA.roomObjects
+    .find(
+      object =>
+        object.id === id
+    );
+}
+
+
+function questObjectConfig(
+  quest,
+  id,
+  create = false
+) {
+
+  let object =
+    quest.objects.find(
+      item =>
+        item.id === id
+    );
+
+
+  if (
+    !object &&
+    create
+  ) {
+
+    object =
+      defaultQuestObjectConfig(
+        id,
+        false
+      );
+
+    quest.objects.push(
+      object
     );
   }
+
+
+  return object || null;
+}
+
+
+function effectiveQuestObject(
+  quest,
+  id
+) {
+
+  const definition =
+    roomObjectDefinition(id);
+
+
+  if (!definition) {
+    return null;
+  }
+
+
+  const config =
+    questObjectConfig(
+      quest,
+      id,
+      false
+    ) ||
+    defaultQuestObjectConfig(
+      id,
+      false
+    );
+
+
+  return {
+    ...config,
+    ...definition,
+    id
+  };
+}
+
+
+function questObjects(
+  quest
+) {
+
+  return APP_DATA.roomObjects
+    .map(
+      definition =>
+        effectiveQuestObject(
+          quest,
+          definition.id
+        )
+    )
+    .filter(Boolean);
 }
 
 
@@ -1047,7 +1311,7 @@ function renderHotspots() {
     currentQuest();
 
 
-  quest.objects
+  questObjects(quest)
     .filter(
       object =>
         object.active !== false
@@ -3329,10 +3593,6 @@ document
 
 function renderAdminObjectList() {
 
-  const quest =
-    adminQuest();
-
-
   const select =
     document.getElementById(
       "admin-object-select"
@@ -3343,34 +3603,35 @@ function renderAdminObjectList() {
     "";
 
 
-  quest.objects.forEach(
-    object => {
+  APP_DATA.roomObjects
+    .forEach(
+      object => {
 
-      const option =
-        document.createElement(
-          "option"
+        const option =
+          document.createElement(
+            "option"
+          );
+
+
+        option.value =
+          object.id;
+
+
+        option.textContent =
+          object.name;
+
+
+        select.appendChild(
+          option
         );
 
-
-      option.value =
-        object.id;
-
-
-      option.textContent =
-        object.name;
-
-
-      select.appendChild(
-        option
-      );
-
-    }
-  );
+      }
+    );
 
 
   if (
     !adminObjectId ||
-    !quest.objects.some(
+    !APP_DATA.roomObjects.some(
       object =>
         object.id ===
         adminObjectId
@@ -3378,7 +3639,7 @@ function renderAdminObjectList() {
   ) {
 
     adminObjectId =
-      quest.objects[0]
+      APP_DATA.roomObjects[0]
         ?.id ||
       null;
 
@@ -3398,7 +3659,9 @@ function renderAdminObjectList() {
   }
 
   else {
+
     clearAdminObject();
+
   }
 
 
@@ -3412,17 +3675,57 @@ function renderAdminObjectList() {
 
 function selectedAdminObject() {
 
-  return adminQuest()
-    .objects
-    .find(
-      object =>
-        object.id ===
-        adminObjectId
-    );
+  if (!adminObjectId) {
+    return null;
+  }
+
+
+  return effectiveQuestObject(
+    adminQuest(),
+    adminObjectId
+  );
+}
+
+
+function selectedRoomObjectDefinition() {
+
+  if (!adminObjectId) {
+    return null;
+  }
+
+
+  return roomObjectDefinition(
+    adminObjectId
+  );
+}
+
+
+function selectedQuestObjectConfig(
+  create = false
+) {
+
+  if (!adminObjectId) {
+    return null;
+  }
+
+
+  return questObjectConfig(
+    adminQuest(),
+    adminObjectId,
+    create
+  );
 }
 
 
 function clearAdminObject() {
+
+  document
+    .getElementById(
+      "admin-object-active"
+    )
+    .checked =
+    false;
+
 
   [
     "admin-object-name",
@@ -3452,6 +3755,35 @@ function clearAdminObject() {
 
     }
   );
+
+
+  document
+    .getElementById(
+      "admin-requirement-type"
+    )
+    .value =
+    "none";
+
+
+  document
+    .getElementById(
+      "admin-requirement-consume"
+    )
+    .checked =
+    false;
+
+
+  document
+    .getElementById(
+      "admin-object-action"
+    )
+    .value =
+    "message";
+
+
+  updateRequirementFields();
+
+  updateObjectActionFields();
 }
 
 
@@ -3462,7 +3794,11 @@ function loadAdminObject() {
 
 
   if (!object) {
+
+    clearAdminObject();
+
     return;
+
   }
 
 
@@ -3471,7 +3807,7 @@ function loadAdminObject() {
       "admin-object-active"
     )
     .checked =
-    object.active !== false;
+    object.active === true;
 
 
   document
@@ -3527,7 +3863,7 @@ function loadAdminObject() {
       "admin-requirement-type"
     )
     .value =
-    req.type;
+    req.type || "none";
 
 
   document
@@ -3558,7 +3894,9 @@ function loadAdminObject() {
 
   const action =
     object.action || {
-      type: "message"
+      type: "message",
+      message:
+        "Пока здесь ничего полезного."
     };
 
 
@@ -3567,7 +3905,8 @@ function loadAdminObject() {
       "admin-object-action"
     )
     .value =
-    action.type;
+    action.type ||
+    "message";
 
 
   document
@@ -3576,6 +3915,13 @@ function loadAdminObject() {
     )
     .value =
     action.message || "";
+
+
+  fillTaskOptions(
+    document.getElementById(
+      "admin-object-task"
+    )
+  );
 
 
   document
@@ -3666,6 +4012,17 @@ document
   );
 
 
+/*
+  Новый предмет комнаты создается ОДИН РАЗ
+  в общей библиотеке.
+
+  Во всех днях он сразу становится доступен
+  для настройки.
+
+  В текущем дне новый предмет включаем,
+  в остальных днях оставляем выключенным.
+*/
+
 document
   .getElementById(
     "admin-add-object"
@@ -3678,33 +4035,36 @@ document
         uid("object");
 
 
-      adminQuest()
-        .objects
-        .push({
-          id,
-          name:
-            "Новый предмет",
-          active: true,
+      APP_DATA.roomObjects.push({
+        id,
 
-          x: 50,
-          y: 50,
-          width: 10,
-          height: 10,
+        name:
+          "Новый предмет",
 
-          requirement: {
-            type: "none",
-            key: "",
-            consume: false
-          },
+        x: 50,
+        y: 50,
 
-          fallback: "",
+        width: 10,
+        height: 10
+      });
 
-          action: {
-            type: "message",
-            message:
-              "Новый предмет."
+
+      Object.entries(
+        APP_DATA.quests
+      )
+        .forEach(
+          ([questId, quest]) => {
+
+            quest.objects.push(
+              defaultQuestObjectConfig(
+                id,
+                questId ===
+                  adminQuestId
+              )
+            );
+
           }
-        });
+        );
 
 
       adminObjectId =
@@ -3715,9 +4075,25 @@ document
 
       renderAdminObjectList();
 
+
+      adminStatus(
+        "Предмет добавлен в общую комнату."
+      );
+
     }
   );
 
+
+/*
+  Удаление предмета — глобальное.
+
+  Если удалить телефон как физический объект,
+  он исчезнет из всех дней.
+
+  Если предмет нужен в других днях,
+  но не нужен в текущем — его надо просто
+  выключить галочкой «Активен».
+*/
 
 document
   .getElementById(
@@ -3734,23 +4110,48 @@ document
       }
 
 
+      const definition =
+        selectedRoomObjectDefinition();
+
+
+      if (!definition) {
+        return;
+      }
+
+
       if (
         !confirm(
-          "Удалить этот предмет?"
+          `Удалить предмет «${definition.name}» из комнаты во всех днях?`
         )
       ) {
         return;
       }
 
 
-      adminQuest().objects =
-        adminQuest()
-          .objects
+      APP_DATA.roomObjects =
+        APP_DATA.roomObjects
           .filter(
             object =>
               object.id !==
               adminObjectId
           );
+
+
+      Object.values(
+        APP_DATA.quests
+      )
+        .forEach(
+          quest => {
+
+            quest.objects =
+              quest.objects.filter(
+                object =>
+                  object.id !==
+                  adminObjectId
+              );
+
+          }
+        );
 
 
       adminObjectId =
@@ -3760,6 +4161,11 @@ document
       saveData();
 
       renderAdminObjectList();
+
+
+      adminStatus(
+        "Предмет удален из всех дней."
+      );
 
     }
   );
@@ -3833,27 +4239,33 @@ function updateObjectActionFields() {
   if (
     type === "message"
   ) {
+
     showActionField(
       "object-action-message"
     );
+
   }
 
 
   if (
     type === "task"
   ) {
+
     showActionField(
       "object-action-task"
     );
+
   }
 
 
   if (
     type === "giveItem"
   ) {
+
     showActionField(
       "object-action-item"
     );
+
   }
 
 
@@ -3869,15 +4281,18 @@ function updateObjectActionFields() {
     showActionField(
       "object-action-task"
     );
+
   }
 
 
   if (
     type === "codeLock"
   ) {
+
     showActionField(
       "object-action-code"
     );
+
   }
 }
 
@@ -3905,6 +4320,16 @@ document
   );
 
 
+/*
+  СОХРАНЕНИЕ ПРЕДМЕТА
+
+  name/x/y/width/height
+  сохраняются в ОБЩЕЙ комнате.
+
+  active/requirement/fallback/action
+  сохраняются только для выбранного дня.
+*/
+
 document
   .getElementById(
     "admin-save-object"
@@ -3913,33 +4338,39 @@ document
     "click",
     () => {
 
-      const object =
-        selectedAdminObject();
+      const definition =
+        selectedRoomObjectDefinition();
 
 
-      if (!object) {
+      if (!definition) {
         return;
       }
 
 
-      object.active =
-        document
-          .getElementById(
-            "admin-object-active"
-          )
-          .checked;
+      const config =
+        selectedQuestObjectConfig(
+          true
+        );
 
 
-      object.name =
+      if (!config) {
+        return;
+      }
+
+
+      /* ОБЩИЕ ПАРАМЕТРЫ */
+
+      definition.name =
         document
           .getElementById(
             "admin-object-name"
           )
           .value
-          .trim();
+          .trim() ||
+        "Предмет";
 
 
-      object.x =
+      definition.x =
         Number(
           document
             .getElementById(
@@ -3949,7 +4380,7 @@ document
         );
 
 
-      object.y =
+      definition.y =
         Number(
           document
             .getElementById(
@@ -3959,7 +4390,7 @@ document
         );
 
 
-      object.width =
+      definition.width =
         Number(
           document
             .getElementById(
@@ -3969,7 +4400,7 @@ document
         );
 
 
-      object.height =
+      definition.height =
         Number(
           document
             .getElementById(
@@ -3979,7 +4410,17 @@ document
         );
 
 
-      object.requirement = {
+      /* НАСТРОЙКИ ТЕКУЩЕГО ДНЯ */
+
+      config.active =
+        document
+          .getElementById(
+            "admin-object-active"
+          )
+          .checked;
+
+
+      config.requirement = {
         type:
           document
             .getElementById(
@@ -4004,7 +4445,7 @@ document
       };
 
 
-      object.fallback =
+      config.fallback =
         document
           .getElementById(
             "admin-object-fallback"
@@ -4025,7 +4466,7 @@ document
         type === "message"
       ) {
 
-        object.action = {
+        config.action = {
           type,
 
           message:
@@ -4043,7 +4484,7 @@ document
         type === "task"
       ) {
 
-        object.action = {
+        config.action = {
           type,
 
           taskId:
@@ -4061,7 +4502,7 @@ document
         type === "giveItem"
       ) {
 
-        object.action = {
+        config.action = {
           type,
 
           item: {
@@ -4099,7 +4540,7 @@ document
         "passwordTask"
       ) {
 
-        object.action = {
+        config.action = {
           type,
 
           password:
@@ -4125,7 +4566,7 @@ document
         "codeLock"
       ) {
 
-        object.action = {
+        config.action = {
           type,
 
           code:
@@ -4157,8 +4598,9 @@ document
 
       renderAdminObjectList();
 
+
       adminStatus(
-        "Предмет сохранен."
+        "Предмет сохранен. Положение общее, действие настроено для этого дня."
       );
 
     }
@@ -4171,8 +4613,32 @@ function fillTaskOptions(
   select
 ) {
 
+  if (!select) {
+    return;
+  }
+
+
   select.innerHTML =
     "";
+
+
+  const emptyOption =
+    document.createElement(
+      "option"
+    );
+
+
+  emptyOption.value =
+    "";
+
+
+  emptyOption.textContent =
+    "— не выбрано —";
+
+
+  select.appendChild(
+    emptyOption
+  );
 
 
   Object.values(
@@ -4247,7 +4713,9 @@ function renderAdminTaskList() {
   }
 
   else {
+
     clearAdminTask();
+
   }
 
 
@@ -4281,6 +4749,54 @@ function clearAdminTask() {
   document
     .getElementById(
       "admin-task-question"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-task-options"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-task-correct"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-task-answers"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-task-order"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-task-pairs"
+    )
+    .value =
+    "";
+
+
+  document
+    .getElementById(
+      "admin-task-success"
     )
     .value =
     "";
@@ -4393,6 +4909,7 @@ function loadAdminTask() {
 
   updateTaskEditor();
 
+
   renderRewards(
     task.rewards || []
   );
@@ -4408,10 +4925,23 @@ document
     event => {
 
       adminTaskId =
-        event.target.value;
+        event.target.value ||
+        null;
 
 
-      loadAdminTask();
+      if (
+        adminTaskId
+      ) {
+
+        loadAdminTask();
+
+      }
+
+      else {
+
+        clearAdminTask();
+
+      }
 
     }
   );
@@ -4432,6 +4962,7 @@ document
       adminQuest()
         .tasks[id] = {
           id,
+
           title:
             "Новое задание",
 
@@ -4466,6 +4997,11 @@ document
 
       renderAdminTaskList();
 
+
+      adminStatus(
+        "Новое задание добавлено."
+      );
+
     }
   );
 
@@ -4494,10 +5030,43 @@ document
       }
 
 
+      const removedTaskId =
+        adminTaskId;
+
+
       delete adminQuest()
         .tasks[
-          adminTaskId
+          removedTaskId
         ];
+
+
+      /*
+        Если предмет текущего дня ссылался
+        на удаленное задание, убираем ссылку,
+        но сам предмет комнаты не удаляем.
+      */
+
+      adminQuest()
+        .objects
+        .forEach(
+          object => {
+
+            if (
+              object.action?.taskId ===
+              removedTaskId
+            ) {
+
+              object.action = {
+                type: "message",
+
+                message:
+                  "Для этого предмета еще не назначено задание."
+              };
+
+            }
+
+          }
+        );
 
 
       adminTaskId =
@@ -4507,6 +5076,13 @@ document
       saveData();
 
       renderAdminTaskList();
+
+      renderAdminObjectList();
+
+
+      adminStatus(
+        "Задание удалено."
+      );
 
     }
   );
@@ -4537,20 +5113,24 @@ function updateTaskEditor() {
       "task-editor-choice"
     );
 
+
   const correct =
     document.getElementById(
       "task-editor-correct"
     );
+
 
   const text =
     document.getElementById(
       "task-editor-text"
     );
 
+
   const ordering =
     document.getElementById(
       "task-editor-ordering"
     );
+
 
   const matching =
     document.getElementById(
@@ -4971,6 +5551,7 @@ document
 
       renderAdminObjectList();
 
+
       adminStatus(
         "Задание сохранено."
       );
@@ -5071,6 +5652,15 @@ document
         );
 
 
+      /*
+        У day1 уже есть настроенные объекты.
+        Для остальных дней общая библиотека
+        будет показываться автоматически.
+      */
+
+      migrateRoomObjects();
+
+
       adminQuestId =
         "day1";
 
@@ -5083,9 +5673,12 @@ document
         null;
 
 
+      saveData();
+
       renderDays();
 
       renderAdminQuestSelect();
+
 
       adminStatus(
         "Исходная конфигурация восстановлена."
@@ -5225,7 +5818,9 @@ document
       if (
         !previewMode
       ) {
+
         gameHints += 1;
+
       }
 
 
@@ -5332,16 +5927,32 @@ overlay.addEventListener(
       event.target ===
       overlay
     ) {
+
       closeOverlay();
+
     }
 
   }
 );
 
 
-/* ЗАПУСК */
+/* =========================================================
+   ЗАПУСК
+
+   loadData() загружает старые настройки.
+
+   migrateRoomObjects() внутри loadData()
+   автоматически превращает старую структуру
+   в новую с общей библиотекой предметов.
+
+   saveData() сразу сохраняет миграцию,
+   чтобы при следующем открытии браузера
+   она уже была постоянной.
+========================================================= */
 
 loadData();
+
+saveData();
 
 renderDays();
 
