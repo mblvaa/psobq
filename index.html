@@ -216,6 +216,15 @@
       <div class="game-actions">
 
         <button
+          id="inventory-btn"
+          class="topbar-btn"
+          type="button"
+        >
+          🎒
+          <span>Инвентарь</span>
+        </button>
+
+        <button
           id="notes-btn"
           class="topbar-btn"
           type="button"
@@ -247,6 +256,11 @@
     </header>
 
 
+    <!--
+      ДВИГАЕТСЯ ТОЛЬКО ЭТА ОБЛАСТЬ.
+      Верхняя панель остается на месте.
+    -->
+
     <div
       id="scene-wrap"
       class="scene-wrap"
@@ -272,22 +286,17 @@
     </div>
 
 
-    <div class="game-bottom-bar">
+    <!--
+      Технический контейнер.
+      Он нужен существующему app.js,
+      но визуально больше не показывается.
+    -->
 
-      <button
-        id="inventory-btn"
-        class="inventory-title"
-        type="button"
-      >
-        🎒 Инвентарь
-      </button>
-
-      <div
-        id="inventory-slots"
-        class="inventory-slots"
-      ></div>
-
-    </div>
+    <div
+      id="inventory-slots"
+      class="inventory-slots inventory-slots--hidden"
+      aria-hidden="true"
+    ></div>
 
   </section>
 
