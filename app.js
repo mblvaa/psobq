@@ -3,62 +3,155 @@ const STORAGE_KEY = "psychologyEscapeBuilderV3";
 
 let playToken = "";
 let adminToken = "";
+
 let gameStartedAt = 0;
 let gameErrors = 0;
 let gameHints = 0;
+
 let previewMode = false;
 let questCompleting = false;
+
+
+/* =========================================================
+   СЕРВЕРНАЯ СИНХРОНИЗАЦИЯ
+========================================================= */
 
 let serverConfigExists = false;
 let serverConfigRevision = 0;
 let serverConfigUpdatedAt = "";
-let serverSaveChain = Promise.resolve();
+
+let serverSaveChain =
+  Promise.resolve();
 
 
-async function apiPost(action, data = {}) {
-  const response = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify({
-      action,
-      ...data
-    })
-  });
+/*
+  Копия localStorage, найденная при запуске.
 
-  const text = await response.text();
+  Это особенно важно сейчас:
+  в ней лежат ваши изменения Дня 3,
+  которые предыдущая версия не смогла
+  отправить на сервер.
+*/
+
+let startupLocalSnapshot =
+  null;
+
+let startupServerSnapshot =
+  null;
+
+let localDiffersFromServer =
+  false;
+
+
+/* =========================================================
+   API
+========================================================= */
+
+async function apiPost(
+  action,
+  data = {}
+) {
+
+  const response =
+    await fetch(
+      API_URL,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "text/plain;charset=utf-8"
+        },
+
+        body:
+          JSON.stringify({
+            action,
+            ...data
+          })
+      }
+    );
+
+
+  const text =
+    await response.text();
+
 
   let result;
 
+
   try {
-    result = JSON.parse(text);
-  } catch (error) {
-    throw new Error("Сервер вернул некорректный ответ.");
+
+    result =
+      JSON.parse(
+        text
+      );
+
   }
 
-  if (!response.ok || result.ok === false) {
+  catch (error) {
+
+    console.error(
+      "Ответ сервера:",
+      text
+    );
+
+
+    throw new Error(
+      "Сервер вернул некорректный ответ."
+    );
+
+  }
+
+
+  if (
+    !response.ok ||
+    result.ok === false
+  ) {
+
     throw new Error(
       result.error ||
       result.message ||
       "Ошибка связи с сервером."
     );
+
   }
 
+
   return result;
+
 }
 
 
-function makeEmptyQuest(day) {
+/* =========================================================
+   БАЗОВЫЕ ДАННЫЕ
+========================================================= */
+
+function makeEmptyQuest(
+  day
+) {
+
   return {
     day,
-    enabled: false,
-    title: `День ${day}`,
-    topic: "",
-    password: `day${day}`,
-    tasks: {},
-    objects: []
+
+    enabled:
+      false,
+
+    title:
+      `День ${day}`,
+
+    topic:
+      "",
+
+    password:
+      `day${day}`,
+
+    tasks:
+      {},
+
+    objects:
+      []
   };
+
 }
 
 
@@ -67,18 +160,35 @@ const DEFAULT_DATA = {
   quests: {
 
     day1: {
-      day: 1,
-      enabled: true,
-      title: "Первый день в аптеке",
-      topic: "Введение в психологию общения",
-      password: "day1",
+
+      day:
+        1,
+
+      enabled:
+        true,
+
+      title:
+        "Первый день в аптеке",
+
+      topic:
+        "Введение в психологию общения",
+
+      password:
+        "day1",
+
 
       tasks: {
 
         psychology: {
-          id: "psychology",
-          title: "Психология",
-          type: "singleChoice",
+
+          id:
+            "psychology",
+
+          title:
+            "Психология",
+
+          type:
+            "singleChoice",
 
           question:
             "Что является предметом изучения психологии?",
@@ -90,37 +200,66 @@ const DEFAULT_DATA = {
             "Способы лечения психических заболеваний"
           ],
 
-          correct: [0],
-          answers: [],
-          order: [],
-          pairs: [],
+          correct: [
+            0
+          ],
+
+          answers:
+            [],
+
+          order:
+            [],
+
+          pairs:
+            [],
 
           successMessage:
             "Из трубки слышится сообщение: «Ищите там, где всегда холодно»",
 
           rewards: [
+
             {
-              type: "flag",
-              value: "fridgeClueKnown",
-              name: "",
-              icon: ""
+              type:
+                "flag",
+
+              value:
+                "fridgeClueKnown",
+
+              name:
+                "",
+
+              icon:
+                ""
             },
 
             {
-              type: "note",
+              type:
+                "note",
+
               value:
                 "Телефон: «Ищите там, где всегда холодно».",
-              name: "",
-              icon: ""
+
+              name:
+                "",
+
+              icon:
+                ""
             }
+
           ]
         },
 
 
         psyche: {
-          id: "psyche",
-          title: "Психика",
-          type: "singleChoice",
+
+          id:
+            "psyche",
+
+          title:
+            "Психика",
+
+          type:
+            "singleChoice",
 
           question:
             "Как называется свойство высокоорганизованной материи отражать объективную действительность?",
@@ -132,36 +271,64 @@ const DEFAULT_DATA = {
             "Память"
           ],
 
-          correct: [0],
-          answers: [],
-          order: [],
-          pairs: [],
+          correct: [
+            0
+          ],
+
+          answers:
+            [],
+
+          order:
+            [],
+
+          pairs:
+            [],
 
           successMessage:
             "За карточкой обнаруживается металлическая пластинка с цифрой 7.",
 
           rewards: [
+
             {
-              type: "note",
-              value: "Найдена цифра: 7.",
-              name: "",
-              icon: ""
+              type:
+                "note",
+
+              value:
+                "Найдена цифра: 7.",
+
+              name:
+                "",
+
+              icon:
+                ""
             }
+
           ]
         },
 
 
         history: {
-          id: "history",
-          title: "Основные этапы развития психологии",
-          type: "ordering",
+
+          id:
+            "history",
+
+          title:
+            "Основные этапы развития психологии",
+
+          type:
+            "ordering",
 
           question:
             "Расположите этапы развития представлений о предмете психологии в правильном порядке.",
 
-          options: [],
-          correct: [],
-          answers: [],
+          options:
+            [],
+
+          correct:
+            [],
+
+          answers:
+            [],
 
           order: [
             "Душа",
@@ -170,26 +337,42 @@ const DEFAULT_DATA = {
             "Психика"
           ],
 
-          pairs: [],
+          pairs:
+            [],
 
           successMessage:
             "На полях журнала обнаружена запись: PAVLOV.",
 
           rewards: [
+
             {
-              type: "note",
-              value: "Пароль от компьютера: PAVLOV.",
-              name: "",
-              icon: ""
+              type:
+                "note",
+
+              value:
+                "Пароль от компьютера: PAVLOV.",
+
+              name:
+                "",
+
+              icon:
+                ""
             }
+
           ]
         },
 
 
         mentalActivity: {
-          id: "mentalActivity",
-          title: "Психическая деятельность",
-          type: "singleChoice",
+
+          id:
+            "mentalActivity",
+
+          title:
+            "Психическая деятельность",
+
+          type:
+            "singleChoice",
 
           question:
             "Что наиболее точно описывает психическую деятельность?",
@@ -201,29 +384,52 @@ const DEFAULT_DATA = {
             "Любая физическая активность"
           ],
 
-          correct: [0],
-          answers: [],
-          order: [],
-          pairs: [],
+          correct: [
+            0
+          ],
+
+          answers:
+            [],
+
+          order:
+            [],
+
+          pairs:
+            [],
 
           successMessage:
             "На экране остается цифра 2.",
 
           rewards: [
+
             {
-              type: "note",
-              value: "Найдена цифра: 2.",
-              name: "",
-              icon: ""
+              type:
+                "note",
+
+              value:
+                "Найдена цифра: 2.",
+
+              name:
+                "",
+
+              icon:
+                ""
             }
+
           ]
         },
 
 
         everydayPsychology: {
-          id: "everydayPsychology",
-          title: "Житейская психология",
-          type: "multipleChoice",
+
+          id:
+            "everydayPsychology",
+
+          title:
+            "Житейская психология",
+
+          type:
+            "multipleChoice",
 
           question:
             "Какие признаки характерны для житейской психологии?",
@@ -235,53 +441,93 @@ const DEFAULT_DATA = {
             "Передается через наблюдения, советы и жизненный опыт"
           ],
 
-          correct: [0, 1, 3],
-          answers: [],
-          order: [],
-          pairs: [],
+          correct: [
+            0,
+            1,
+            3
+          ],
+
+          answers:
+            [],
+
+          order:
+            [],
+
+          pairs:
+            [],
 
           successMessage:
             "За упаковками обнаруживается небольшой ключ с символом ₽.",
 
           rewards: [
+
             {
-              type: "item",
-              value: "cashKey",
-              name: "Ключ от кассы",
-              icon: "🔑"
+              type:
+                "item",
+
+              value:
+                "cashKey",
+
+              name:
+                "Ключ от кассы",
+
+              icon:
+                "🔑"
             }
+
           ]
         },
 
 
         communicationPsychology: {
-          id: "communicationPsychology",
-          title: "Психология общения",
-          type: "textInput",
+
+          id:
+            "communicationPsychology",
+
+          title:
+            "Психология общения",
+
+          type:
+            "textInput",
 
           question:
             "Как называется раздел психологии, изучающий закономерности взаимодействия и общения людей? Введите словосочетание.",
 
-          options: [],
-          correct: [],
+          options:
+            [],
+
+          correct:
+            [],
 
           answers: [
             "психология общения"
           ],
 
-          order: [],
-          pairs: [],
+          order:
+            [],
+
+          pairs:
+            [],
 
           successMessage:
             "На внутренней стороне крышки кассы вы видите цифру 9.",
 
           rewards: [
+
             {
-              type: "note",
-              value: "Найдена цифра: 9.",
-              name: "",
-              icon: ""
+              type:
+                "note",
+
+              value:
+                "Найдена цифра: 9.",
+
+              name:
+                "",
+
+              icon:
+                ""
             }
+
           ]
         }
 
@@ -291,209 +537,378 @@ const DEFAULT_DATA = {
       objects: [
 
         {
-          id: "phone",
-          name: "Телефон",
-          active: true,
+          id:
+            "phone",
 
-          x: 10.5,
-          y: 79,
-          width: 13,
-          height: 22,
+          name:
+            "Телефон",
+
+          active:
+            true,
+
+          x:
+            10.5,
+
+          y:
+            79,
+
+          width:
+            13,
+
+          height:
+            22,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "task",
-            taskId: "psychology"
+            type:
+              "task",
+
+            taskId:
+              "psychology"
           }
         },
 
 
         {
-          id: "fridge",
-          name: "Холодильник",
-          active: true,
+          id:
+            "fridge",
 
-          x: 5.5,
-          y: 47,
-          width: 11,
-          height: 41,
+          name:
+            "Холодильник",
+
+          active:
+            true,
+
+          x:
+            5.5,
+
+          y:
+            47,
+
+          width:
+            11,
+
+          height:
+            41,
 
           requirement: {
-            type: "flag",
-            key: "fridgeClueKnown",
-            consume: false
+            type:
+              "flag",
+
+            key:
+              "fridgeClueKnown",
+
+            consume:
+              false
           },
 
           fallback:
             "В холодильнике стоят препараты. Ничего необычного вы пока не замечаете.",
 
           action: {
-            type: "giveItem",
+            type:
+              "giveItem",
 
             item: {
-              id: "smallKey",
-              name: "Маленький ключ",
-              icon: "🔑"
+              id:
+                "smallKey",
+
+              name:
+                "Маленький ключ",
+
+              icon:
+                "🔑"
             }
           }
         },
 
 
         {
-          id: "locker",
-          name: "Служебный шкафчик",
-          active: true,
+          id:
+            "locker",
 
-          x: 49.5,
-          y: 42,
-          width: 13,
-          height: 43,
+          name:
+            "Служебный шкафчик",
+
+          active:
+            true,
+
+          x:
+            49.5,
+
+          y:
+            42,
+
+          width:
+            13,
+
+          height:
+            43,
 
           requirement: {
-            type: "item",
-            key: "smallKey",
-            consume: true
+            type:
+              "item",
+
+            key:
+              "smallKey",
+
+            consume:
+              true
           },
 
           fallback:
             "Шкафчик заперт. На дверце маленькая замочная скважина.",
 
           action: {
-            type: "task",
-            taskId: "psyche"
+            type:
+              "task",
+
+            taskId:
+              "psyche"
           }
         },
 
 
         {
-          id: "journal",
-          name: "Журнал",
-          active: true,
+          id:
+            "journal",
 
-          x: 51,
-          y: 80,
-          width: 19,
-          height: 22,
+          name:
+            "Журнал",
+
+          active:
+            true,
+
+          x:
+            51,
+
+          y:
+            80,
+
+          width:
+            19,
+
+          height:
+            22,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "task",
-            taskId: "history"
+            type:
+              "task",
+
+            taskId:
+              "history"
           }
         },
 
 
         {
-          id: "computer",
-          name: "Компьютер",
-          active: true,
+          id:
+            "computer",
 
-          x: 28,
-          y: 72,
-          width: 22,
-          height: 29,
+          name:
+            "Компьютер",
+
+          active:
+            true,
+
+          x:
+            28,
+
+          y:
+            72,
+
+          width:
+            22,
+
+          height:
+            29,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "passwordTask",
-            password: "PAVLOV",
-            taskId: "mentalActivity"
+            type:
+              "passwordTask",
+
+            password:
+              "PAVLOV",
+
+            taskId:
+              "mentalActivity"
           }
         },
 
 
         {
-          id: "medicineCabinet",
-          name: "Шкаф препаратов",
-          active: true,
+          id:
+            "medicineCabinet",
 
-          x: 19,
-          y: 31,
-          width: 18,
-          height: 47,
+          name:
+            "Шкаф препаратов",
+
+          active:
+            true,
+
+          x:
+            19,
+
+          y:
+            31,
+
+          width:
+            18,
+
+          height:
+            47,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "task",
-            taskId: "everydayPsychology"
+            type:
+              "task",
+
+            taskId:
+              "everydayPsychology"
           }
         },
 
 
         {
-          id: "cashbox",
-          name: "Касса",
-          active: true,
+          id:
+            "cashbox",
 
-          x: 72.5,
-          y: 80,
-          width: 20,
-          height: 22,
+          name:
+            "Касса",
+
+          active:
+            true,
+
+          x:
+            72.5,
+
+          y:
+            80,
+
+          width:
+            20,
+
+          height:
+            22,
 
           requirement: {
-            type: "item",
-            key: "cashKey",
-            consume: true
+            type:
+              "item",
+
+            key:
+              "cashKey",
+
+            consume:
+              true
           },
 
           fallback:
             "Касса закрыта на ключ.",
 
           action: {
-            type: "task",
-            taskId: "communicationPsychology"
+            type:
+              "task",
+
+            taskId:
+              "communicationPsychology"
           }
         },
 
 
         {
-          id: "safe",
-          name: "Сейф",
-          active: true,
+          id:
+            "safe",
 
-          x: 61,
-          y: 47,
-          width: 11,
-          height: 31,
+          name:
+            "Сейф",
+
+          active:
+            true,
+
+          x:
+            61,
+
+          y:
+            47,
+
+          width:
+            11,
+
+          height:
+            31,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "message",
+            type:
+              "message",
+
             message:
               "Сейф закрыт. Похоже, сегодня он не нужен."
           }
@@ -501,25 +916,45 @@ const DEFAULT_DATA = {
 
 
         {
-          id: "board",
-          name: "Доска объявлений",
-          active: true,
+          id:
+            "board",
 
-          x: 31,
-          y: 28,
-          width: 11,
-          height: 19,
+          name:
+            "Доска объявлений",
+
+          active:
+            true,
+
+          x:
+            31,
+
+          y:
+            28,
+
+          width:
+            11,
+
+          height:
+            19,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "message",
+            type:
+              "message",
+
             message:
               "Расписание смен, объявления и старые записки."
           }
@@ -527,25 +962,45 @@ const DEFAULT_DATA = {
 
 
         {
-          id: "clock",
-          name: "Часы",
-          active: true,
+          id:
+            "clock",
 
-          x: 33,
-          y: 12,
-          width: 8,
-          height: 12,
+          name:
+            "Часы",
+
+          active:
+            true,
+
+          x:
+            33,
+
+          y:
+            12,
+
+          width:
+            8,
+
+          height:
+            12,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "message",
+            type:
+              "message",
+
             message:
               "Часы идут. Время явно не собирается вам помогать."
           }
@@ -553,25 +1008,45 @@ const DEFAULT_DATA = {
 
 
         {
-          id: "calendar",
-          name: "Календарь",
-          active: true,
+          id:
+            "calendar",
 
-          x: 40,
-          y: 28,
-          width: 7,
-          height: 16,
+          name:
+            "Календарь",
+
+          active:
+            true,
+
+          x:
+            40,
+
+          y:
+            28,
+
+          width:
+            7,
+
+          height:
+            16,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "message",
+            type:
+              "message",
+
             message:
               "Обычный календарь."
           }
@@ -579,25 +1054,45 @@ const DEFAULT_DATA = {
 
 
         {
-          id: "trash",
-          name: "Корзина",
-          active: true,
+          id:
+            "trash",
 
-          x: 83,
-          y: 61,
-          width: 8,
-          height: 18,
+          name:
+            "Корзина",
+
+          active:
+            true,
+
+          x:
+            83,
+
+          y:
+            61,
+
+          width:
+            8,
+
+          height:
+            18,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "message",
+            type:
+              "message",
+
             message:
               "Вы проверили даже мусор. В escape room это вполне разумно."
           }
@@ -605,25 +1100,45 @@ const DEFAULT_DATA = {
 
 
         {
-          id: "firstAid",
-          name: "Аптечка",
-          active: true,
+          id:
+            "firstAid",
 
-          x: 35.5,
-          y: 39,
-          width: 9,
-          height: 11,
+          name:
+            "Аптечка",
+
+          active:
+            true,
+
+          x:
+            35.5,
+
+          y:
+            39,
+
+          width:
+            9,
+
+          height:
+            11,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "message",
+            type:
+              "message",
+
             message:
               "Пока аптечка вам не нужна."
           }
@@ -631,26 +1146,47 @@ const DEFAULT_DATA = {
 
 
         {
-          id: "door",
-          name: "Выход",
-          active: true,
+          id:
+            "door",
 
-          x: 76,
-          y: 39,
-          width: 13,
-          height: 43,
+          name:
+            "Выход",
+
+          active:
+            true,
+
+          x:
+            76,
+
+          y:
+            39,
+
+          width:
+            13,
+
+          height:
+            43,
 
           requirement: {
-            type: "none",
-            key: "",
-            consume: false
+            type:
+              "none",
+
+            key:
+              "",
+
+            consume:
+              false
           },
 
-          fallback: "",
+          fallback:
+            "",
 
           action: {
-            type: "codeLock",
-            code: "792",
+            type:
+              "codeLock",
+
+            code:
+              "792",
 
             hint:
               "На панели три символа: ☎ → ₽ → 💻",
@@ -664,11 +1200,30 @@ const DEFAULT_DATA = {
     },
 
 
-    day2: makeEmptyQuest(2),
-    day3: makeEmptyQuest(3),
-    day4: makeEmptyQuest(4),
-    day5: makeEmptyQuest(5),
-    day6: makeEmptyQuest(6)
+    day2:
+      makeEmptyQuest(
+        2
+      ),
+
+    day3:
+      makeEmptyQuest(
+        3
+      ),
+
+    day4:
+      makeEmptyQuest(
+        4
+      ),
+
+    day5:
+      makeEmptyQuest(
+        5
+      ),
+
+    day6:
+      makeEmptyQuest(
+        6
+      )
 
   }
 
@@ -676,26 +1231,42 @@ const DEFAULT_DATA = {
 
 
 /* =========================================================
-   ОБЩАЯ БИБЛИОТЕКА ПРЕДМЕТОВ КОМНАТЫ
+   ОБЩАЯ БИБЛИОТЕКА ПРЕДМЕТОВ
 ========================================================= */
 
 DEFAULT_DATA.roomObjects =
-  DEFAULT_DATA.quests.day1.objects.map(
-    object => ({
-      id: object.id,
-      name: object.name,
-      x: object.x,
-      y: object.y,
-      width: object.width,
-      height: object.height
-    })
-  );
+  DEFAULT_DATA
+    .quests
+    .day1
+    .objects
+    .map(
+      object => ({
+        id:
+          object.id,
+
+        name:
+          object.name,
+
+        x:
+          object.x,
+
+        y:
+          object.y,
+
+        width:
+          object.width,
+
+        height:
+          object.height
+      })
+    );
 
 
 let APP_DATA =
   structuredClone(
     DEFAULT_DATA
   );
+
 
 let selectedQuestId =
   "day1";
@@ -712,25 +1283,42 @@ let adminObjectId =
 let adminUnlocked =
   false;
 
+
 let gameState =
   createGameState();
 
 
 function createGameState() {
+
   return {
-    flags: {},
-    inventory: [],
-    notes: [],
-    completedTasks: {},
-    unlockedObjects: {},
-    takenObjects: {}
+    flags:
+      {},
+
+    inventory:
+      [],
+
+    notes:
+      [],
+
+    completedTasks:
+      {},
+
+    unlockedObjects:
+      {},
+
+    takenObjects:
+      {}
   };
+
 }
 
 
-/* DOM */
+/* =========================================================
+   DOM
+========================================================= */
 
 const screens = {
+
   start:
     document.getElementById(
       "start-screen"
@@ -755,6 +1343,7 @@ const screens = {
     document.getElementById(
       "admin-screen"
     )
+
 };
 
 
@@ -770,87 +1359,147 @@ const overlayContent =
   );
 
 
-/* ОБЩИЕ */
+/* =========================================================
+   ОБЩИЕ ФУНКЦИИ
+========================================================= */
 
-function escapeHtml(text) {
+function escapeHtml(
+  text
+) {
+
   return String(
     text ?? ""
   )
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
 }
 
 
-function uid(prefix) {
+function uid(
+  prefix
+) {
+
   return (
     prefix +
     "_" +
-    Date.now().toString(36) +
+    Date.now()
+      .toString(
+        36
+      ) +
     Math.random()
-      .toString(36)
-      .slice(2, 6)
+      .toString(
+        36
+      )
+      .slice(
+        2,
+        6
+      )
   );
+
 }
 
 
-function normalize(text) {
+function normalize(
+  text
+) {
+
   return String(
     text ?? ""
   )
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, " ");
+    .replace(
+      /\s+/g,
+      " "
+    );
+
 }
 
 
-function showScreen(name) {
+function showScreen(
+  name
+) {
 
   if (
     name === "admin" &&
     !adminUnlocked
   ) {
-    name = "adminLogin";
+
+    name =
+      "adminLogin";
+
   }
 
 
   Object.values(
     screens
-  ).forEach(
-    screen => {
-      screen?.classList.remove(
-        "screen--active"
-      );
-    }
-  );
+  )
+    .forEach(
+      screen => {
+
+        screen
+          ?.classList
+          .remove(
+            "screen--active"
+          );
+
+      }
+    );
 
 
-  screens[name]
-    ?.classList.add(
+  screens[
+    name
+  ]
+    ?.classList
+    .add(
       "screen--active"
     );
+
 }
 
 
-function openOverlay(html) {
+function openOverlay(
+  html
+) {
+
   overlayContent.innerHTML =
     html;
 
   overlay.hidden =
     false;
+
 }
 
 
 function closeOverlay() {
+
   overlay.hidden =
     true;
+
 }
 
 
 /* =========================================================
-   ЛОКАЛЬНОЕ + СЕРВЕРНОЕ ХРАНЕНИЕ
+   ХРАНЕНИЕ
 ========================================================= */
 
 function saveLocalData() {
@@ -865,29 +1514,56 @@ function saveLocalData() {
 }
 
 
-function saveData() {
+/*
+  Для совместимости со старым кодом.
+  Эта функция теперь сохраняет ТОЛЬКО
+  локальную копию.
 
-  /*
-    Всегда сохраняем локальную копию.
-    Даже если интернет временно пропал,
-    настройки в этом браузере останутся.
-  */
+  Отправка на сервер выполняется
+  отдельной функцией syncAdminConfig().
+*/
+
+function saveData() {
 
   saveLocalData();
 
+}
 
-  /*
-    После первичной публикации админские
-    изменения дополнительно уходят на сервер.
-  */
+
+function readLocalData() {
+
+  const raw =
+    localStorage.getItem(
+      STORAGE_KEY
+    );
+
 
   if (
-    adminUnlocked &&
-    adminToken &&
-    serverConfigExists
+    !raw
   ) {
 
-    queueServerConfigSave();
+    return null;
+
+  }
+
+
+  try {
+
+    return JSON.parse(
+      raw
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Ошибка чтения localStorage",
+      error
+    );
+
+
+    return null;
 
   }
 
@@ -896,31 +1572,16 @@ function saveData() {
 
 function loadData() {
 
-  const raw =
-    localStorage.getItem(
-      STORAGE_KEY
-    );
+  const local =
+    readLocalData();
 
 
-  if (raw) {
+  if (
+    local
+  ) {
 
-    try {
-
-      APP_DATA =
-        JSON.parse(
-          raw
-        );
-
-    }
-
-    catch (error) {
-
-      console.error(
-        "Ошибка загрузки конфигурации",
-        error
-      );
-
-    }
+    APP_DATA =
+      local;
 
   }
 
@@ -931,90 +1592,169 @@ function loadData() {
 
 
 /*
-  Пароль дня специально не приходит
-  из публичной серверной конфигурации.
+  Пароли дней не входят в публичную
+  конфигурацию.
 
-  На том компьютере, где пароль уже был
-  сохранен локально, оставляем его в форме
-  администратора.
+  Поэтому при загрузке сервера сохраняем
+  локально известные значения.
 */
 
-function copyLocalPrivateFields(
-  targetConfig,
-  localConfig
+function preservePrivateFields(
+  target,
+  source
 ) {
 
   if (
-    !targetConfig?.quests ||
-    !localConfig?.quests
+    !target?.quests
   ) {
+
     return;
+
   }
 
 
-  Object.keys(
-    targetConfig.quests
-  ).forEach(
-    questId => {
+  Object.entries(
+    target.quests
+  )
+    .forEach(
+      (
+        [
+          questId,
+          quest
+        ]
+      ) => {
 
-      const targetQuest =
-        targetConfig.quests[
-          questId
-        ];
+        const localPassword =
+          source
+            ?.quests
+            ?.[questId]
+            ?.password;
 
 
-      const localQuest =
-        localConfig.quests[
-          questId
-        ];
-
-
-      if (
-        targetQuest &&
-        localQuest &&
-        typeof localQuest.password ===
-          "string"
-      ) {
-
-        targetQuest.password =
-          localQuest.password;
+        quest.password =
+          typeof localPassword ===
+            "string"
+            ? localPassword
+            : "";
 
       }
-
-      else if (
-        targetQuest
-      ) {
-
-        targetQuest.password =
-          "";
-
-      }
-
-    }
-  );
+    );
 
 }
 
 
 /*
-  При запуске сайт проверяет сервер.
-
-  Если серверная конфигурация уже есть —
-  она становится основной.
-
-  Если сервер еще пуст —
-  локальная конфигурация остается нетронутой.
-  Именно это позволяет сохранить уже
-  настроенный День 2 до первой публикации.
+  Для сравнения конфигураций пароли дней
+  исключаем: сервер их намеренно не отдает.
 */
 
-async function loadServerConfig() {
+function publicComparableConfig(
+  config
+) {
 
-  const localSnapshot =
+  if (
+    !config
+  ) {
+
+    return null;
+
+  }
+
+
+  const copy =
     structuredClone(
-      APP_DATA
+      config
     );
 
+
+  Object.values(
+    copy.quests ||
+    {}
+  )
+    .forEach(
+      quest => {
+
+        delete quest.password;
+
+      }
+    );
+
+
+  return copy;
+
+}
+
+
+function configsEqual(
+  first,
+  second
+) {
+
+  try {
+
+    return (
+      JSON.stringify(
+        publicComparableConfig(
+          first
+        )
+      ) ===
+      JSON.stringify(
+        publicComparableConfig(
+          second
+        )
+      )
+    );
+
+  }
+
+  catch (error) {
+
+    return false;
+
+  }
+
+}
+
+
+/*
+  Отправляем на сервер конфигурацию
+  без паролей дней.
+*/
+
+function configForServer(
+  source =
+    APP_DATA
+) {
+
+  const copy =
+    structuredClone(
+      source
+    );
+
+
+  Object.values(
+    copy.quests ||
+    {}
+  )
+    .forEach(
+      quest => {
+
+        delete quest.password;
+
+      }
+    );
+
+
+  return copy;
+
+}
+
+
+/* =========================================================
+   ЗАГРУЗКА СЕРВЕРНОЙ КОНФИГУРАЦИИ
+========================================================= */
+
+async function loadServerConfig() {
 
   try {
 
@@ -1025,166 +1765,125 @@ async function loadServerConfig() {
 
 
     serverConfigExists =
-      result.exists === true;
+      result.exists ===
+      true;
 
 
     serverConfigRevision =
       Number(
         result.revision
-      ) || 0;
+      ) ||
+      0;
 
 
     serverConfigUpdatedAt =
-      result.updatedAt || "";
+      result.updatedAt ||
+      "";
 
 
     if (
-      serverConfigExists &&
-      result.config
+      !serverConfigExists ||
+      !result.config
     ) {
 
-      APP_DATA =
-        result.config;
+      startupServerSnapshot =
+        null;
 
 
-      copyLocalPrivateFields(
-        APP_DATA,
-        localSnapshot
+      return;
+
+    }
+
+
+    startupServerSnapshot =
+      structuredClone(
+        result.config
       );
 
 
-      migrateRoomObjects();
+    /*
+      Проверяем, отличается ли то,
+      что лежало в localStorage,
+      от опубликованной версии.
 
-      saveLocalData();
+      Именно здесь обнаружатся ваши
+      несинхронизированные изменения
+      Дня 3.
+    */
 
-    }
+    localDiffersFromServer =
+      Boolean(
+        startupLocalSnapshot &&
+        !configsEqual(
+          startupLocalSnapshot,
+          result.config
+        )
+      );
+
+
+    /*
+      Для обычного игрового интерфейса
+      сервер остается источником истины.
+    */
+
+    const previousLocal =
+      startupLocalSnapshot ||
+      APP_DATA;
+
+
+    APP_DATA =
+      structuredClone(
+        result.config
+      );
+
+
+    preservePrivateFields(
+      APP_DATA,
+      previousLocal
+    );
+
+
+    migrateRoomObjects();
+
+    saveLocalData();
 
   }
 
   catch (error) {
 
-    /*
-      При проблеме связи не уничтожаем
-      локальную конфигурацию.
-    */
-
     console.error(
-      "Не удалось загрузить общую конфигурацию с сервера",
+      "Не удалось загрузить конфигурацию с сервера",
       error
     );
+
+
+    /*
+      При проблеме сети оставляем
+      локальную версию.
+    */
 
   }
 
 }
 
 
-/*
-  Все серверные сохранения ставятся
-  в очередь.
-
-  Поэтому два быстрых нажатия «Сохранить»
-  не отправят две версии одновременно.
-*/
-
-function queueServerConfigSave() {
-
-  const snapshot =
-    structuredClone(
-      APP_DATA
-    );
-
-
-  serverSaveChain =
-    serverSaveChain
-      .then(
-        async () => {
-
-          if (
-            !adminUnlocked ||
-            !adminToken ||
-            !serverConfigExists
-          ) {
-            return;
-          }
-
-
-          const result =
-            await apiPost(
-              "saveConfig",
-              {
-                adminToken,
-
-                config:
-                  snapshot,
-
-                expectedRevision:
-                  serverConfigRevision
-              }
-            );
-
-
-          serverConfigRevision =
-            Number(
-              result.revision
-            ) ||
-            serverConfigRevision;
-
-
-          serverConfigUpdatedAt =
-            result.updatedAt ||
-            serverConfigUpdatedAt;
-
-        }
-      )
-      .catch(
-        error => {
-
-          console.error(
-            "Не удалось сохранить конфигурацию на сервере",
-            error
-          );
-
-
-          if (
-            adminUnlocked
-          ) {
-
-            adminStatus(
-              "Локально сохранено, но сервер не обновлен: " +
-              (
-                error.message ||
-                "ошибка связи"
-              ),
-              true
-            );
-
-          }
-
-        }
-      );
-
-
-  return serverSaveChain;
-
-}
-
+/* =========================================================
+   СИНХРОНИЗАЦИЯ АДМИНКИ
+========================================================= */
 
 /*
-  Самая важная функция миграции.
+  Получаем текущую ревизию прямо перед
+  записью.
 
-  После успешного входа администратора:
+  При нормальной работе она должна
+  совпадать с той, которую знает браузер.
 
-  1. Проверяет, есть ли Config на сервере.
-  2. Если его еще нет — публикует текущий
-     APP_DATA из этого браузера.
-  3. Если уже есть — берет серверную версию.
-
-  Поэтому ПЕРВЫЙ вход в админку после
-  обновления нужно сделать именно на
-  компьютере с настроенным Днем 2.
+  Если нет — конфигурацию изменило
+  другое устройство и мы ничего
+  автоматически не перезаписываем.
 */
 
-async function ensureServerConfigAfterAdminLogin() {
+async function getFreshConfigStatus() {
 
   const status =
     await apiPost(
@@ -1195,18 +1894,68 @@ async function ensureServerConfigAfterAdminLogin() {
     );
 
 
+  return {
+    exists:
+      status.exists ===
+      true,
+
+    revision:
+      Number(
+        status.revision
+      ) ||
+      0,
+
+    updatedAt:
+      status.updatedAt ||
+      ""
+  };
+
+}
+
+
+/*
+  Одна операция серверного сохранения.
+
+  ВАЖНО:
+  snapshot передается уже готовым.
+  Следующее сохранение не начнется,
+  пока это не получит ответ сервера.
+*/
+
+async function performServerSave(
+  snapshot
+) {
+
   if (
-    status.exists !== true
+    !adminUnlocked ||
+    !adminToken
   ) {
 
-    const result =
+    throw new Error(
+      "ADMIN_AUTH_REQUIRED"
+    );
+
+  }
+
+
+  const status =
+    await getFreshConfigStatus();
+
+
+  if (
+    !status.exists
+  ) {
+
+    const initial =
       await apiPost(
         "publishInitialConfig",
         {
           adminToken,
 
           config:
-            APP_DATA
+            configForServer(
+              snapshot
+            )
         }
       );
 
@@ -1217,22 +1966,79 @@ async function ensureServerConfigAfterAdminLogin() {
 
     serverConfigRevision =
       Number(
-        result.revision
-      ) || 1;
+        initial.revision
+      ) ||
+      1;
 
 
     serverConfigUpdatedAt =
-      result.updatedAt || "";
+      initial.updatedAt ||
+      "";
 
 
-    saveLocalData();
+    startupServerSnapshot =
+      structuredClone(
+        configForServer(
+          snapshot
+        )
+      );
 
 
-    return {
-      published: true
-    };
+    localDiffersFromServer =
+      false;
+
+
+    return initial;
 
   }
+
+
+  /*
+    Если наша предыдущая операция
+    завершилась успешно, serverConfigRevision
+    уже содержит новую ревизию.
+
+    Несовпадение здесь означает реальное
+    изменение сервера извне.
+  */
+
+  if (
+    serverConfigRevision > 0 &&
+    status.revision !==
+      serverConfigRevision
+  ) {
+
+    throw new Error(
+      "CONFIG_CHANGED_ON_ANOTHER_DEVICE"
+    );
+
+  }
+
+
+  /*
+    Синхронизируем номер с фактическим
+    статусом непосредственно перед записью.
+  */
+
+  serverConfigRevision =
+    status.revision;
+
+
+  const result =
+    await apiPost(
+      "saveConfig",
+      {
+        adminToken,
+
+        config:
+          configForServer(
+            snapshot
+          ),
+
+        expectedRevision:
+          serverConfigRevision
+      }
+    );
 
 
   serverConfigExists =
@@ -1241,13 +2047,288 @@ async function ensureServerConfigAfterAdminLogin() {
 
   serverConfigRevision =
     Number(
-      status.revision
-    ) || 1;
+      result.revision
+    ) ||
+    (
+      serverConfigRevision +
+      1
+    );
 
 
   serverConfigUpdatedAt =
-    status.updatedAt || "";
+    result.updatedAt ||
+    "";
 
+
+  startupServerSnapshot =
+    structuredClone(
+      configForServer(
+        snapshot
+      )
+    );
+
+
+  localDiffersFromServer =
+    false;
+
+
+  return result;
+
+}
+
+
+/*
+  ЕДИНАЯ очередь сохранения.
+
+  Именно этого не хватало предыдущей
+  версии.
+
+  Каждый вызов:
+  1. сохраняет localStorage;
+  2. делает собственный снимок данных;
+  3. ждет окончания предыдущей записи;
+  4. только потом отправляет свой снимок;
+  5. получает новую revision;
+  6. после этого допускает следующую запись.
+*/
+
+function syncAdminConfig(
+  successMessage =
+    "Изменения сохранены."
+) {
+
+  saveLocalData();
+
+
+  const snapshot =
+    structuredClone(
+      APP_DATA
+    );
+
+
+  const operation =
+    serverSaveChain
+      .then(
+        async () => {
+
+          adminStatus(
+            "Сохраняем на сервере..."
+          );
+
+
+          const result =
+            await performServerSave(
+              snapshot
+            );
+
+
+          adminStatus(
+            successMessage
+          );
+
+
+          return result;
+
+        }
+      );
+
+
+  /*
+    Цепочку продолжаем даже после ошибки,
+    чтобы одна неудачная запись навсегда
+    не блокировала все последующие.
+  */
+
+  serverSaveChain =
+    operation.catch(
+      () => undefined
+    );
+
+
+  return operation;
+
+}
+
+
+/* =========================================================
+   ВОССТАНОВЛЕНИЕ ЛОКАЛЬНЫХ ИЗМЕНЕНИЙ
+========================================================= */
+
+/*
+  Вызывается после входа администратора.
+
+  Если на сервере уже есть Config,
+  но в localStorage была другая версия,
+  ничего молча не уничтожаем.
+
+  Для текущей ситуации это позволит
+  вернуть именно несинхронизированный
+  День 3.
+*/
+
+async function reconcileAdminConfigAfterLogin() {
+
+  const status =
+    await getFreshConfigStatus();
+
+
+  serverConfigExists =
+    status.exists;
+
+
+  serverConfigRevision =
+    status.revision;
+
+
+  serverConfigUpdatedAt =
+    status.updatedAt;
+
+
+  if (
+    !status.exists
+  ) {
+
+    /*
+      Сервер пуст — публикуем текущую
+      локальную конфигурацию.
+    */
+
+    const source =
+      startupLocalSnapshot ||
+      APP_DATA;
+
+
+    APP_DATA =
+      structuredClone(
+        source
+      );
+
+
+    migrateRoomObjects();
+
+    saveLocalData();
+
+
+    await performServerSave(
+      APP_DATA
+    );
+
+
+    return {
+      recoveredLocal:
+        true,
+
+      publishedInitial:
+        true
+    };
+
+  }
+
+
+  if (
+    localDiffersFromServer &&
+    startupLocalSnapshot
+  ) {
+
+    const useLocal =
+      confirm(
+        "На этом устройстве найдены локальные изменения, которых нет в опубликованной версии. Это могут быть ваши последние изменения Дня 3, которые не удалось синхронизировать. Отправить локальную версию на сервер?"
+      );
+
+
+    if (
+      useLocal
+    ) {
+
+      APP_DATA =
+        structuredClone(
+          startupLocalSnapshot
+        );
+
+
+      migrateRoomObjects();
+
+      saveLocalData();
+
+
+      /*
+        Это ОСОЗНАННОЕ восстановление.
+        Мы только что получили свежую
+        revision сервера и записываем
+        локальную версию поверх нее.
+      */
+
+      const result =
+        await apiPost(
+          "saveConfig",
+          {
+            adminToken,
+
+            config:
+              configForServer(
+                APP_DATA
+              ),
+
+            expectedRevision:
+              status.revision
+          }
+        );
+
+
+      serverConfigRevision =
+        Number(
+          result.revision
+        ) ||
+        (
+          status.revision +
+          1
+        );
+
+
+      serverConfigUpdatedAt =
+        result.updatedAt ||
+        "";
+
+
+      serverConfigExists =
+        true;
+
+
+      startupServerSnapshot =
+        structuredClone(
+          configForServer(
+            APP_DATA
+          )
+        );
+
+
+      startupLocalSnapshot =
+        structuredClone(
+          APP_DATA
+        );
+
+
+      localDiffersFromServer =
+        false;
+
+
+      return {
+        recoveredLocal:
+          true,
+
+        publishedInitial:
+          false
+      };
+
+    }
+
+  }
+
+
+  /*
+    Пользователь выбрал опубликованную
+    версию либо различий не было.
+  */
 
   const latest =
     await apiPost(
@@ -1256,23 +2337,24 @@ async function ensureServerConfigAfterAdminLogin() {
 
 
   if (
-    latest.exists === true &&
+    latest.exists &&
     latest.config
   ) {
 
-    const localSnapshot =
-      structuredClone(
-        APP_DATA
-      );
+    const privateSource =
+      startupLocalSnapshot ||
+      APP_DATA;
 
 
     APP_DATA =
-      latest.config;
+      structuredClone(
+        latest.config
+      );
 
 
-    copyLocalPrivateFields(
+    preservePrivateFields(
       APP_DATA,
-      localSnapshot
+      privateSource
     );
 
 
@@ -1285,19 +2367,98 @@ async function ensureServerConfigAfterAdminLogin() {
       Number(
         latest.revision
       ) ||
-      serverConfigRevision;
+      status.revision;
 
 
     serverConfigUpdatedAt =
       latest.updatedAt ||
-      serverConfigUpdatedAt;
+      status.updatedAt;
+
+
+    startupServerSnapshot =
+      structuredClone(
+        latest.config
+      );
+
+
+    startupLocalSnapshot =
+      structuredClone(
+        APP_DATA
+      );
+
+
+    localDiffersFromServer =
+      false;
 
   }
 
 
   return {
-    published: false
+    recoveredLocal:
+      false,
+
+    publishedInitial:
+      false
   };
+
+}
+
+
+/* =========================================================
+   ОБРАБОТКА ОШИБОК СИНХРОНИЗАЦИИ
+========================================================= */
+
+function handleSyncError(
+  error
+) {
+
+  console.error(
+    error
+  );
+
+
+  if (
+    error.message ===
+      "CONFIG_CHANGED_ON_ANOTHER_DEVICE" ||
+    error.message ===
+      "CONFIG_VERSION_CONFLICT"
+  ) {
+
+    adminStatus(
+      "Серверная версия изменилась на другом устройстве. Локальные изменения сохранены, сервер не перезаписан. Обновите страницу перед дальнейшим редактированием.",
+      true
+    );
+
+
+    return;
+
+  }
+
+
+  if (
+    error.message ===
+      "ADMIN_SESSION_EXPIRED"
+  ) {
+
+    adminStatus(
+      "Сессия администратора истекла. Локальные изменения сохранены. Войдите в админку снова.",
+      true
+    );
+
+
+    return;
+
+  }
+
+
+  adminStatus(
+    "Локально сохранено, но сервер не обновлен: " +
+    (
+      error.message ||
+      "ошибка связи"
+    ),
+    true
+  );
 
 }
 
@@ -1368,23 +2529,33 @@ function roomObjectFromLegacy(
 
 function defaultQuestObjectConfig(
   id,
-  active = false
+  active =
+    false
 ) {
 
   return {
     id,
+
     active,
 
     requirement: {
-      type: "none",
-      key: "",
-      consume: false
+      type:
+        "none",
+
+      key:
+        "",
+
+      consume:
+        false
     },
 
-    fallback: "",
+    fallback:
+      "",
 
     action: {
-      type: "message",
+      type:
+        "message",
+
       message:
         "Пока здесь ничего полезного."
     }
@@ -1399,11 +2570,13 @@ function migrateRoomObjects() {
     !Array.isArray(
       APP_DATA.roomObjects
     ) ||
-    APP_DATA.roomObjects.length === 0
+    APP_DATA.roomObjects.length ===
+      0
   ) {
 
     const day1Objects =
-      APP_DATA.quests
+      APP_DATA
+        .quests
         ?.day1
         ?.objects;
 
@@ -1427,64 +2600,72 @@ function migrateRoomObjects() {
 
   const knownIds =
     new Set(
-      APP_DATA.roomObjects.map(
-        object =>
-          object.id
-      )
+      APP_DATA.roomObjects
+        .map(
+          object =>
+            object.id
+        )
     );
 
 
   Object.values(
-    APP_DATA.quests || {}
-  ).forEach(
-    quest => {
+    APP_DATA.quests ||
+    {}
+  )
+    .forEach(
+      quest => {
 
-      if (
-        !Array.isArray(
-          quest.objects
-        )
-      ) {
+        if (
+          !Array.isArray(
+            quest.objects
+          )
+        ) {
 
-        quest.objects =
-          [];
-
-      }
-
-
-      quest.objects.forEach(
-        object => {
-
-          if (
-            object?.id &&
-            !knownIds.has(
-              object.id
-            )
-          ) {
-
-            APP_DATA.roomObjects.push(
-              roomObjectFromLegacy(
-                object
-              )
-            );
-
-
-            knownIds.add(
-              object.id
-            );
-
-          }
+          quest.objects =
+            [];
 
         }
-      );
 
-    }
-  );
+
+        quest.objects
+          .forEach(
+            object => {
+
+              if (
+                object?.id &&
+                !knownIds.has(
+                  object.id
+                )
+              ) {
+
+                APP_DATA
+                  .roomObjects
+                  .push(
+                    roomObjectFromLegacy(
+                      object
+                    )
+                  );
+
+
+                knownIds.add(
+                  object.id
+                );
+
+              }
+
+            }
+          );
+
+      }
+    );
 
 
   APP_DATA.roomObjects =
-    APP_DATA.roomObjects.map(
-      roomObjectFromLegacy
-    );
+    APP_DATA
+      .roomObjects
+      .map(
+        roomObjectFromLegacy
+      );
 
 }
 
@@ -1497,7 +2678,8 @@ function roomObjectDefinition(
     .roomObjects
     .find(
       object =>
-        object.id === id
+        object.id ===
+        id
     );
 
 }
@@ -1506,14 +2688,17 @@ function roomObjectDefinition(
 function questObjectConfig(
   quest,
   id,
-  create = false
+  create =
+    false
 ) {
 
   let object =
-    quest.objects.find(
-      item =>
-        item.id === id
-    );
+    quest.objects
+      .find(
+        item =>
+          item.id ===
+          id
+      );
 
 
   if (
@@ -1535,7 +2720,10 @@ function questObjectConfig(
   }
 
 
-  return object || null;
+  return (
+    object ||
+    null
+  );
 
 }
 
@@ -1554,7 +2742,9 @@ function effectiveQuestObject(
   if (
     !definition
   ) {
+
     return null;
+
   }
 
 
@@ -1600,7 +2790,7 @@ function questObjects(
 
 
 /* =========================================================
-   СТАРТ
+   СТАРТОВЫЙ ЭКРАН
 ========================================================= */
 
 function renderDays() {
@@ -1619,12 +2809,20 @@ function renderDays() {
     APP_DATA.quests
   )
     .sort(
-      (a, b) =>
+      (
+        a,
+        b
+      ) =>
         a[1].day -
         b[1].day
     )
     .forEach(
-      ([id, quest]) => {
+      (
+        [
+          id,
+          quest
+        ]
+      ) => {
 
         const button =
           document.createElement(
@@ -1653,60 +2851,61 @@ function renderDays() {
         `;
 
 
-        button.addEventListener(
-          "click",
-          () => {
+        button
+          .addEventListener(
+            "click",
+            () => {
 
-            selectedQuestId =
-              id;
-
-
-            document
-              .getElementById(
-                "login-day-label"
-              )
-              .textContent =
-              `ДЕНЬ ${quest.day}`;
+              selectedQuestId =
+                id;
 
 
-            document
-              .getElementById(
-                "login-title"
-              )
-              .textContent =
-              quest.title;
+              document
+                .getElementById(
+                  "login-day-label"
+                )
+                .textContent =
+                  `ДЕНЬ ${quest.day}`;
 
 
-            document
-              .getElementById(
-                "login-topic"
-              )
-              .textContent =
-              quest.topic;
+              document
+                .getElementById(
+                  "login-title"
+                )
+                .textContent =
+                  quest.title;
 
 
-            document
-              .getElementById(
-                "quest-password"
-              )
-              .value =
-              "";
+              document
+                .getElementById(
+                  "login-topic"
+                )
+                .textContent =
+                  quest.topic;
 
 
-            document
-              .getElementById(
-                "password-error"
-              )
-              .textContent =
-              "";
+              document
+                .getElementById(
+                  "quest-password"
+                )
+                .value =
+                  "";
 
 
-            showScreen(
-              "login"
-            );
+              document
+                .getElementById(
+                  "password-error"
+                )
+                .textContent =
+                  "";
 
-          }
-        );
+
+              showScreen(
+                "login"
+              );
+
+            }
+          );
 
 
         grid.appendChild(
@@ -1768,7 +2967,6 @@ function startQuest() {
 
   renderHotspots();
 
-
   showScreen(
     "game"
   );
@@ -1797,7 +2995,8 @@ function renderHotspots() {
   )
     .filter(
       object =>
-        object.active !== false
+        object.active !==
+        false
     )
     .forEach(
       object => {
@@ -1839,14 +3038,15 @@ function renderHotspots() {
           "click",
           () => {
 
-            button.classList.add(
-              "hotspot--tap"
-            );
+            button
+              .classList
+              .add(
+                "hotspot--tap"
+              );
 
 
             setTimeout(
               () =>
-
                 button
                   .classList
                   .remove(
@@ -1880,9 +3080,10 @@ function requirementPassed(
 ) {
 
   if (
-    gameState.unlockedObjects[
-      object.id
-    ]
+    gameState
+      .unlockedObjects[
+        object.id
+      ]
   ) {
 
     return true;
@@ -1892,7 +3093,8 @@ function requirementPassed(
 
   const requirement =
     object.requirement || {
-      type: "none"
+      type:
+        "none"
     };
 
 
@@ -1926,9 +3128,10 @@ function requirementPassed(
   ) {
 
     return Boolean(
-      gameState.completedTasks[
-        requirement.key
-      ]
+      gameState
+        .completedTasks[
+          requirement.key
+        ]
     );
 
   }
@@ -2040,7 +3243,8 @@ function runObjectAction(
 ) {
 
   const action =
-    object.action || {};
+    object.action ||
+    {};
 
 
   if (
@@ -2133,9 +3337,10 @@ function giveObjectItem(
 ) {
 
   if (
-    gameState.takenObjects[
-      object.id
-    ]
+    gameState
+      .takenObjects[
+        object.id
+      ]
   ) {
 
     openOverlay(`
@@ -2698,9 +3903,10 @@ function openTask(
 
 
   if (
-    gameState.completedTasks[
-      taskId
-    ]
+    gameState
+      .completedTasks[
+        taskId
+      ]
   ) {
 
     openOverlay(`
@@ -2829,7 +4035,9 @@ function openSingleChoice(
           </button>
         `
       )
-      .join("");
+      .join(
+        ""
+      );
 
 
   openOverlay(
@@ -2856,35 +4064,36 @@ function openSingleChoice(
     .forEach(
       button => {
 
-        button.addEventListener(
-          "click",
-          () => {
+        button
+          .addEventListener(
+            "click",
+            () => {
 
-            const answer =
-              Number(
-                button.dataset.single
-              );
+              const answer =
+                Number(
+                  button.dataset.single
+                );
 
 
-            if (
-              answer ===
-              task.correct[0]
-            ) {
+              if (
+                answer ===
+                task.correct[0]
+              ) {
 
-              completeTask(
-                task
-              );
+                completeTask(
+                  task
+                );
+
+              }
+
+              else {
+
+                taskError();
+
+              }
 
             }
-
-            else {
-
-              taskError();
-
-            }
-
-          }
-        );
+          );
 
       }
     );
@@ -2920,7 +4129,9 @@ function openMultipleChoice(
           </label>
         `
       )
-      .join("");
+      .join(
+        ""
+      );
 
 
   openOverlay(
@@ -3118,6 +4329,7 @@ function openOrderingTask(
           id="order-list"
           class="order-list"
         >
+
           ${
             order
               .map(
@@ -3154,8 +4366,11 @@ function openOrderingTask(
                   </div>
                 `
               )
-              .join("")
+              .join(
+                ""
+              )
           }
+
         </div>
 
         <br>
@@ -3183,47 +4398,51 @@ function openOrderingTask(
       .forEach(
         button => {
 
-          button.addEventListener(
-            "click",
-            () => {
+          button
+            .addEventListener(
+              "click",
+              () => {
 
-              const i =
-                Number(
-                  button.dataset.up
-                );
+                const i =
+                  Number(
+                    button.dataset.up
+                  );
 
 
-              if (
-                i === 0
-              ) {
+                if (
+                  i ===
+                  0
+                ) {
 
-                return;
+                  return;
+
+                }
+
+
+                [
+                  order[
+                    i - 1
+                  ],
+
+                  order[
+                    i
+                  ]
+                ] =
+                [
+                  order[
+                    i
+                  ],
+
+                  order[
+                    i - 1
+                  ]
+                ];
+
+
+                render();
 
               }
-
-
-              [
-                order[
-                  i - 1
-                ],
-                order[
-                  i
-                ]
-              ] =
-              [
-                order[
-                  i
-                ],
-                order[
-                  i - 1
-                ]
-              ];
-
-
-              render();
-
-            }
-          );
+            );
 
         }
       );
@@ -3236,49 +4455,52 @@ function openOrderingTask(
       .forEach(
         button => {
 
-          button.addEventListener(
-            "click",
-            () => {
+          button
+            .addEventListener(
+              "click",
+              () => {
 
-              const i =
-                Number(
-                  button.dataset.down
-                );
+                const i =
+                  Number(
+                    button.dataset.down
+                  );
 
 
-              if (
-                i ===
-                order.length -
-                1
-              ) {
+                if (
+                  i ===
+                  order.length -
+                  1
+                ) {
 
-                return;
+                  return;
+
+                }
+
+
+                [
+                  order[
+                    i + 1
+                  ],
+
+                  order[
+                    i
+                  ]
+                ] =
+                [
+                  order[
+                    i
+                  ],
+
+                  order[
+                    i + 1
+                  ]
+                ];
+
+
+                render();
 
               }
-
-
-              [
-                order[
-                  i + 1
-                ],
-                order[
-                  i
-                ]
-              ] =
-              [
-                order[
-                  i
-                ],
-                order[
-                  i + 1
-                ]
-              ];
-
-
-              render();
-
-            }
-          );
+            );
 
         }
       );
@@ -3380,7 +4602,9 @@ function openMatchingTask(
                       </option>
                     `
                   )
-                  .join("")
+                  .join(
+                    ""
+                  )
               }
 
             </select>
@@ -3388,7 +4612,9 @@ function openMatchingTask(
           </div>
         `
       )
-      .join("");
+      .join(
+        ""
+      );
 
 
   openOverlay(
@@ -3515,7 +4741,8 @@ function completeTask(
 
 
   applyRewards(
-    task.rewards || []
+    task.rewards ||
+    []
   );
 
 
@@ -3557,7 +4784,6 @@ function applyRewards(
 
       }
 
-
       else if (
         reward.type ===
           "flag"
@@ -3570,7 +4796,6 @@ function applyRewards(
             true;
 
       }
-
 
       else if (
         reward.type ===
@@ -3638,7 +4863,8 @@ function removeItem(
       .inventory
       .filter(
         item =>
-          item.id !== id
+          item.id !==
+          id
       );
 
 
@@ -3655,7 +4881,8 @@ function hasItem(
     .inventory
     .some(
       item =>
-        item.id === id
+        item.id ===
+        id
     );
 
 }
@@ -3666,9 +4893,10 @@ function addNote(
 ) {
 
   if (
-    !gameState.notes.includes(
-      text
-    )
+    !gameState.notes
+      .includes(
+        text
+      )
   ) {
 
     gameState
@@ -3690,13 +4918,26 @@ function renderInventory() {
     );
 
 
+  if (
+    !host
+  ) {
+
+    return;
+
+  }
+
+
   host.innerHTML =
     "";
 
 
   for (
-    let i = 0;
-    i < 6;
+    let i =
+      0;
+
+    i <
+    6;
+
     i++
   ) {
 
@@ -3711,9 +4952,10 @@ function renderInventory() {
 
 
     const item =
-      gameState.inventory[
-        i
-      ];
+      gameState
+        .inventory[
+          i
+        ];
 
 
     if (
@@ -3853,16 +5095,18 @@ document
   )
   .addEventListener(
     "click",
-    () =>
+    () => {
 
       showScreen(
         "start"
-      )
+      );
+
+    }
   );
 
 
 /* =========================================================
-   АДМИН-ПАРОЛЬ
+   ВХОД В АДМИНКУ
 ========================================================= */
 
 document
@@ -3991,27 +5235,38 @@ async function checkAdminLogin() {
 
 
     errorElement.textContent =
-      "Синхронизируем настройки...";
+      "Проверяем синхронизацию...";
 
 
-    /*
-      Именно здесь впервые переносится
-      локальный День 2 на сервер, если
-      Config еще не создан.
-    */
-
-    const configResult =
-      await ensureServerConfigAfterAdminLogin();
+    const reconciliation =
+      await reconcileAdminConfigAfterLogin();
 
 
     errorElement.textContent =
       "";
 
 
+    /*
+      Если восстановили локальную версию,
+      остаемся на том дне, который
+      редактировался ранее.
+    */
+
+    if (
+      !APP_DATA.quests[
+        adminQuestId
+      ]
+    ) {
+
+      adminQuestId =
+        "day1";
+
+    }
+
+
     renderDays();
 
     renderAdminQuestSelect();
-
 
     showScreen(
       "admin"
@@ -4019,11 +5274,14 @@ async function checkAdminLogin() {
 
 
     if (
-      configResult.published
+      reconciliation.recoveredLocal
     ) {
 
       adminStatus(
-        "Текущая конфигурация опубликована. Теперь она общая для всех устройств."
+        reconciliation
+          .publishedInitial
+          ? "Локальная конфигурация опубликована на сервере."
+          : "Локальные изменения восстановлены и синхронизированы с сервером."
       );
 
     }
@@ -4139,12 +5397,20 @@ function renderAdminQuestSelect() {
     APP_DATA.quests
   )
     .sort(
-      (a, b) =>
+      (
+        a,
+        b
+      ) =>
         a[1].day -
         b[1].day
     )
     .forEach(
-      ([id, quest]) => {
+      (
+        [
+          id,
+          quest
+        ]
+      ) => {
 
         const option =
           document.createElement(
@@ -4192,7 +5458,8 @@ function loadAdminQuestForm() {
       "admin-quest-enabled"
     )
     .checked =
-      quest.enabled;
+      quest.enabled ===
+      true;
 
 
   document
@@ -4200,7 +5467,8 @@ function loadAdminQuestForm() {
       "admin-quest-title"
     )
     .value =
-      quest.title;
+      quest.title ||
+      "";
 
 
   document
@@ -4208,16 +5476,32 @@ function loadAdminQuestForm() {
       "admin-quest-topic"
     )
     .value =
-      quest.topic;
-
-
-  document
-    .getElementById(
-      "admin-quest-password"
-    )
-    .value =
-      quest.password ||
+      quest.topic ||
       "";
+
+
+  const passwordInput =
+    document.getElementById(
+      "admin-quest-password"
+    );
+
+
+  /*
+    Если пароль известен локально,
+    показываем его.
+
+    На новом устройстве поле будет пустым.
+    Пустое поле при сохранении НЕ меняет
+    пароль на сервере.
+  */
+
+  passwordInput.value =
+    quest.password ||
+    "";
+
+
+  passwordInput.placeholder =
+    "Оставьте пустым, чтобы не менять пароль";
 
 }
 
@@ -4236,7 +5520,6 @@ document
 
       adminTaskId =
         null;
-
 
       adminObjectId =
         null;
@@ -4290,31 +5573,33 @@ document
           .trim();
 
 
+      const passwordInput =
+        document.getElementById(
+          "admin-quest-password"
+        );
+
+
       const enteredPassword =
-        document
-          .getElementById(
-            "admin-quest-password"
-          )
-          .value;
+        passwordInput
+          .value
+          .trim();
 
 
-      quest.password =
-        enteredPassword;
+      /*
+        Сразу пишем localStorage.
+        Даже если сеть пропадет,
+        изменения не потеряются.
+      */
+
+      saveLocalData();
+
+      renderDays();
 
 
       try {
 
-        /*
-          На другом устройстве поле пароля
-          будет пустым, потому что сервер
-          специально его не раскрывает.
-
-          Пустое поле означает:
-          оставить существующий пароль.
-        */
-
         if (
-          enteredPassword.trim()
+          enteredPassword
         ) {
 
           await apiPost(
@@ -4333,28 +5618,34 @@ document
             }
           );
 
+
+          quest.password =
+            enteredPassword;
+
+
+          saveLocalData();
+
         }
 
 
-        saveData();
-
-        renderDays();
-
-
-        adminStatus(
-          enteredPassword.trim()
-            ? "Настройки дня и пароль сохранены."
-            : "Настройки дня сохранены. Пароль не изменен."
+        await syncAdminConfig(
+          enteredPassword
+            ? "Настройки дня и пароль сохранены на сервере."
+            : "Настройки дня сохранены на сервере."
         );
+
+
+        startupLocalSnapshot =
+          structuredClone(
+            APP_DATA
+          );
 
       }
 
       catch (error) {
 
-        adminStatus(
-          error.message ||
-          "Не удалось сохранить настройки дня.",
-          true
+        handleSyncError(
+          error
         );
 
       }
@@ -4365,6 +5656,7 @@ document
 
 /* =========================================================
    КОНЕЦ ЧАСТИ 1
+
    ЧАСТЬ 2 НАЧИНАЕТСЯ С:
    АДМИН — ОБЪЕКТЫ
 ========================================================= */
@@ -4435,7 +5727,6 @@ function renderAdminObjectList() {
     select.value =
       adminObjectId;
 
-
     loadAdminObject();
 
   }
@@ -4461,7 +5752,9 @@ function selectedAdminObject() {
   if (
     !adminObjectId
   ) {
+
     return null;
+
   }
 
 
@@ -4478,7 +5771,9 @@ function selectedRoomObjectDefinition() {
   if (
     !adminObjectId
   ) {
+
     return null;
+
   }
 
 
@@ -4496,7 +5791,9 @@ function selectedQuestObjectConfig(
   if (
     !adminObjectId
   ) {
+
     return null;
+
   }
 
 
@@ -4535,42 +5832,75 @@ function clearAdminObject() {
     "admin-object-code",
     "admin-object-code-hint",
     "admin-object-success"
-  ].forEach(
-    id => {
+  ]
+    .forEach(
+      id => {
 
-      document
-        .getElementById(
-          id
-        )
-        .value =
-          "";
-
-    }
-  );
+        const element =
+          document.getElementById(
+            id
+          );
 
 
-  document
-    .getElementById(
+        if (
+          element
+        ) {
+
+          element.value =
+            "";
+
+        }
+
+      }
+    );
+
+
+  const requirementType =
+    document.getElementById(
       "admin-requirement-type"
-    )
-    .value =
+    );
+
+
+  if (
+    requirementType
+  ) {
+
+    requirementType.value =
       "none";
 
+  }
 
-  document
-    .getElementById(
+
+  const consume =
+    document.getElementById(
       "admin-requirement-consume"
-    )
-    .checked =
+    );
+
+
+  if (
+    consume
+  ) {
+
+    consume.checked =
       false;
 
+  }
 
-  document
-    .getElementById(
+
+  const action =
+    document.getElementById(
       "admin-object-action"
-    )
-    .value =
+    );
+
+
+  if (
+    action
+  ) {
+
+    action.value =
       "message";
+
+  }
 
 
   updateRequirementFields();
@@ -4651,7 +5981,7 @@ function loadAdminObject() {
       10;
 
 
-  const req =
+  const requirement =
     object.requirement || {
       type: "none",
       key: "",
@@ -4664,7 +5994,7 @@ function loadAdminObject() {
       "admin-requirement-type"
     )
     .value =
-      req.type ||
+      requirement.type ||
       "none";
 
 
@@ -4673,7 +6003,7 @@ function loadAdminObject() {
       "admin-requirement-key"
     )
     .value =
-      req.key ||
+      requirement.key ||
       "";
 
 
@@ -4683,7 +6013,7 @@ function loadAdminObject() {
     )
     .checked =
       Boolean(
-        req.consume
+        requirement.consume
       );
 
 
@@ -4832,7 +6162,7 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       const id =
         uid(
@@ -4840,20 +6170,24 @@ document
         );
 
 
-      APP_DATA
-        .roomObjects
-        .push({
-          id,
+      APP_DATA.roomObjects.push({
+        id,
 
-          name:
-            "Новый предмет",
+        name:
+          "Новый предмет",
 
-          x: 50,
-          y: 50,
+        x:
+          50,
 
-          width: 10,
-          height: 10
-        });
+        y:
+          50,
+
+        width:
+          10,
+
+        height:
+          10
+      });
 
 
       Object.entries(
@@ -4883,14 +6217,32 @@ document
         id;
 
 
-      saveData();
+      saveLocalData();
 
       renderAdminObjectList();
 
 
-      adminStatus(
-        "Предмет добавлен в общую комнату."
-      );
+      try {
+
+        await syncAdminConfig(
+          "Предмет добавлен и сохранен на сервере."
+        );
+
+
+        startupLocalSnapshot =
+          structuredClone(
+            APP_DATA
+          );
+
+      }
+
+      catch (error) {
+
+        handleSyncError(
+          error
+        );
+
+      }
 
     }
   );
@@ -4902,12 +6254,14 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       if (
         !adminObjectId
       ) {
+
         return;
+
       }
 
 
@@ -4918,7 +6272,9 @@ document
       if (
         !definition
       ) {
+
         return;
+
       }
 
 
@@ -4927,17 +6283,22 @@ document
           `Удалить предмет «${definition.name}» из комнаты во всех днях?`
         )
       ) {
+
         return;
+
       }
 
 
+      const deletedId =
+        adminObjectId;
+
+
       APP_DATA.roomObjects =
-        APP_DATA
-          .roomObjects
+        APP_DATA.roomObjects
           .filter(
             object =>
               object.id !==
-              adminObjectId
+              deletedId
           );
 
 
@@ -4952,7 +6313,7 @@ document
                 .filter(
                   object =>
                     object.id !==
-                    adminObjectId
+                    deletedId
                 );
 
           }
@@ -4963,14 +6324,32 @@ document
         null;
 
 
-      saveData();
+      saveLocalData();
 
       renderAdminObjectList();
 
 
-      adminStatus(
-        "Предмет удален из всех дней."
-      );
+      try {
+
+        await syncAdminConfig(
+          "Предмет удален из всех дней и сервер обновлен."
+        );
+
+
+        startupLocalSnapshot =
+          structuredClone(
+            APP_DATA
+          );
+
+      }
+
+      catch (error) {
+
+        handleSyncError(
+          error
+        );
+
+      }
 
     }
   );
@@ -4978,34 +6357,61 @@ document
 
 function updateRequirementFields() {
 
+  const typeElement =
+    document.getElementById(
+      "admin-requirement-type"
+    );
+
+
+  if (
+    !typeElement
+  ) {
+
+    return;
+
+  }
+
+
   const type =
-    document
-      .getElementById(
-        "admin-requirement-type"
-      )
-      .value;
+    typeElement.value;
 
 
-  document
-    .getElementById(
+  const keyWrap =
+    document.getElementById(
       "admin-requirement-key-wrap"
-    )
-    .style.display =
+    );
+
+
+  const consumeWrap =
+    document.getElementById(
+      "admin-consume-wrap"
+    );
+
+
+  if (
+    keyWrap
+  ) {
+
+    keyWrap.style.display =
       type ===
       "none"
         ? "none"
         : "block";
 
+  }
 
-  document
-    .getElementById(
-      "admin-consume-wrap"
-    )
-    .style.display =
+
+  if (
+    consumeWrap
+  ) {
+
+    consumeWrap.style.display =
       type ===
       "item"
         ? "flex"
         : "none";
+
+  }
 
 }
 
@@ -5036,12 +6442,23 @@ function updateObjectActionFields() {
     );
 
 
+  const actionElement =
+    document.getElementById(
+      "admin-object-action"
+    );
+
+
+  if (
+    !actionElement
+  ) {
+
+    return;
+
+  }
+
+
   const type =
-    document
-      .getElementById(
-        "admin-object-action"
-      )
-      .value;
+    actionElement.value;
 
 
   if (
@@ -5089,7 +6506,6 @@ function updateObjectActionFields() {
       "object-action-password"
     );
 
-
     showActionField(
       "object-action-task"
     );
@@ -5115,12 +6531,20 @@ function showActionField(
   id
 ) {
 
-  document
-    .getElementById(
+  const element =
+    document.getElementById(
       id
-    )
-    .style.display =
+    );
+
+
+  if (
+    element
+  ) {
+
+    element.style.display =
       "block";
+
+  }
 
 }
 
@@ -5141,7 +6565,7 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       const definition =
         selectedRoomObjectDefinition();
@@ -5150,7 +6574,9 @@ document
       if (
         !definition
       ) {
+
         return;
+
       }
 
 
@@ -5163,7 +6589,9 @@ document
       if (
         !config
       ) {
+
         return;
+
       }
 
 
@@ -5226,6 +6654,7 @@ document
 
 
       config.requirement = {
+
         type:
           document
             .getElementById(
@@ -5247,6 +6676,7 @@ document
               "admin-requirement-consume"
             )
             .checked
+
       };
 
 
@@ -5273,6 +6703,7 @@ document
       ) {
 
         config.action = {
+
           type,
 
           message:
@@ -5281,6 +6712,7 @@ document
                 "admin-object-message"
               )
               .value
+
         };
 
       }
@@ -5292,6 +6724,7 @@ document
       ) {
 
         config.action = {
+
           type,
 
           taskId:
@@ -5300,6 +6733,7 @@ document
                 "admin-object-task"
               )
               .value
+
         };
 
       }
@@ -5311,9 +6745,11 @@ document
       ) {
 
         config.action = {
+
           type,
 
           item: {
+
             id:
               document
                 .getElementById(
@@ -5337,7 +6773,9 @@ document
                 )
                 .value
                 .trim()
+
           }
+
         };
 
       }
@@ -5349,6 +6787,7 @@ document
       ) {
 
         config.action = {
+
           type,
 
           password:
@@ -5364,6 +6803,7 @@ document
                 "admin-object-task"
               )
               .value
+
         };
 
       }
@@ -5375,6 +6815,7 @@ document
       ) {
 
         config.action = {
+
           type,
 
           code:
@@ -5397,19 +6838,38 @@ document
                 "admin-object-success"
               )
               .value
+
         };
 
       }
 
 
-      saveData();
+      saveLocalData();
 
       renderAdminObjectList();
 
 
-      adminStatus(
-        "Предмет сохранен. Положение общее, действие настроено для этого дня."
-      );
+      try {
+
+        await syncAdminConfig(
+          "Предмет сохранен на сервере."
+        );
+
+
+        startupLocalSnapshot =
+          structuredClone(
+            APP_DATA
+          );
+
+      }
+
+      catch (error) {
+
+        handleSyncError(
+          error
+        );
+
+      }
 
     }
   );
@@ -5426,7 +6886,9 @@ function fillTaskOptions(
   if (
     !select
   ) {
+
     return;
+
   }
 
 
@@ -5520,7 +6982,6 @@ function renderAdminTaskList() {
     select.value =
       adminTaskId;
 
-
     loadAdminTask();
 
   }
@@ -5553,76 +7014,52 @@ function selectedAdminTask() {
 
 function clearAdminTask() {
 
-  document
-    .getElementById(
-      "admin-task-title"
-    )
-    .value =
-      "";
+  [
+    "admin-task-title",
+    "admin-task-question",
+    "admin-task-options",
+    "admin-task-correct",
+    "admin-task-answers",
+    "admin-task-order",
+    "admin-task-pairs",
+    "admin-task-success"
+  ]
+    .forEach(
+      id => {
+
+        const element =
+          document.getElementById(
+            id
+          );
 
 
-  document
-    .getElementById(
-      "admin-task-question"
-    )
-    .value =
-      "";
+        if (
+          element
+        ) {
+
+          element.value =
+            "";
+
+        }
+
+      }
+    );
 
 
-  document
-    .getElementById(
-      "admin-task-options"
-    )
-    .value =
-      "";
-
-
-  document
-    .getElementById(
-      "admin-task-correct"
-    )
-    .value =
-      "";
-
-
-  document
-    .getElementById(
-      "admin-task-answers"
-    )
-    .value =
-      "";
-
-
-  document
-    .getElementById(
-      "admin-task-order"
-    )
-    .value =
-      "";
-
-
-  document
-    .getElementById(
-      "admin-task-pairs"
-    )
-    .value =
-      "";
-
-
-  document
-    .getElementById(
-      "admin-task-success"
-    )
-    .value =
-      "";
-
-
-  document
-    .getElementById(
+  const rewards =
+    document.getElementById(
       "admin-rewards"
-    )
-    .innerHTML =
+    );
+
+
+  if (
+    rewards
+  ) {
+
+    rewards.innerHTML =
       "";
+
+  }
 
 }
 
@@ -5636,7 +7073,9 @@ function loadAdminTask() {
   if (
     !task
   ) {
+
     return;
+
   }
 
 
@@ -5801,7 +7240,7 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       const id =
         uid(
@@ -5813,6 +7252,7 @@ document
         .tasks[
           id
         ] = {
+
           id,
 
           title:
@@ -5829,16 +7269,25 @@ document
             "Вариант 2"
           ],
 
-          correct: [0],
+          correct: [
+            0
+          ],
 
-          answers: [],
-          order: [],
-          pairs: [],
+          answers:
+            [],
+
+          order:
+            [],
+
+          pairs:
+            [],
 
           successMessage:
             "Задание выполнено.",
 
-          rewards: []
+          rewards:
+            []
+
         };
 
 
@@ -5846,14 +7295,32 @@ document
         id;
 
 
-      saveData();
+      saveLocalData();
 
       renderAdminTaskList();
 
 
-      adminStatus(
-        "Новое задание добавлено."
-      );
+      try {
+
+        await syncAdminConfig(
+          "Новое задание добавлено и сохранено на сервере."
+        );
+
+
+        startupLocalSnapshot =
+          structuredClone(
+            APP_DATA
+          );
+
+      }
+
+      catch (error) {
+
+        handleSyncError(
+          error
+        );
+
+      }
 
     }
   );
@@ -5865,12 +7332,14 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       if (
         !adminTaskId
       ) {
+
         return;
+
       }
 
 
@@ -5879,7 +7348,9 @@ document
           "Удалить это задание?"
         )
       ) {
+
         return;
+
       }
 
 
@@ -5899,17 +7370,18 @@ document
           object => {
 
             if (
-              object.action
-                ?.taskId ===
+              object.action?.taskId ===
               removedTaskId
             ) {
 
               object.action = {
+
                 type:
                   "message",
 
                 message:
                   "Для этого предмета еще не назначено задание."
+
               };
 
             }
@@ -5922,16 +7394,34 @@ document
         null;
 
 
-      saveData();
+      saveLocalData();
 
       renderAdminTaskList();
 
       renderAdminObjectList();
 
 
-      adminStatus(
-        "Задание удалено."
-      );
+      try {
+
+        await syncAdminConfig(
+          "Задание удалено и сервер обновлен."
+        );
+
+
+        startupLocalSnapshot =
+          structuredClone(
+            APP_DATA
+          );
+
+      }
+
+      catch (error) {
+
+        handleSyncError(
+          error
+        );
+
+      }
 
     }
   );
@@ -5949,12 +7439,23 @@ document
 
 function updateTaskEditor() {
 
+  const typeElement =
+    document.getElementById(
+      "admin-task-type"
+    );
+
+
+  if (
+    !typeElement
+  ) {
+
+    return;
+
+  }
+
+
   const type =
-    document
-      .getElementById(
-        "admin-task-type"
-      )
-      .value;
+    typeElement.value;
 
 
   const choice =
@@ -5987,58 +7488,96 @@ function updateTaskEditor() {
     );
 
 
-  choice.style.display =
-    (
+  if (
+    choice
+  ) {
+
+    choice.style.display =
+      (
+        type ===
+          "singleChoice" ||
+        type ===
+          "multipleChoice"
+      )
+        ? "block"
+        : "none";
+
+  }
+
+
+  if (
+    correct
+  ) {
+
+    correct.style.display =
+      (
+        type ===
+          "singleChoice" ||
+        type ===
+          "multipleChoice"
+      )
+        ? "block"
+        : "none";
+
+  }
+
+
+  if (
+    text
+  ) {
+
+    text.style.display =
       type ===
-        "singleChoice" ||
+        "textInput"
+        ? "block"
+        : "none";
+
+  }
+
+
+  if (
+    ordering
+  ) {
+
+    ordering.style.display =
       type ===
-        "multipleChoice"
-    )
-      ? "block"
-      : "none";
+        "ordering"
+        ? "block"
+        : "none";
+
+  }
 
 
-  correct.style.display =
-    (
+  if (
+    matching
+  ) {
+
+    matching.style.display =
       type ===
-        "singleChoice" ||
-      type ===
-        "multipleChoice"
-    )
-      ? "block"
-      : "none";
+        "matching"
+        ? "block"
+        : "none";
+
+  }
 
 
-  text.style.display =
-    type ===
-      "textInput"
-      ? "block"
-      : "none";
-
-
-  ordering.style.display =
-    type ===
-      "ordering"
-      ? "block"
-      : "none";
-
-
-  matching.style.display =
-    type ===
-      "matching"
-      ? "block"
-      : "none";
-
-
-  document
-    .getElementById(
+  const help =
+    document.getElementById(
       "admin-correct-help"
-    )
-    .textContent =
+    );
+
+
+  if (
+    help
+  ) {
+
+    help.textContent =
       type ===
         "multipleChoice"
         ? "Несколько номеров через запятую: 1,2,4"
         : "Номер правильного варианта: например 2";
+
+  }
 
 }
 
@@ -6184,8 +7723,11 @@ function addRewardRow(
     )
     .addEventListener(
       "click",
-      () =>
-        row.remove()
+      () => {
+
+        row.remove();
+
+      }
     );
 
 
@@ -6202,21 +7744,24 @@ document
   )
   .addEventListener(
     "click",
-    () =>
-      addRewardRow()
+    () => {
+
+      addRewardRow();
+
+    }
   );
 
 
 function collectRewards() {
 
   return [
-    ...document
-      .querySelectorAll(
-        ".reward-row"
-      )
+    ...document.querySelectorAll(
+      ".reward-row"
+    )
   ]
     .map(
       row => ({
+
         type:
           row
             .querySelector(
@@ -6247,6 +7792,7 @@ function collectRewards() {
             )
             .value
             .trim()
+
       })
     )
     .filter(
@@ -6263,7 +7809,7 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       const task =
         selectedAdminTask();
@@ -6272,7 +7818,9 @@ document
       if (
         !task
       ) {
+
         return;
+
       }
 
 
@@ -6342,6 +7890,9 @@ document
           )
           .filter(
             value =>
+              Number.isInteger(
+                value
+              ) &&
               value >=
               0
           );
@@ -6412,11 +7963,13 @@ document
           )
           .map(
             values => ({
+
               left:
                 values[0],
 
               right:
                 values[1]
+
             })
           );
 
@@ -6434,16 +7987,34 @@ document
         collectRewards();
 
 
-      saveData();
+      saveLocalData();
 
       renderAdminTaskList();
 
       renderAdminObjectList();
 
 
-      adminStatus(
-        "Задание сохранено."
-      );
+      try {
+
+        await syncAdminConfig(
+          "Задание сохранено на сервере."
+        );
+
+
+        startupLocalSnapshot =
+          structuredClone(
+            APP_DATA
+          );
+
+      }
+
+      catch (error) {
+
+        handleSyncError(
+          error
+        );
+
+      }
 
     }
   );
@@ -6505,7 +8076,6 @@ document
 
       renderHotspots();
 
-
       showScreen(
         "game"
       );
@@ -6515,7 +8085,7 @@ document
 
 
 /* =========================================================
-   RESET
+   БЕЗОПАСНЫЙ RESET
 ========================================================= */
 
 document
@@ -6524,14 +8094,163 @@ document
   )
   .addEventListener(
     "click",
-    () => {
+    async () => {
+
+      /*
+        Если серверная конфигурация уже есть,
+        Reset больше НЕ уничтожает все дни.
+
+        Он просто заново загружает
+        опубликованную серверную версию.
+      */
 
       if (
-        !confirm(
-          "Удалить все настройки конструктора и вернуть исходную версию? Изменения будут сохранены и на сервере."
-        )
+        serverConfigExists
       ) {
+
+        const confirmed =
+          confirm(
+            "Вернуть эту админку к последней опубликованной серверной версии? Несохраненные локальные изменения будут отброшены. Серверные настройки не удаляются."
+          );
+
+
+        if (
+          !confirmed
+        ) {
+
+          return;
+
+        }
+
+
+        try {
+
+          adminStatus(
+            "Загружаем серверную версию..."
+          );
+
+
+          const latest =
+            await apiPost(
+              "getConfig"
+            );
+
+
+          if (
+            !latest.exists ||
+            !latest.config
+          ) {
+
+            throw new Error(
+              "SERVER_CONFIG_NOT_FOUND"
+            );
+
+          }
+
+
+          const privateSource =
+            APP_DATA;
+
+
+          APP_DATA =
+            structuredClone(
+              latest.config
+            );
+
+
+          preservePrivateFields(
+            APP_DATA,
+            privateSource
+          );
+
+
+          migrateRoomObjects();
+
+          saveLocalData();
+
+
+          serverConfigRevision =
+            Number(
+              latest.revision
+            ) ||
+            serverConfigRevision;
+
+
+          serverConfigUpdatedAt =
+            latest.updatedAt ||
+            "";
+
+
+          startupServerSnapshot =
+            structuredClone(
+              latest.config
+            );
+
+
+          startupLocalSnapshot =
+            structuredClone(
+              APP_DATA
+            );
+
+
+          localDiffersFromServer =
+            false;
+
+
+          adminTaskId =
+            null;
+
+          adminObjectId =
+            null;
+
+
+          renderDays();
+
+          renderAdminQuestSelect();
+
+
+          adminStatus(
+            "Опубликованная серверная версия восстановлена."
+          );
+
+        }
+
+        catch (error) {
+
+          adminStatus(
+            "Не удалось загрузить серверную версию: " +
+            (
+              error.message ||
+              "ошибка связи"
+            ),
+            true
+          );
+
+        }
+
+
         return;
+
+      }
+
+
+      /*
+        Только если сервер еще вообще пуст,
+        разрешаем восстановить DEFAULT_DATA.
+      */
+
+      const confirmed =
+        confirm(
+          "Вернуть локальный конструктор к исходной версии?"
+        );
+
+
+      if (
+        !confirmed
+      ) {
+
+        return;
+
       }
 
 
@@ -6547,16 +8266,21 @@ document
       adminQuestId =
         "day1";
 
-
       adminTaskId =
         null;
-
 
       adminObjectId =
         null;
 
 
-      saveData();
+      saveLocalData();
+
+
+      startupLocalSnapshot =
+        structuredClone(
+          APP_DATA
+        );
+
 
       renderDays();
 
@@ -6564,11 +8288,19 @@ document
 
 
       adminStatus(
-        "Исходная конфигурация восстановлена."
+        "Локальная исходная конфигурация восстановлена."
       );
 
     }
   );
+
+
+/* =========================================================
+   СТАТУС АДМИНКИ
+========================================================= */
+
+let adminStatusTimer =
+  null;
 
 
 function adminStatus(
@@ -6582,6 +8314,26 @@ function adminStatus(
     );
 
 
+  if (
+    !element
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    adminStatusTimer
+  ) {
+
+    clearTimeout(
+      adminStatusTimer
+    );
+
+  }
+
+
   element.textContent =
     text;
 
@@ -6592,16 +8344,19 @@ function adminStatus(
       : "#79e9c2";
 
 
-  setTimeout(
-    () => {
+  adminStatusTimer =
+    setTimeout(
+      () => {
 
-      element.textContent =
-        "";
+        element.textContent =
+          "";
 
-    },
+      },
 
-    4000
-  );
+      error
+        ? 9000
+        : 5000
+    );
 
 }
 
@@ -6828,29 +8583,68 @@ overlay.addEventListener(
 
 
 /* =========================================================
-   ЗАПУСК ПРИЛОЖЕНИЯ
+   ЗАПУСК
 ========================================================= */
 
 async function bootstrapApp() {
 
   /*
-    Сначала читаем localStorage.
+    КРИТИЧЕСКИ ВАЖНО:
 
-    На вашем компьютере именно здесь
-    находится уже настроенный День 2.
+    Сначала фиксируем то, что сейчас
+    находится в localStorage.
+
+    Именно здесь может лежать ваш
+    несинхронизированный День 3.
   */
 
-  loadData();
+  const local =
+    readLocalData();
+
+
+  if (
+    local
+  ) {
+
+    APP_DATA =
+      local;
+
+
+    migrateRoomObjects();
+
+
+    startupLocalSnapshot =
+      structuredClone(
+        APP_DATA
+      );
+
+  }
+
+  else {
+
+    APP_DATA =
+      structuredClone(
+        DEFAULT_DATA
+      );
+
+
+    migrateRoomObjects();
+
+
+    startupLocalSnapshot =
+      null;
+
+  }
 
 
   /*
-    Затем проверяем сервер.
+    После этого можно безопасно читать
+    сервер.
 
-    Если сервер пуст — локальные данные
-    НЕ заменяются.
-
-    Если сервер уже содержит Config —
-    берем серверную версию.
+    Даже если серверная версия заменит
+    APP_DATA для обычного просмотра,
+    старая локальная копия уже сохранена
+    в startupLocalSnapshot.
   */
 
   await loadServerConfig();
