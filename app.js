@@ -9,6 +9,11 @@ let gameHints = 0;
 let previewMode = false;
 let questCompleting = false;
 
+let serverConfigExists = false;
+let serverConfigRevision = 0;
+let serverConfigUpdatedAt = "";
+let serverSaveChain = Promise.resolve();
+
 
 async function apiPost(action, data = {}) {
   const response = await fetch(API_URL, {
@@ -672,15 +677,6 @@ const DEFAULT_DATA = {
 
 /* =========================================================
    ОБЩАЯ БИБЛИОТЕКА ПРЕДМЕТОВ КОМНАТЫ
-
-   Геометрия предметов (название, X, Y, ширина и высота)
-   общая для всех дней.
-
-   В каждом дне отдельно хранятся только:
-   - активность предмета;
-   - условие доступа;
-   - действие;
-   - связанное задание / пароль / награда.
 ========================================================= */
 
 DEFAULT_DATA.roomObjects =
@@ -701,26 +697,20 @@ let APP_DATA =
     DEFAULT_DATA
   );
 
-
 let selectedQuestId =
   "day1";
-
 
 let adminQuestId =
   "day1";
 
-
 let adminTaskId =
   null;
-
 
 let adminObjectId =
   null;
 
-
 let adminUnlocked =
   false;
-
 
 let gameState =
   createGameState();
@@ -859,13 +849,48 @@ function closeOverlay() {
 }
 
 
-function saveData() {
+/* =========================================================
+   ЛОКАЛЬНОЕ + СЕРВЕРНОЕ ХРАНЕНИЕ
+========================================================= */
+
+function saveLocalData() {
+
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify(
       APP_DATA
     )
   );
+
+}
+
+
+function saveData() {
+
+  /*
+    Всегда сохраняем локальную копию.
+    Даже если интернет временно пропал,
+    настройки в этом браузере останутся.
+  */
+
+  saveLocalData();
+
+
+  /*
+    После первичной публикации админские
+    изменения дополнительно уходят на сервер.
+  */
+
+  if (
+    adminUnlocked &&
+    adminToken &&
+    serverConfigExists
+  ) {
+
+    queueServerConfigSave();
+
+  }
+
 }
 
 
@@ -880,59 +905,464 @@ function loadData() {
   if (raw) {
 
     try {
+
       APP_DATA =
         JSON.parse(
           raw
         );
+
     }
 
     catch (error) {
+
       console.error(
         "Ошибка загрузки конфигурации",
         error
       );
+
     }
+
   }
 
 
   migrateRoomObjects();
+
 }
 
+
+/*
+  Пароль дня специально не приходит
+  из публичной серверной конфигурации.
+
+  На том компьютере, где пароль уже был
+  сохранен локально, оставляем его в форме
+  администратора.
+*/
+
+function copyLocalPrivateFields(
+  targetConfig,
+  localConfig
+) {
+
+  if (
+    !targetConfig?.quests ||
+    !localConfig?.quests
+  ) {
+    return;
+  }
+
+
+  Object.keys(
+    targetConfig.quests
+  ).forEach(
+    questId => {
+
+      const targetQuest =
+        targetConfig.quests[
+          questId
+        ];
+
+
+      const localQuest =
+        localConfig.quests[
+          questId
+        ];
+
+
+      if (
+        targetQuest &&
+        localQuest &&
+        typeof localQuest.password ===
+          "string"
+      ) {
+
+        targetQuest.password =
+          localQuest.password;
+
+      }
+
+      else if (
+        targetQuest
+      ) {
+
+        targetQuest.password =
+          "";
+
+      }
+
+    }
+  );
+
+}
+
+
+/*
+  При запуске сайт проверяет сервер.
+
+  Если серверная конфигурация уже есть —
+  она становится основной.
+
+  Если сервер еще пуст —
+  локальная конфигурация остается нетронутой.
+  Именно это позволяет сохранить уже
+  настроенный День 2 до первой публикации.
+*/
+
+async function loadServerConfig() {
+
+  const localSnapshot =
+    structuredClone(
+      APP_DATA
+    );
+
+
+  try {
+
+    const result =
+      await apiPost(
+        "getConfig"
+      );
+
+
+    serverConfigExists =
+      result.exists === true;
+
+
+    serverConfigRevision =
+      Number(
+        result.revision
+      ) || 0;
+
+
+    serverConfigUpdatedAt =
+      result.updatedAt || "";
+
+
+    if (
+      serverConfigExists &&
+      result.config
+    ) {
+
+      APP_DATA =
+        result.config;
+
+
+      copyLocalPrivateFields(
+        APP_DATA,
+        localSnapshot
+      );
+
+
+      migrateRoomObjects();
+
+      saveLocalData();
+
+    }
+
+  }
+
+  catch (error) {
+
+    /*
+      При проблеме связи не уничтожаем
+      локальную конфигурацию.
+    */
+
+    console.error(
+      "Не удалось загрузить общую конфигурацию с сервера",
+      error
+    );
+
+  }
+
+}
+
+
+/*
+  Все серверные сохранения ставятся
+  в очередь.
+
+  Поэтому два быстрых нажатия «Сохранить»
+  не отправят две версии одновременно.
+*/
+
+function queueServerConfigSave() {
+
+  const snapshot =
+    structuredClone(
+      APP_DATA
+    );
+
+
+  serverSaveChain =
+    serverSaveChain
+      .then(
+        async () => {
+
+          if (
+            !adminUnlocked ||
+            !adminToken ||
+            !serverConfigExists
+          ) {
+            return;
+          }
+
+
+          const result =
+            await apiPost(
+              "saveConfig",
+              {
+                adminToken,
+
+                config:
+                  snapshot,
+
+                expectedRevision:
+                  serverConfigRevision
+              }
+            );
+
+
+          serverConfigRevision =
+            Number(
+              result.revision
+            ) ||
+            serverConfigRevision;
+
+
+          serverConfigUpdatedAt =
+            result.updatedAt ||
+            serverConfigUpdatedAt;
+
+        }
+      )
+      .catch(
+        error => {
+
+          console.error(
+            "Не удалось сохранить конфигурацию на сервере",
+            error
+          );
+
+
+          if (
+            adminUnlocked
+          ) {
+
+            adminStatus(
+              "Локально сохранено, но сервер не обновлен: " +
+              (
+                error.message ||
+                "ошибка связи"
+              ),
+              true
+            );
+
+          }
+
+        }
+      );
+
+
+  return serverSaveChain;
+
+}
+
+
+/*
+  Самая важная функция миграции.
+
+  После успешного входа администратора:
+
+  1. Проверяет, есть ли Config на сервере.
+  2. Если его еще нет — публикует текущий
+     APP_DATA из этого браузера.
+  3. Если уже есть — берет серверную версию.
+
+  Поэтому ПЕРВЫЙ вход в админку после
+  обновления нужно сделать именно на
+  компьютере с настроенным Днем 2.
+*/
+
+async function ensureServerConfigAfterAdminLogin() {
+
+  const status =
+    await apiPost(
+      "getConfigStatus",
+      {
+        adminToken
+      }
+    );
+
+
+  if (
+    status.exists !== true
+  ) {
+
+    const result =
+      await apiPost(
+        "publishInitialConfig",
+        {
+          adminToken,
+
+          config:
+            APP_DATA
+        }
+      );
+
+
+    serverConfigExists =
+      true;
+
+
+    serverConfigRevision =
+      Number(
+        result.revision
+      ) || 1;
+
+
+    serverConfigUpdatedAt =
+      result.updatedAt || "";
+
+
+    saveLocalData();
+
+
+    return {
+      published: true
+    };
+
+  }
+
+
+  serverConfigExists =
+    true;
+
+
+  serverConfigRevision =
+    Number(
+      status.revision
+    ) || 1;
+
+
+  serverConfigUpdatedAt =
+    status.updatedAt || "";
+
+
+  const latest =
+    await apiPost(
+      "getConfig"
+    );
+
+
+  if (
+    latest.exists === true &&
+    latest.config
+  ) {
+
+    const localSnapshot =
+      structuredClone(
+        APP_DATA
+      );
+
+
+    APP_DATA =
+      latest.config;
+
+
+    copyLocalPrivateFields(
+      APP_DATA,
+      localSnapshot
+    );
+
+
+    migrateRoomObjects();
+
+    saveLocalData();
+
+
+    serverConfigRevision =
+      Number(
+        latest.revision
+      ) ||
+      serverConfigRevision;
+
+
+    serverConfigUpdatedAt =
+      latest.updatedAt ||
+      serverConfigUpdatedAt;
+
+  }
+
+
+  return {
+    published: false
+  };
+
+}
+
+
+/* =========================================================
+   ОБЪЕКТЫ КОМНАТЫ
+========================================================= */
 
 function roomObjectFromLegacy(
   object
 ) {
 
   return {
-    id: object.id,
+    id:
+      object.id,
+
     name:
       object.name ||
       "Предмет",
+
     x:
       Number.isFinite(
-        Number(object.x)
+        Number(
+          object.x
+        )
       )
-        ? Number(object.x)
+        ? Number(
+            object.x
+          )
         : 50,
+
     y:
       Number.isFinite(
-        Number(object.y)
+        Number(
+          object.y
+        )
       )
-        ? Number(object.y)
+        ? Number(
+            object.y
+          )
         : 50,
+
     width:
       Number.isFinite(
-        Number(object.width)
+        Number(
+          object.width
+        )
       )
-        ? Number(object.width)
+        ? Number(
+            object.width
+          )
         : 10,
+
     height:
       Number.isFinite(
-        Number(object.height)
+        Number(
+          object.height
+        )
       )
-        ? Number(object.height)
+        ? Number(
+            object.height
+          )
         : 10
   };
+
 }
 
 
@@ -959,6 +1389,7 @@ function defaultQuestObjectConfig(
         "Пока здесь ничего полезного."
     }
   };
+
 }
 
 
@@ -972,11 +1403,15 @@ function migrateRoomObjects() {
   ) {
 
     const day1Objects =
-      APP_DATA.quests?.day1?.objects;
+      APP_DATA.quests
+        ?.day1
+        ?.objects;
 
 
     const source =
-      Array.isArray(day1Objects) &&
+      Array.isArray(
+        day1Objects
+      ) &&
       day1Objects.length
         ? day1Objects
         : DEFAULT_DATA.roomObjects;
@@ -986,13 +1421,15 @@ function migrateRoomObjects() {
       source.map(
         roomObjectFromLegacy
       );
+
   }
 
 
   const knownIds =
     new Set(
       APP_DATA.roomObjects.map(
-        object => object.id
+        object =>
+          object.id
       )
     );
 
@@ -1002,8 +1439,15 @@ function migrateRoomObjects() {
   ).forEach(
     quest => {
 
-      if (!Array.isArray(quest.objects)) {
-        quest.objects = [];
+      if (
+        !Array.isArray(
+          quest.objects
+        )
+      ) {
+
+        quest.objects =
+          [];
+
       }
 
 
@@ -1023,12 +1467,16 @@ function migrateRoomObjects() {
               )
             );
 
+
             knownIds.add(
               object.id
             );
+
           }
+
         }
       );
+
     }
   );
 
@@ -1037,6 +1485,7 @@ function migrateRoomObjects() {
     APP_DATA.roomObjects.map(
       roomObjectFromLegacy
     );
+
 }
 
 
@@ -1044,11 +1493,13 @@ function roomObjectDefinition(
   id
 ) {
 
-  return APP_DATA.roomObjects
+  return APP_DATA
+    .roomObjects
     .find(
       object =>
         object.id === id
     );
+
 }
 
 
@@ -1076,13 +1527,16 @@ function questObjectConfig(
         false
       );
 
+
     quest.objects.push(
       object
     );
+
   }
 
 
   return object || null;
+
 }
 
 
@@ -1092,10 +1546,14 @@ function effectiveQuestObject(
 ) {
 
   const definition =
-    roomObjectDefinition(id);
+    roomObjectDefinition(
+      id
+    );
 
 
-  if (!definition) {
+  if (
+    !definition
+  ) {
     return null;
   }
 
@@ -1117,6 +1575,7 @@ function effectiveQuestObject(
     ...definition,
     id
   };
+
 }
 
 
@@ -1124,7 +1583,8 @@ function questObjects(
   quest
 ) {
 
-  return APP_DATA.roomObjects
+  return APP_DATA
+    .roomObjects
     .map(
       definition =>
         effectiveQuestObject(
@@ -1132,11 +1592,16 @@ function questObjects(
           definition.id
         )
     )
-    .filter(Boolean);
+    .filter(
+      Boolean
+    );
+
 }
 
 
-/* СТАРТ */
+/* =========================================================
+   СТАРТ
+========================================================= */
 
 function renderDays() {
 
@@ -1146,7 +1611,8 @@ function renderDays() {
     );
 
 
-  grid.innerHTML = "";
+  grid.innerHTML =
+    "";
 
 
   Object.entries(
@@ -1249,16 +1715,21 @@ function renderDays() {
 
       }
     );
+
 }
 
 
-/* ИГРА */
+/* =========================================================
+   ИГРА
+========================================================= */
 
 function currentQuest() {
+
   return APP_DATA
     .quests[
       selectedQuestId
     ];
+
 }
 
 
@@ -1267,10 +1738,18 @@ function startQuest() {
   gameState =
     createGameState();
 
-  gameStartedAt = Date.now();
-  gameErrors = 0;
-  gameHints = 0;
-  questCompleting = false;
+
+  gameStartedAt =
+    Date.now();
+
+  gameErrors =
+    0;
+
+  gameHints =
+    0;
+
+  questCompleting =
+    false;
 
 
   const quest =
@@ -1282,16 +1761,18 @@ function startQuest() {
       "game-day-title"
     )
     .textContent =
-    `День ${quest.day}`;
+      `День ${quest.day}`;
 
 
   renderInventory();
 
   renderHotspots();
 
+
   showScreen(
     "game"
   );
+
 }
 
 
@@ -1311,7 +1792,9 @@ function renderHotspots() {
     currentQuest();
 
 
-  questObjects(quest)
+  questObjects(
+    quest
+  )
     .filter(
       object =>
         object.active !== false
@@ -1363,6 +1846,7 @@ function renderHotspots() {
 
             setTimeout(
               () =>
+
                 button
                   .classList
                   .remove(
@@ -1387,6 +1871,7 @@ function renderHotspots() {
 
       }
     );
+
 }
 
 
@@ -1399,7 +1884,9 @@ function requirementPassed(
       object.id
     ]
   ) {
+
     return true;
+
   }
 
 
@@ -1411,47 +1898,56 @@ function requirementPassed(
 
   if (
     requirement.type ===
-    "none"
+      "none"
   ) {
+
     return true;
+
   }
 
 
   if (
     requirement.type ===
-    "flag"
+      "flag"
   ) {
+
     return Boolean(
       gameState.flags[
         requirement.key
       ]
     );
+
   }
 
 
   if (
     requirement.type ===
-    "task"
+      "task"
   ) {
+
     return Boolean(
       gameState.completedTasks[
         requirement.key
       ]
     );
+
   }
 
 
   if (
     requirement.type ===
-    "item"
+      "item"
   ) {
+
     return hasItem(
       requirement.key
     );
+
   }
 
 
   return false;
+
 }
 
 
@@ -1466,9 +1962,11 @@ function unlockRequirement(
   if (
     !requirement ||
     requirement.type ===
-    "none"
+      "none"
   ) {
+
     return;
+
   }
 
 
@@ -1489,7 +1987,8 @@ function unlockRequirement(
     .unlockedObjects[
       object.id
     ] =
-    true;
+      true;
+
 }
 
 
@@ -1518,7 +2017,9 @@ function interactObject(
       </div>
     `);
 
+
     return;
+
   }
 
 
@@ -1530,6 +2031,7 @@ function interactObject(
   runObjectAction(
     object
   );
+
 }
 
 
@@ -1543,7 +2045,7 @@ function runObjectAction(
 
   if (
     action.type ===
-    "message"
+      "message"
   ) {
 
     openOverlay(`
@@ -1561,52 +2063,60 @@ function runObjectAction(
       </p>
     `);
 
+
     return;
+
   }
 
 
   if (
     action.type ===
-    "task"
+      "task"
   ) {
 
     openTask(
       action.taskId
     );
 
+
     return;
+
   }
 
 
   if (
     action.type ===
-    "giveItem"
+      "giveItem"
   ) {
 
     giveObjectItem(
       object
     );
 
+
     return;
+
   }
 
 
   if (
     action.type ===
-    "passwordTask"
+      "passwordTask"
   ) {
 
     openPasswordTask(
       object
     );
 
+
     return;
+
   }
 
 
   if (
     action.type ===
-    "codeLock"
+      "codeLock"
   ) {
 
     openCodeLock(
@@ -1614,6 +2124,7 @@ function runObjectAction(
     );
 
   }
+
 }
 
 
@@ -1639,7 +2150,9 @@ function giveObjectItem(
       </p>
     `);
 
+
     return;
+
   }
 
 
@@ -1694,7 +2207,7 @@ function giveObjectItem(
           .takenObjects[
             object.id
           ] =
-          true;
+            true;
 
 
         openOverlay(`
@@ -1712,6 +2225,7 @@ function giveObjectItem(
 
       }
     );
+
 }
 
 
@@ -1777,18 +2291,26 @@ function openPasswordTask(
         )
       ) {
 
-        if (!previewMode) {
-          gameErrors += 1;
+        if (
+          !previewMode
+        ) {
+
+          gameErrors +=
+            1;
+
         }
+
 
         document
           .getElementById(
             "object-password-error"
           )
           .textContent =
-          "Пароль не подходит.";
+            "Пароль не подходит.";
+
 
         return;
+
       }
 
 
@@ -1807,6 +2329,7 @@ function openPasswordTask(
       "click",
       check
     );
+
 }
 
 
@@ -1886,36 +2409,55 @@ function openCodeLock(
           )
         ) {
 
-          if (!previewMode) {
-            gameErrors += 1;
+          if (
+            !previewMode
+          ) {
+
+            gameErrors +=
+              1;
+
           }
+
 
           document
             .getElementById(
               "code-lock-error"
             )
             .textContent =
-            "Код неверный.";
+              "Код неверный.";
+
 
           return;
+
         }
 
 
-        finishQuest(action);
+        finishQuest(
+          action
+        );
 
       }
     );
+
 }
 
 
-async function finishQuest(action) {
+async function finishQuest(
+  action
+) {
 
-  if (questCompleting) {
+  if (
+    questCompleting
+  ) {
+
     return;
+
   }
 
 
-  if (previewMode) {
+  if (
+    previewMode
+  ) {
 
     openOverlay(`
       <h2>
@@ -1935,11 +2477,15 @@ async function finishQuest(action) {
       </p>
     `);
 
+
     return;
+
   }
 
 
-  if (!playToken) {
+  if (
+    !playToken
+  ) {
 
     openOverlay(`
       <h3>
@@ -1952,11 +2498,14 @@ async function finishQuest(action) {
       </p>
     `);
 
+
     return;
+
   }
 
 
-  questCompleting = true;
+  questCompleting =
+    true;
 
 
   openOverlay(`
@@ -1984,8 +2533,13 @@ async function finishQuest(action) {
   const durationSec =
     Math.max(
       0,
+
       Math.round(
-        (Date.now() - gameStartedAt) / 1000
+        (
+          Date.now() -
+          gameStartedAt
+        ) /
+        1000
       )
     );
 
@@ -1997,14 +2551,19 @@ async function finishQuest(action) {
         "completeQuest",
         {
           playToken,
+
           questId:
             selectedQuestId,
+
           day:
             quest.day,
+
           errors:
             gameErrors,
+
           hints:
             gameHints,
+
           durationSec
         }
       );
@@ -2016,10 +2575,14 @@ async function finishQuest(action) {
       "";
 
 
-    if (!code) {
+    if (
+      !code
+    ) {
+
       throw new Error(
         "Сервер не вернул персональный код."
       );
+
     }
 
 
@@ -2041,7 +2604,9 @@ async function finishQuest(action) {
 
       <div class="clue-card">
         <strong style="font-size:1.45em;letter-spacing:.08em;">
-          ${escapeHtml(code)}
+          ${escapeHtml(
+            code
+          )}
         </strong>
       </div>
 
@@ -2087,14 +2652,19 @@ async function finishQuest(action) {
       ?.addEventListener(
         "click",
         () =>
-          finishQuest(action)
+          finishQuest(
+            action
+          )
       );
 
   }
+
 }
 
 
-/* ЗАДАНИЯ */
+/* =========================================================
+   ЗАДАНИЯ
+========================================================= */
 
 function openTask(
   taskId
@@ -2107,7 +2677,9 @@ function openTask(
       ];
 
 
-  if (!task) {
+  if (
+    !task
+  ) {
 
     openOverlay(`
       <h3>
@@ -2119,7 +2691,9 @@ function openTask(
       </p>
     `);
 
+
     return;
+
   }
 
 
@@ -2148,57 +2722,65 @@ function openTask(
       </p>
     `);
 
+
     return;
+
   }
 
 
   if (
     task.type ===
-    "singleChoice"
+      "singleChoice"
   ) {
+
     openSingleChoice(
       task
     );
-  }
 
+  }
 
   else if (
     task.type ===
-    "multipleChoice"
+      "multipleChoice"
   ) {
+
     openMultipleChoice(
       task
     );
-  }
 
+  }
 
   else if (
     task.type ===
-    "textInput"
+      "textInput"
   ) {
+
     openTextTask(
       task
     );
-  }
 
+  }
 
   else if (
     task.type ===
-    "ordering"
+      "ordering"
   ) {
+
     openOrderingTask(
       task
     );
-  }
 
+  }
 
   else if (
     task.type ===
-    "matching"
+      "matching"
   ) {
+
     openMatchingTask(
       task
     );
+
   }
 
 }
@@ -2221,6 +2803,7 @@ function taskHeader(
       )}
     </p>
   `;
+
 }
 
 
@@ -2231,7 +2814,10 @@ function openSingleChoice(
   const html =
     task.options
       .map(
-        (option, index) => `
+        (
+          option,
+          index
+        ) => `
           <button
             class="choice-btn"
             data-single="${index}"
@@ -2247,7 +2833,9 @@ function openSingleChoice(
 
 
   openOverlay(
-    taskHeader(task) +
+    taskHeader(
+      task
+    ) +
     `
       <div class="choice-list">
         ${html}
@@ -2282,13 +2870,17 @@ function openSingleChoice(
               answer ===
               task.correct[0]
             ) {
+
               completeTask(
                 task
               );
+
             }
 
             else {
+
               taskError();
+
             }
 
           }
@@ -2296,6 +2888,7 @@ function openSingleChoice(
 
       }
     );
+
 }
 
 
@@ -2306,8 +2899,12 @@ function openMultipleChoice(
   const html =
     task.options
       .map(
-        (option, index) => `
+        (
+          option,
+          index
+        ) => `
           <label class="choice-check">
+
             <input
               type="checkbox"
               value="${index}"
@@ -2319,6 +2916,7 @@ function openMultipleChoice(
                 option
               )}
             </span>
+
           </label>
         `
       )
@@ -2326,7 +2924,9 @@ function openMultipleChoice(
 
 
   openOverlay(
-    taskHeader(task) +
+    taskHeader(
+      task
+    ) +
     `
       <div class="choice-list">
         ${html}
@@ -2377,7 +2977,8 @@ function openMultipleChoice(
         const correct =
           [
             ...task.correct
-          ].sort();
+          ]
+            .sort();
 
 
         if (
@@ -2396,11 +2997,14 @@ function openMultipleChoice(
         }
 
         else {
+
           taskError();
+
         }
 
       }
     );
+
 }
 
 
@@ -2409,7 +3013,9 @@ function openTextTask(
 ) {
 
   openOverlay(
-    taskHeader(task) +
+    taskHeader(
+      task
+    ) +
     `
       <input
         id="text-task-input"
@@ -2456,24 +3062,33 @@ function openTextTask(
 
         const ok =
           task.answers
-            .map(normalize)
+            .map(
+              normalize
+            )
             .includes(
               value
             );
 
 
-        if (ok) {
+        if (
+          ok
+        ) {
+
           completeTask(
             task
           );
+
         }
 
         else {
+
           taskError();
+
         }
 
       }
     );
+
 }
 
 
@@ -2482,7 +3097,9 @@ function openOrderingTask(
 ) {
 
   const order =
-    [...task.order]
+    [
+      ...task.order
+    ]
       .sort(
         () =>
           Math.random() -
@@ -2493,7 +3110,9 @@ function openOrderingTask(
   function render() {
 
     openOverlay(
-      taskHeader(task) +
+      taskHeader(
+        task
+      ) +
       `
         <div
           id="order-list"
@@ -2502,7 +3121,10 @@ function openOrderingTask(
           ${
             order
               .map(
-                (item, index) => `
+                (
+                  item,
+                  index
+                ) => `
                   <div class="order-item">
 
                     <span>
@@ -2571,18 +3193,30 @@ function openOrderingTask(
                 );
 
 
-              if (i === 0) {
+              if (
+                i === 0
+              ) {
+
                 return;
+
               }
 
 
               [
-                order[i - 1],
-                order[i]
+                order[
+                  i - 1
+                ],
+                order[
+                  i
+                ]
               ] =
               [
-                order[i],
-                order[i - 1]
+                order[
+                  i
+                ],
+                order[
+                  i - 1
+                ]
               ];
 
 
@@ -2614,19 +3248,30 @@ function openOrderingTask(
 
               if (
                 i ===
-                order.length - 1
+                order.length -
+                1
               ) {
+
                 return;
+
               }
 
 
               [
-                order[i + 1],
-                order[i]
+                order[
+                  i + 1
+                ],
+                order[
+                  i
+                ]
               ] =
               [
-                order[i],
-                order[i + 1]
+                order[
+                  i
+                ],
+                order[
+                  i + 1
+                ]
               ];
 
 
@@ -2663,7 +3308,9 @@ function openOrderingTask(
           }
 
           else {
+
             taskError();
+
           }
 
         }
@@ -2673,6 +3320,7 @@ function openOrderingTask(
 
 
   render();
+
 }
 
 
@@ -2696,7 +3344,10 @@ function openMatchingTask(
   const rows =
     task.pairs
       .map(
-        (pair, index) => `
+        (
+          pair,
+          index
+        ) => `
           <div class="match-row">
 
             <div>
@@ -2741,7 +3392,9 @@ function openMatchingTask(
 
 
   openOverlay(
-    taskHeader(task) +
+    taskHeader(
+      task
+    ) +
     rows +
     `
       <button
@@ -2798,25 +3451,37 @@ function openMatchingTask(
           );
 
 
-        if (ok) {
+        if (
+          ok
+        ) {
+
           completeTask(
             task
           );
+
         }
 
         else {
+
           taskError();
+
         }
 
       }
     );
+
 }
 
 
 function taskError() {
 
-  if (!previewMode) {
-    gameErrors += 1;
+  if (
+    !previewMode
+  ) {
+
+    gameErrors +=
+      1;
+
   }
 
 
@@ -2826,10 +3491,15 @@ function taskError() {
     );
 
 
-  if (target) {
+  if (
+    target
+  ) {
+
     target.textContent =
       "Пока неверно. Попробуйте еще раз.";
+
   }
+
 }
 
 
@@ -2841,7 +3511,7 @@ function completeTask(
     .completedTasks[
       task.id
     ] =
-    true;
+      true;
 
 
   applyRewards(
@@ -2861,10 +3531,13 @@ function completeTask(
       )}
     </div>
   `);
+
 }
 
 
-/* НАГРАДЫ */
+/* =========================================================
+   НАГРАДЫ
+========================================================= */
 
 function applyRewards(
   rewards
@@ -2875,7 +3548,7 @@ function applyRewards(
 
       if (
         reward.type ===
-        "note"
+          "note"
       ) {
 
         addNote(
@@ -2887,21 +3560,21 @@ function applyRewards(
 
       else if (
         reward.type ===
-        "flag"
+          "flag"
       ) {
 
         gameState
           .flags[
             reward.value
           ] =
-          true;
+            true;
 
       }
 
 
       else if (
         reward.type ===
-        "item"
+          "item"
       ) {
 
         addItem({
@@ -2921,10 +3594,13 @@ function applyRewards(
 
     }
   );
+
 }
 
 
-/* ИНВЕНТАРЬ */
+/* =========================================================
+   ИНВЕНТАРЬ
+========================================================= */
 
 function addItem(
   item
@@ -2935,7 +3611,9 @@ function addItem(
       item.id
     )
   ) {
+
     return;
+
   }
 
 
@@ -2947,6 +3625,7 @@ function addItem(
 
 
   renderInventory();
+
 }
 
 
@@ -2964,6 +3643,7 @@ function removeItem(
 
 
   renderInventory();
+
 }
 
 
@@ -2977,6 +3657,7 @@ function hasItem(
       item =>
         item.id === id
     );
+
 }
 
 
@@ -2997,6 +3678,7 @@ function addNote(
       );
 
   }
+
 }
 
 
@@ -3029,10 +3711,14 @@ function renderInventory() {
 
 
     const item =
-      gameState.inventory[i];
+      gameState.inventory[
+        i
+      ];
 
 
-    if (item) {
+    if (
+      item
+    ) {
 
       slot.textContent =
         item.icon ||
@@ -3050,10 +3736,13 @@ function renderInventory() {
     );
 
   }
+
 }
 
 
-/* ВХОД В ИГРУ */
+/* =========================================================
+   ВХОД В ИГРУ
+========================================================= */
 
 document
   .getElementById(
@@ -3110,10 +3799,14 @@ document
           "";
 
 
-        if (!playToken) {
+        if (
+          !playToken
+        ) {
+
           throw new Error(
             "Сервер не создал игровую сессию."
           );
+
         }
 
 
@@ -3136,8 +3829,12 @@ document
 
 
         errorElement.textContent =
-          error.message ===
-          "INVALID_PASSWORD"
+          (
+            error.message ===
+              "INVALID_PASSWORD" ||
+            error.message ===
+              "INVALID_QUEST_PASSWORD"
+          )
             ? "Неверный пароль."
             : (
                 error.message ||
@@ -3157,13 +3854,16 @@ document
   .addEventListener(
     "click",
     () =>
+
       showScreen(
         "start"
       )
   );
 
 
-/* АДМИН-ПАРОЛЬ */
+/* =========================================================
+   АДМИН-ПАРОЛЬ
+========================================================= */
 
 document
   .getElementById(
@@ -3186,7 +3886,7 @@ document
           "admin-password"
         )
         .value =
-        "";
+          "";
 
 
       document
@@ -3194,7 +3894,7 @@ document
           "admin-password-error"
         )
         .textContent =
-        "";
+          "";
 
 
       showScreen(
@@ -3224,9 +3924,12 @@ document
     event => {
 
       if (
-        event.key === "Enter"
+        event.key ===
+          "Enter"
       ) {
+
         checkAdminLogin();
+
       }
 
     }
@@ -3272,10 +3975,14 @@ async function checkAdminLogin() {
       "";
 
 
-    if (!adminToken) {
+    if (
+      !adminToken
+    ) {
+
       throw new Error(
         "Сервер не создал сессию администратора."
       );
+
     }
 
 
@@ -3284,8 +3991,24 @@ async function checkAdminLogin() {
 
 
     errorElement.textContent =
+      "Синхронизируем настройки...";
+
+
+    /*
+      Именно здесь впервые переносится
+      локальный День 2 на сервер, если
+      Config еще не создан.
+    */
+
+    const configResult =
+      await ensureServerConfigAfterAdminLogin();
+
+
+    errorElement.textContent =
       "";
 
+
+    renderDays();
 
     renderAdminQuestSelect();
 
@@ -3293,6 +4016,17 @@ async function checkAdminLogin() {
     showScreen(
       "admin"
     );
+
+
+    if (
+      configResult.published
+    ) {
+
+      adminStatus(
+        "Текущая конфигурация опубликована. Теперь она общая для всех устройств."
+      );
+
+    }
 
   }
 
@@ -3308,7 +4042,7 @@ async function checkAdminLogin() {
 
     errorElement.textContent =
       error.message ===
-      "INVALID_ADMIN_PASSWORD"
+        "INVALID_ADMIN_PASSWORD"
         ? "Неверный пароль."
         : (
             error.message ||
@@ -3316,6 +4050,7 @@ async function checkAdminLogin() {
           );
 
   }
+
 }
 
 
@@ -3332,6 +4067,7 @@ document
 
       adminToken =
         "";
+
 
       showScreen(
         "start"
@@ -3355,6 +4091,7 @@ document
       adminToken =
         "";
 
+
       showScreen(
         "start"
       );
@@ -3363,20 +4100,28 @@ document
   );
 
 
-/* АДМИН — ДНИ */
+/* =========================================================
+   АДМИН — ДНИ
+========================================================= */
 
 function adminQuest() {
+
   return APP_DATA
     .quests[
       adminQuestId
     ];
+
 }
 
 
 function renderAdminQuestSelect() {
 
-  if (!adminUnlocked) {
+  if (
+    !adminUnlocked
+  ) {
+
     return;
+
   }
 
 
@@ -3432,6 +4177,7 @@ function renderAdminQuestSelect() {
   renderAdminTaskList();
 
   renderAdminObjectList();
+
 }
 
 
@@ -3446,7 +4192,7 @@ function loadAdminQuestForm() {
       "admin-quest-enabled"
     )
     .checked =
-    quest.enabled;
+      quest.enabled;
 
 
   document
@@ -3454,7 +4200,7 @@ function loadAdminQuestForm() {
       "admin-quest-title"
     )
     .value =
-    quest.title;
+      quest.title;
 
 
   document
@@ -3462,7 +4208,7 @@ function loadAdminQuestForm() {
       "admin-quest-topic"
     )
     .value =
-    quest.topic;
+      quest.topic;
 
 
   document
@@ -3470,7 +4216,9 @@ function loadAdminQuestForm() {
       "admin-quest-password"
     )
     .value =
-    quest.password;
+      quest.password ||
+      "";
+
 }
 
 
@@ -3542,7 +4290,7 @@ document
           .trim();
 
 
-      quest.password =
+      const enteredPassword =
         document
           .getElementById(
             "admin-quest-password"
@@ -3550,20 +4298,42 @@ document
           .value;
 
 
+      quest.password =
+        enteredPassword;
+
+
       try {
 
-        await apiPost(
-          "setQuestPassword",
-          {
-            adminToken,
-            questId:
-              adminQuestId,
-            day:
-              quest.day,
-            password:
-              quest.password
-          }
-        );
+        /*
+          На другом устройстве поле пароля
+          будет пустым, потому что сервер
+          специально его не раскрывает.
+
+          Пустое поле означает:
+          оставить существующий пароль.
+        */
+
+        if (
+          enteredPassword.trim()
+        ) {
+
+          await apiPost(
+            "setQuestPassword",
+            {
+              adminToken,
+
+              questId:
+                adminQuestId,
+
+              day:
+                quest.day,
+
+              password:
+                enteredPassword
+            }
+          );
+
+        }
 
 
         saveData();
@@ -3572,7 +4342,9 @@ document
 
 
         adminStatus(
-          "Настройки дня и пароль сохранены."
+          enteredPassword.trim()
+            ? "Настройки дня и пароль сохранены."
+            : "Настройки дня сохранены. Пароль не изменен."
         );
 
       }
@@ -3581,15 +4353,25 @@ document
 
         adminStatus(
           error.message ||
-          "Не удалось сохранить пароль дня на сервере.",
+          "Не удалось сохранить настройки дня.",
           true
         );
 
       }
+
     }
   );
 
-/* АДМИН — ОБЪЕКТЫ */
+
+/* =========================================================
+   КОНЕЦ ЧАСТИ 1
+   ЧАСТЬ 2 НАЧИНАЕТСЯ С:
+   АДМИН — ОБЪЕКТЫ
+========================================================= */
+
+/* =========================================================
+   АДМИН — ОБЪЕКТЫ
+========================================================= */
 
 function renderAdminObjectList() {
 
@@ -3670,12 +4452,15 @@ function renderAdminObjectList() {
       "admin-object-task"
     )
   );
+
 }
 
 
 function selectedAdminObject() {
 
-  if (!adminObjectId) {
+  if (
+    !adminObjectId
+  ) {
     return null;
   }
 
@@ -3684,12 +4469,15 @@ function selectedAdminObject() {
     adminQuest(),
     adminObjectId
   );
+
 }
 
 
 function selectedRoomObjectDefinition() {
 
-  if (!adminObjectId) {
+  if (
+    !adminObjectId
+  ) {
     return null;
   }
 
@@ -3697,6 +4485,7 @@ function selectedRoomObjectDefinition() {
   return roomObjectDefinition(
     adminObjectId
   );
+
 }
 
 
@@ -3704,7 +4493,9 @@ function selectedQuestObjectConfig(
   create = false
 ) {
 
-  if (!adminObjectId) {
+  if (
+    !adminObjectId
+  ) {
     return null;
   }
 
@@ -3714,6 +4505,7 @@ function selectedQuestObjectConfig(
     adminObjectId,
     create
   );
+
 }
 
 
@@ -3724,7 +4516,7 @@ function clearAdminObject() {
       "admin-object-active"
     )
     .checked =
-    false;
+      false;
 
 
   [
@@ -3751,7 +4543,7 @@ function clearAdminObject() {
           id
         )
         .value =
-        "";
+          "";
 
     }
   );
@@ -3762,7 +4554,7 @@ function clearAdminObject() {
       "admin-requirement-type"
     )
     .value =
-    "none";
+      "none";
 
 
   document
@@ -3770,7 +4562,7 @@ function clearAdminObject() {
       "admin-requirement-consume"
     )
     .checked =
-    false;
+      false;
 
 
   document
@@ -3778,12 +4570,13 @@ function clearAdminObject() {
       "admin-object-action"
     )
     .value =
-    "message";
+      "message";
 
 
   updateRequirementFields();
 
   updateObjectActionFields();
+
 }
 
 
@@ -3793,7 +4586,9 @@ function loadAdminObject() {
     selectedAdminObject();
 
 
-  if (!object) {
+  if (
+    !object
+  ) {
 
     clearAdminObject();
 
@@ -3807,7 +4602,8 @@ function loadAdminObject() {
       "admin-object-active"
     )
     .checked =
-    object.active === true;
+      object.active ===
+      true;
 
 
   document
@@ -3815,7 +4611,8 @@ function loadAdminObject() {
       "admin-object-name"
     )
     .value =
-    object.name || "";
+      object.name ||
+      "";
 
 
   document
@@ -3823,7 +4620,8 @@ function loadAdminObject() {
       "admin-object-x"
     )
     .value =
-    object.x ?? 50;
+      object.x ??
+      50;
 
 
   document
@@ -3831,7 +4629,8 @@ function loadAdminObject() {
       "admin-object-y"
     )
     .value =
-    object.y ?? 50;
+      object.y ??
+      50;
 
 
   document
@@ -3839,7 +4638,8 @@ function loadAdminObject() {
       "admin-object-width"
     )
     .value =
-    object.width ?? 10;
+      object.width ??
+      10;
 
 
   document
@@ -3847,7 +4647,8 @@ function loadAdminObject() {
       "admin-object-height"
     )
     .value =
-    object.height ?? 10;
+      object.height ??
+      10;
 
 
   const req =
@@ -3863,7 +4664,8 @@ function loadAdminObject() {
       "admin-requirement-type"
     )
     .value =
-    req.type || "none";
+      req.type ||
+      "none";
 
 
   document
@@ -3871,7 +4673,8 @@ function loadAdminObject() {
       "admin-requirement-key"
     )
     .value =
-    req.key || "";
+      req.key ||
+      "";
 
 
   document
@@ -3879,9 +4682,9 @@ function loadAdminObject() {
       "admin-requirement-consume"
     )
     .checked =
-    Boolean(
-      req.consume
-    );
+      Boolean(
+        req.consume
+      );
 
 
   document
@@ -3889,7 +4692,8 @@ function loadAdminObject() {
       "admin-object-fallback"
     )
     .value =
-    object.fallback || "";
+      object.fallback ||
+      "";
 
 
   const action =
@@ -3905,8 +4709,8 @@ function loadAdminObject() {
       "admin-object-action"
     )
     .value =
-    action.type ||
-    "message";
+      action.type ||
+      "message";
 
 
   document
@@ -3914,7 +4718,8 @@ function loadAdminObject() {
       "admin-object-message"
     )
     .value =
-    action.message || "";
+      action.message ||
+      "";
 
 
   fillTaskOptions(
@@ -3929,7 +4734,8 @@ function loadAdminObject() {
       "admin-object-task"
     )
     .value =
-    action.taskId || "";
+      action.taskId ||
+      "";
 
 
   document
@@ -3937,7 +4743,8 @@ function loadAdminObject() {
       "admin-object-item-id"
     )
     .value =
-    action.item?.id || "";
+      action.item?.id ||
+      "";
 
 
   document
@@ -3945,7 +4752,8 @@ function loadAdminObject() {
       "admin-object-item-name"
     )
     .value =
-    action.item?.name || "";
+      action.item?.name ||
+      "";
 
 
   document
@@ -3953,7 +4761,8 @@ function loadAdminObject() {
       "admin-object-item-icon"
     )
     .value =
-    action.item?.icon || "";
+      action.item?.icon ||
+      "";
 
 
   document
@@ -3961,7 +4770,8 @@ function loadAdminObject() {
       "admin-object-password"
     )
     .value =
-    action.password || "";
+      action.password ||
+      "";
 
 
   document
@@ -3969,7 +4779,8 @@ function loadAdminObject() {
       "admin-object-code"
     )
     .value =
-    action.code || "";
+      action.code ||
+      "";
 
 
   document
@@ -3977,7 +4788,8 @@ function loadAdminObject() {
       "admin-object-code-hint"
     )
     .value =
-    action.hint || "";
+      action.hint ||
+      "";
 
 
   document
@@ -3985,12 +4797,14 @@ function loadAdminObject() {
       "admin-object-success"
     )
     .value =
-    action.success || "";
+      action.success ||
+      "";
 
 
   updateRequirementFields();
 
   updateObjectActionFields();
+
 }
 
 
@@ -4012,17 +4826,6 @@ document
   );
 
 
-/*
-  Новый предмет комнаты создается ОДИН РАЗ
-  в общей библиотеке.
-
-  Во всех днях он сразу становится доступен
-  для настройки.
-
-  В текущем дне новый предмет включаем,
-  в остальных днях оставляем выключенным.
-*/
-
 document
   .getElementById(
     "admin-add-object"
@@ -4032,28 +4835,37 @@ document
     () => {
 
       const id =
-        uid("object");
+        uid(
+          "object"
+        );
 
 
-      APP_DATA.roomObjects.push({
-        id,
+      APP_DATA
+        .roomObjects
+        .push({
+          id,
 
-        name:
-          "Новый предмет",
+          name:
+            "Новый предмет",
 
-        x: 50,
-        y: 50,
+          x: 50,
+          y: 50,
 
-        width: 10,
-        height: 10
-      });
+          width: 10,
+          height: 10
+        });
 
 
       Object.entries(
         APP_DATA.quests
       )
         .forEach(
-          ([questId, quest]) => {
+          (
+            [
+              questId,
+              quest
+            ]
+          ) => {
 
             quest.objects.push(
               defaultQuestObjectConfig(
@@ -4084,17 +4896,6 @@ document
   );
 
 
-/*
-  Удаление предмета — глобальное.
-
-  Если удалить телефон как физический объект,
-  он исчезнет из всех дней.
-
-  Если предмет нужен в других днях,
-  но не нужен в текущем — его надо просто
-  выключить галочкой «Активен».
-*/
-
 document
   .getElementById(
     "admin-delete-object"
@@ -4114,7 +4915,9 @@ document
         selectedRoomObjectDefinition();
 
 
-      if (!definition) {
+      if (
+        !definition
+      ) {
         return;
       }
 
@@ -4129,7 +4932,8 @@ document
 
 
       APP_DATA.roomObjects =
-        APP_DATA.roomObjects
+        APP_DATA
+          .roomObjects
           .filter(
             object =>
               object.id !==
@@ -4144,11 +4948,12 @@ document
           quest => {
 
             quest.objects =
-              quest.objects.filter(
-                object =>
-                  object.id !==
-                  adminObjectId
-              );
+              quest.objects
+                .filter(
+                  object =>
+                    object.id !==
+                    adminObjectId
+                );
 
           }
         );
@@ -4186,9 +4991,10 @@ function updateRequirementFields() {
       "admin-requirement-key-wrap"
     )
     .style.display =
-    type === "none"
-      ? "none"
-      : "block";
+      type ===
+      "none"
+        ? "none"
+        : "block";
 
 
   document
@@ -4196,9 +5002,11 @@ function updateRequirementFields() {
       "admin-consume-wrap"
     )
     .style.display =
-    type === "item"
-      ? "flex"
-      : "none";
+      type ===
+      "item"
+        ? "flex"
+        : "none";
+
 }
 
 
@@ -4237,7 +5045,8 @@ function updateObjectActionFields() {
 
 
   if (
-    type === "message"
+    type ===
+    "message"
   ) {
 
     showActionField(
@@ -4248,7 +5057,8 @@ function updateObjectActionFields() {
 
 
   if (
-    type === "task"
+    type ===
+    "task"
   ) {
 
     showActionField(
@@ -4259,7 +5069,8 @@ function updateObjectActionFields() {
 
 
   if (
-    type === "giveItem"
+    type ===
+    "giveItem"
   ) {
 
     showActionField(
@@ -4278,6 +5089,7 @@ function updateObjectActionFields() {
       "object-action-password"
     );
 
+
     showActionField(
       "object-action-task"
     );
@@ -4286,7 +5098,8 @@ function updateObjectActionFields() {
 
 
   if (
-    type === "codeLock"
+    type ===
+    "codeLock"
   ) {
 
     showActionField(
@@ -4294,6 +5107,7 @@ function updateObjectActionFields() {
     );
 
   }
+
 }
 
 
@@ -4306,7 +5120,8 @@ function showActionField(
       id
     )
     .style.display =
-    "block";
+      "block";
+
 }
 
 
@@ -4320,16 +5135,6 @@ document
   );
 
 
-/*
-  СОХРАНЕНИЕ ПРЕДМЕТА
-
-  name/x/y/width/height
-  сохраняются в ОБЩЕЙ комнате.
-
-  active/requirement/fallback/action
-  сохраняются только для выбранного дня.
-*/
-
 document
   .getElementById(
     "admin-save-object"
@@ -4342,7 +5147,9 @@ document
         selectedRoomObjectDefinition();
 
 
-      if (!definition) {
+      if (
+        !definition
+      ) {
         return;
       }
 
@@ -4353,12 +5160,12 @@ document
         );
 
 
-      if (!config) {
+      if (
+        !config
+      ) {
         return;
       }
 
-
-      /* ОБЩИЕ ПАРАМЕТРЫ */
 
       definition.name =
         document
@@ -4409,8 +5216,6 @@ document
             .value
         );
 
-
-      /* НАСТРОЙКИ ТЕКУЩЕГО ДНЯ */
 
       config.active =
         document
@@ -4463,7 +5268,8 @@ document
 
 
       if (
-        type === "message"
+        type ===
+        "message"
       ) {
 
         config.action = {
@@ -4481,7 +5287,8 @@ document
 
 
       else if (
-        type === "task"
+        type ===
+        "task"
       ) {
 
         config.action = {
@@ -4499,7 +5306,8 @@ document
 
 
       else if (
-        type === "giveItem"
+        type ===
+        "giveItem"
       ) {
 
         config.action = {
@@ -4607,13 +5415,17 @@ document
   );
 
 
-/* АДМИН — ЗАДАНИЯ */
+/* =========================================================
+   АДМИН — ЗАДАНИЯ
+========================================================= */
 
 function fillTaskOptions(
   select
 ) {
 
-  if (!select) {
+  if (
+    !select
+  ) {
     return;
   }
 
@@ -4667,6 +5479,7 @@ function fillTaskOptions(
 
       }
     );
+
 }
 
 
@@ -4724,6 +5537,7 @@ function renderAdminTaskList() {
       "admin-object-task"
     )
   );
+
 }
 
 
@@ -4733,6 +5547,7 @@ function selectedAdminTask() {
     .tasks[
       adminTaskId
     ];
+
 }
 
 
@@ -4743,7 +5558,7 @@ function clearAdminTask() {
       "admin-task-title"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4751,7 +5566,7 @@ function clearAdminTask() {
       "admin-task-question"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4759,7 +5574,7 @@ function clearAdminTask() {
       "admin-task-options"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4767,7 +5582,7 @@ function clearAdminTask() {
       "admin-task-correct"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4775,7 +5590,7 @@ function clearAdminTask() {
       "admin-task-answers"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4783,7 +5598,7 @@ function clearAdminTask() {
       "admin-task-order"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4791,7 +5606,7 @@ function clearAdminTask() {
       "admin-task-pairs"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4799,7 +5614,7 @@ function clearAdminTask() {
       "admin-task-success"
     )
     .value =
-    "";
+      "";
 
 
   document
@@ -4807,7 +5622,8 @@ function clearAdminTask() {
       "admin-rewards"
     )
     .innerHTML =
-    "";
+      "";
+
 }
 
 
@@ -4817,7 +5633,9 @@ function loadAdminTask() {
     selectedAdminTask();
 
 
-  if (!task) {
+  if (
+    !task
+  ) {
     return;
   }
 
@@ -4827,7 +5645,8 @@ function loadAdminTask() {
       "admin-task-title"
     )
     .value =
-    task.title || "";
+      task.title ||
+      "";
 
 
   document
@@ -4835,7 +5654,7 @@ function loadAdminTask() {
       "admin-task-type"
     )
     .value =
-    task.type;
+      task.type;
 
 
   document
@@ -4843,7 +5662,8 @@ function loadAdminTask() {
       "admin-task-question"
     )
     .value =
-    task.question || "";
+      task.question ||
+      "";
 
 
   document
@@ -4851,8 +5671,13 @@ function loadAdminTask() {
       "admin-task-options"
     )
     .value =
-    (task.options || [])
-      .join("\n");
+      (
+        task.options ||
+        []
+      )
+        .join(
+          "\n"
+        );
 
 
   document
@@ -4860,12 +5685,17 @@ function loadAdminTask() {
       "admin-task-correct"
     )
     .value =
-    (task.correct || [])
-      .map(
-        index =>
-          index + 1
+      (
+        task.correct ||
+        []
       )
-      .join(",");
+        .map(
+          index =>
+            index + 1
+        )
+        .join(
+          ","
+        );
 
 
   document
@@ -4873,8 +5703,13 @@ function loadAdminTask() {
       "admin-task-answers"
     )
     .value =
-    (task.answers || [])
-      .join("\n");
+      (
+        task.answers ||
+        []
+      )
+        .join(
+          "\n"
+        );
 
 
   document
@@ -4882,8 +5717,13 @@ function loadAdminTask() {
       "admin-task-order"
     )
     .value =
-    (task.order || [])
-      .join("\n");
+      (
+        task.order ||
+        []
+      )
+        .join(
+          "\n"
+        );
 
 
   document
@@ -4891,12 +5731,17 @@ function loadAdminTask() {
       "admin-task-pairs"
     )
     .value =
-    (task.pairs || [])
-      .map(
-        pair =>
-          `${pair.left} | ${pair.right}`
+      (
+        task.pairs ||
+        []
       )
-      .join("\n");
+        .map(
+          pair =>
+            `${pair.left} | ${pair.right}`
+        )
+        .join(
+          "\n"
+        );
 
 
   document
@@ -4904,15 +5749,18 @@ function loadAdminTask() {
       "admin-task-success"
     )
     .value =
-    task.successMessage || "";
+      task.successMessage ||
+      "";
 
 
   updateTaskEditor();
 
 
   renderRewards(
-    task.rewards || []
+    task.rewards ||
+    []
   );
+
 }
 
 
@@ -4956,11 +5804,15 @@ document
     () => {
 
       const id =
-        uid("task");
+        uid(
+          "task"
+        );
 
 
       adminQuest()
-        .tasks[id] = {
+        .tasks[
+          id
+        ] = {
           id,
 
           title:
@@ -4969,7 +5821,8 @@ document
           type:
             "singleChoice",
 
-          question: "",
+          question:
+            "",
 
           options: [
             "Вариант 1",
@@ -5040,24 +5893,20 @@ document
         ];
 
 
-      /*
-        Если предмет текущего дня ссылался
-        на удаленное задание, убираем ссылку,
-        но сам предмет комнаты не удаляем.
-      */
-
       adminQuest()
         .objects
         .forEach(
           object => {
 
             if (
-              object.action?.taskId ===
+              object.action
+                ?.taskId ===
               removedTaskId
             ) {
 
               object.action = {
-                type: "message",
+                type:
+                  "message",
 
                 message:
                   "Для этого предмета еще не назначено задание."
@@ -5140,8 +5989,10 @@ function updateTaskEditor() {
 
   choice.style.display =
     (
-      type === "singleChoice" ||
-      type === "multipleChoice"
+      type ===
+        "singleChoice" ||
+      type ===
+        "multipleChoice"
     )
       ? "block"
       : "none";
@@ -5149,27 +6000,32 @@ function updateTaskEditor() {
 
   correct.style.display =
     (
-      type === "singleChoice" ||
-      type === "multipleChoice"
+      type ===
+        "singleChoice" ||
+      type ===
+        "multipleChoice"
     )
       ? "block"
       : "none";
 
 
   text.style.display =
-    type === "textInput"
+    type ===
+      "textInput"
       ? "block"
       : "none";
 
 
   ordering.style.display =
-    type === "ordering"
+    type ===
+      "ordering"
       ? "block"
       : "none";
 
 
   matching.style.display =
-    type === "matching"
+    type ===
+      "matching"
       ? "block"
       : "none";
 
@@ -5179,13 +6035,17 @@ function updateTaskEditor() {
       "admin-correct-help"
     )
     .textContent =
-    type === "multipleChoice"
-      ? "Несколько номеров через запятую: 1,2,4"
-      : "Номер правильного варианта: например 2";
+      type ===
+        "multipleChoice"
+        ? "Несколько номеров через запятую: 1,2,4"
+        : "Номер правильного варианта: например 2";
+
 }
 
 
-/* НАГРАДЫ */
+/* =========================================================
+   НАГРАДЫ
+========================================================= */
 
 function renderRewards(
   rewards
@@ -5210,6 +6070,7 @@ function renderRewards(
 
     }
   );
+
 }
 
 
@@ -5287,7 +6148,7 @@ function addRewardRow(
       ".reward-type"
     )
     .value =
-    reward.type;
+      reward.type;
 
 
   row
@@ -5295,7 +6156,8 @@ function addRewardRow(
       ".reward-value"
     )
     .value =
-    reward.value || "";
+      reward.value ||
+      "";
 
 
   row
@@ -5303,7 +6165,8 @@ function addRewardRow(
       ".reward-name"
     )
     .value =
-    reward.name || "";
+      reward.name ||
+      "";
 
 
   row
@@ -5311,7 +6174,8 @@ function addRewardRow(
       ".reward-icon"
     )
     .value =
-    reward.icon || "";
+      reward.icon ||
+      "";
 
 
   row
@@ -5328,6 +6192,7 @@ function addRewardRow(
   host.appendChild(
     row
   );
+
 }
 
 
@@ -5388,6 +6253,7 @@ function collectRewards() {
       reward =>
         reward.value
     );
+
 }
 
 
@@ -5403,7 +6269,9 @@ document
         selectedAdminTask();
 
 
-      if (!task) {
+      if (
+        !task
+      ) {
         return;
       }
 
@@ -5444,12 +6312,16 @@ document
             "admin-task-options"
           )
           .value
-          .split("\n")
+          .split(
+            "\n"
+          )
           .map(
             value =>
               value.trim()
           )
-          .filter(Boolean);
+          .filter(
+            Boolean
+          );
 
 
       task.correct =
@@ -5458,16 +6330,20 @@ document
             "admin-task-correct"
           )
           .value
-          .split(",")
+          .split(
+            ","
+          )
           .map(
             value =>
               Number(
                 value.trim()
-              ) - 1
+              ) -
+              1
           )
           .filter(
             value =>
-              value >= 0
+              value >=
+              0
           );
 
 
@@ -5477,12 +6353,16 @@ document
             "admin-task-answers"
           )
           .value
-          .split("\n")
+          .split(
+            "\n"
+          )
           .map(
             value =>
               value.trim()
           )
-          .filter(Boolean);
+          .filter(
+            Boolean
+          );
 
 
       task.order =
@@ -5491,12 +6371,16 @@ document
             "admin-task-order"
           )
           .value
-          .split("\n")
+          .split(
+            "\n"
+          )
           .map(
             value =>
               value.trim()
           )
-          .filter(Boolean);
+          .filter(
+            Boolean
+          );
 
 
       task.pairs =
@@ -5505,11 +6389,15 @@ document
             "admin-task-pairs"
           )
           .value
-          .split("\n")
+          .split(
+            "\n"
+          )
           .map(
             line =>
               line
-                .split("|")
+                .split(
+                  "|"
+                )
                 .map(
                   value =>
                     value.trim()
@@ -5517,7 +6405,8 @@ document
           )
           .filter(
             values =>
-              values.length >= 2 &&
+              values.length >=
+                2 &&
               values[0] &&
               values[1]
           )
@@ -5560,7 +6449,9 @@ document
   );
 
 
-/* ПРЕДПРОСМОТР */
+/* =========================================================
+   ПРЕДПРОСМОТР
+========================================================= */
 
 document
   .getElementById(
@@ -5607,12 +6498,13 @@ document
           "game-day-title"
         )
         .textContent =
-        `День ${adminQuest().day}`;
+          `День ${adminQuest().day}`;
 
 
       renderInventory();
 
       renderHotspots();
+
 
       showScreen(
         "game"
@@ -5622,7 +6514,9 @@ document
   );
 
 
-/* RESET */
+/* =========================================================
+   RESET
+========================================================= */
 
 document
   .getElementById(
@@ -5634,16 +6528,11 @@ document
 
       if (
         !confirm(
-          "Удалить все настройки конструктора и вернуть исходную версию?"
+          "Удалить все настройки конструктора и вернуть исходную версию? Изменения будут сохранены и на сервере."
         )
       ) {
         return;
       }
-
-
-      localStorage.removeItem(
-        STORAGE_KEY
-      );
 
 
       APP_DATA =
@@ -5651,12 +6540,6 @@ document
           DEFAULT_DATA
         );
 
-
-      /*
-        У day1 уже есть настроенные объекты.
-        Для остальных дней общая библиотека
-        будет показываться автоматически.
-      */
 
       migrateRoomObjects();
 
@@ -5717,12 +6600,15 @@ function adminStatus(
 
     },
 
-    2600
+    4000
   );
+
 }
 
 
-/* ИГРОВЫЕ КНОПКИ */
+/* =========================================================
+   ИГРОВЫЕ КНОПКИ
+========================================================= */
 
 document
   .getElementById(
@@ -5755,7 +6641,9 @@ document
                   </div>
                 `
               )
-              .join("")
+              .join(
+                ""
+              )
           : "<p>Пока пусто.</p>";
 
 
@@ -5791,7 +6679,9 @@ document
                   </div>
                 `
               )
-              .join("")
+              .join(
+                ""
+              )
           : "<p>Пока ничего не найдено.</p>";
 
 
@@ -5819,7 +6709,8 @@ document
         !previewMode
       ) {
 
-        gameHints += 1;
+        gameHints +=
+          1;
 
       }
 
@@ -5937,29 +6828,45 @@ overlay.addEventListener(
 
 
 /* =========================================================
-   ЗАПУСК
-
-   loadData() загружает старые настройки.
-
-   migrateRoomObjects() внутри loadData()
-   автоматически превращает старую структуру
-   в новую с общей библиотекой предметов.
-
-   saveData() сразу сохраняет миграцию,
-   чтобы при следующем открытии браузера
-   она уже была постоянной.
+   ЗАПУСК ПРИЛОЖЕНИЯ
 ========================================================= */
 
-loadData();
+async function bootstrapApp() {
 
-saveData();
+  /*
+    Сначала читаем localStorage.
 
-renderDays();
+    На вашем компьютере именно здесь
+    находится уже настроенный День 2.
+  */
 
-renderInventory();
+  loadData();
 
-updateRequirementFields();
 
-updateObjectActionFields();
+  /*
+    Затем проверяем сервер.
 
-updateTaskEditor();
+    Если сервер пуст — локальные данные
+    НЕ заменяются.
+
+    Если сервер уже содержит Config —
+    берем серверную версию.
+  */
+
+  await loadServerConfig();
+
+
+  renderDays();
+
+  renderInventory();
+
+  updateRequirementFields();
+
+  updateObjectActionFields();
+
+  updateTaskEditor();
+
+}
+
+
+bootstrapApp();
